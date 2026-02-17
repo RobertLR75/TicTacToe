@@ -13,6 +13,100 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "agent-os", "agent-os", "{42
 		agent-os\standards\index.yml = agent-os\standards\index.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "standards", "standards", "{C722959E-13F6-400D-BAB2-3B1351B3F6C6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{D36F3EDA-084F-4173-9086-E2528A1E5C30}"
+	ProjectSection(SolutionItems) = preProject
+		agent-os\standards\api\api-docs.md = agent-os\standards\api\api-docs.md
+		agent-os\standards\api\events.md = agent-os\standards\api\events.md
+		agent-os\standards\api\mappers.md = agent-os\standards\api\mappers.md
+		agent-os\standards\api\commands.md = agent-os\standards\api\commands.md
+		agent-os\standards\api\processors.md = agent-os\standards\api\processors.md
+		agent-os\standards\api\validators.md = agent-os\standards\api\validators.md
+		agent-os\standards\api\shared-event.md = agent-os\standards\api\shared-event.md
+		agent-os\standards\api\base-event-handler.md = agent-os\standards\api\base-event-handler.md
+		agent-os\standards\api\endpoint-structure.md = agent-os\standards\api\endpoint-structure.md
+		agent-os\standards\api\exception-handling.md = agent-os\standards\api\exception-handling.md
+		agent-os\standards\api\request-response-types.md = agent-os\standards\api\request-response-types.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspire", "aspire", "{A75BB52D-D3C7-4310-9BF8-A3E0FD1F04FF}"
+	ProjectSection(SolutionItems) = preProject
+		agent-os\standards\aspire\health-checks.md = agent-os\standards\aspire\health-checks.md
+		agent-os\standards\aspire\otlp-exporter.md = agent-os\standards\aspire\otlp-exporter.md
+		agent-os\standards\aspire\service-defaults.md = agent-os\standards\aspire\service-defaults.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "auth", "auth", "{8471DD79-6C35-410B-9995-93669CCECF22}"
+	ProjectSection(SolutionItems) = preProject
+		agent-os\standards\auth\cookie-naming.md = agent-os\standards\auth\cookie-naming.md
+		agent-os\standards\auth\auth-setup.md = agent-os\standards\auth\auth-setup.md
+		agent-os\standards\auth\cancel-deny-pattern.md = agent-os\standards\auth\cancel-deny-pattern.md
+		agent-os\standards\auth\event-sink.md = agent-os\standards\auth\event-sink.md
+		agent-os\standards\auth\jwt-validation.md = agent-os\standards\auth\jwt-validation.md
+		agent-os\standards\auth\security-headers.md = agent-os\standards\auth\security-headers.md
+		agent-os\standards\auth\events-and-metrics.md = agent-os\standards\auth\events-and-metrics.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{05015CFF-F014-4FA6-BCBD-2E7108CC1E00}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "http-client", "http-client", "{4C042DE4-25A3-40F3-B04A-419CF3A3858F}"
+	ProjectSection(SolutionItems) = preProject
+		agent-os\standards\http-client\m2m-auth.md = agent-os\standards\http-client\m2m-auth.md
+		agent-os\standards\http-client\base-api-client.md = agent-os\standards\http-client\base-api-client.md
+		agent-os\standards\http-client\logging-handler.md = agent-os\standards\http-client\logging-handler.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "messaging", "messaging", "{AFA34D5A-251E-45CF-8942-BD5FFAE818A6}"
+	ProjectSection(SolutionItems) = preProject
+		agent-os\standards\messaging\rabbitmq-topology.md = agent-os\standards\messaging\rabbitmq-topology.md
+		agent-os\standards\messaging\broker-configuration.md = agent-os\standards\messaging\broker-configuration.md
+		agent-os\standards\messaging\masstransit-consumer.md = agent-os\standards\messaging\masstransit-consumer.md
+		agent-os\standards\messaging\rabbitmq-queue-naming.md = agent-os\standards\messaging\rabbitmq-queue-naming.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "oauth", "oauth", "{B94A8724-ABE6-44DF-B96B-0844EE6709F9}"
+	ProjectSection(SolutionItems) = preProject
+		agent-os\standards\oauth\scope-naming.md = agent-os\standards\oauth\scope-naming.md
+		agent-os\standards\oauth\api-scope-names.md = agent-os\standards\oauth\api-scope-names.md
+		agent-os\standards\oauth\standard-scopes.md = agent-os\standards\oauth\standard-scopes.md
+		agent-os\standards\oauth\client-grant-types.md = agent-os\standards\oauth\client-grant-types.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "razor-pages", "razor-pages", "{82981352-7F14-45B6-95AF-1CB183470884}"
+	ProjectSection(SolutionItems) = preProject
+		agent-os\standards\razor-pages\options-class.md = agent-os\standards\razor-pages\options-class.md
+		agent-os\standards\razor-pages\folder-structure.md = agent-os\standards\razor-pages\folder-structure.md
+		agent-os\standards\razor-pages\build-model-async.md = agent-os\standards\razor-pages\build-model-async.md
+		agent-os\standards\razor-pages\viewmodel-inputmodel.md = agent-os\standards\razor-pages\viewmodel-inputmodel.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{8E2358CE-8699-41A2-A02E-A0AEB1F69FDB}"
+	ProjectSection(SolutionItems) = preProject
+		agent-os\standards\services\mappers.md = agent-os\standards\services\mappers.md
+		agent-os\standards\services\exceptions.md = agent-os\standards\services\exceptions.md
+		agent-os\standards\services\base-service.md = agent-os\standards\services\base-service.md
+		agent-os\standards\services\base-publisher-service.md = agent-os\standards\services\base-publisher-service.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "storage", "storage", "{30D4AE54-BB8A-4D5C-8B4F-B0F46DCDBB50}"
+	ProjectSection(SolutionItems) = preProject
+		agent-os\standards\storage\entity-ids.md = agent-os\standards\storage\entity-ids.md
+		agent-os\standards\storage\mongodb-patterns.md = agent-os\standards\storage\mongodb-patterns.md
+		agent-os\standards\storage\redis-key-naming.md = agent-os\standards\storage\redis-key-naming.md
+		agent-os\standards\storage\storage-backends.md = agent-os\standards\storage\storage-backends.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "testing", "testing", "{1EC5E087-67AF-448A-A529-F08A96566CF5}"
+	ProjectSection(SolutionItems) = preProject
+		agent-os\standards\testing\naming.md = agent-os\standards\testing\naming.md
+		agent-os\standards\testing\test-clock.md = agent-os\standards\testing\test-clock.md
+		agent-os\standards\testing\sut-factory.md = agent-os\standards\testing\sut-factory.md
+		agent-os\standards\testing\testcontainers.md = agent-os\standards\testing\testcontainers.md
+		agent-os\standards\testing\integration-tests.md = agent-os\standards\testing\integration-tests.md
+		agent-os\standards\testing\http-client-helpers.md = agent-os\standards\testing\http-client-helpers.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,5 +121,17 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{32D1B9E3-A702-4513-AC74-E76432A88F02} = {B73B80C0-109C-41E1-8FC3-ECBFDB3F0344}
 		{38766F61-3556-40CC-9A08-580BBA728422} = {32D1B9E3-A702-4513-AC74-E76432A88F02}
+		{C722959E-13F6-400D-BAB2-3B1351B3F6C6} = {42EB40B1-BCE0-48CA-A992-3614123ACC2D}
+		{D36F3EDA-084F-4173-9086-E2528A1E5C30} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
+		{A75BB52D-D3C7-4310-9BF8-A3E0FD1F04FF} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
+		{8471DD79-6C35-410B-9995-93669CCECF22} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
+		{05015CFF-F014-4FA6-BCBD-2E7108CC1E00} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
+		{4C042DE4-25A3-40F3-B04A-419CF3A3858F} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
+		{AFA34D5A-251E-45CF-8942-BD5FFAE818A6} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
+		{B94A8724-ABE6-44DF-B96B-0844EE6709F9} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
+		{82981352-7F14-45B6-95AF-1CB183470884} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
+		{8E2358CE-8699-41A2-A02E-A0AEB1F69FDB} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
+		{30D4AE54-BB8A-4D5C-8B4F-B0F46DCDBB50} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
+		{1EC5E087-67AF-448A-A529-F08A96566CF5} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
 	EndGlobalSection
 EndGlobal
