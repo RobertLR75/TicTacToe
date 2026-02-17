@@ -1,2 +1,7 @@
 # Agent OS Standards Index
 
+backend:
+  csharp-nullability:
+    description: "Null-safety rules: no null! suppression without comment, prefer ?? and ?."
+  csharp-project-config:
+    description: "Required .csproj settings: net10.0, ImplicitUsings, Nullable; implicit using rules"
