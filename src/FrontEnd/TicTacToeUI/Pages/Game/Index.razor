@@ -1,0 +1,47 @@
+@page "/"
+@namespace TicTacToeUI.Pages.Game
+@using TicTacToeUI.Components.Board
+@inject TicTacToeUI.Services.GameService Game
+
+<PageTitle>TicTacToe</PageTitle>
+
+<div class="game-container">
+    <h1>TicTacToe</h1>
+
+    <div class="game-status">
+        @if (Game.CurrentState.IsOver)
+        {
+            if (Game.CurrentState.IsDraw)
+            {
+                <span>It's a draw!</span>
+            }
+            else
+            {
+                <span>Player @Game.CurrentState.Winner wins!</span>
+            }
+        }
+        else
+        {
+            <span>Player @Game.CurrentState.CurrentPlayer's turn</span>
+        }
+    </div>
+
+    <Board State="@Game.CurrentState"
+           OnCellClick="@HandleCellClick" />
+
+    <button class="new-game-btn" @onclick="StartNewGame">New Game</button>
+</div>
+
+@code {
+    private void HandleCellClick(TicTacToeUI.Models.Cell cell)
+    {
+        Game.MakeMove(cell.Row, cell.Col);
+        StateHasChanged();
+    }
+
+    private void StartNewGame()
+    {
+        Game.StartNewGame();
+        StateHasChanged();
+    }
+}
