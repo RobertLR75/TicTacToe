@@ -33,15 +33,20 @@
 </div>
 
 @code {
-    private void HandleCellClick(TicTacToeUI.Models.Cell cell)
+    protected override async Task OnInitializedAsync()
     {
-        Game.MakeMove(cell.Row, cell.Col);
+        await StartNewGame();
+    }
+
+    private async Task HandleCellClick(TicTacToeUI.Models.Cell cell)
+    {
+        await Game.MakeMoveAsync(cell.Row, cell.Col);
         StateHasChanged();
     }
 
-    private void StartNewGame()
+    private async Task StartNewGame()
     {
-        Game.StartNewGame();
+        await Game.StartNewGameAsync();
         StateHasChanged();
     }
 }

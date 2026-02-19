@@ -1,0 +1,209 @@
+# 🎮 TicTacToe - Komplett Oppstartsguide
+## 🌟 ENKLESTE METODE: Aspire AppHost (ANBEFALT!)
+**Start alt med Aspire i én kommando:**
+```bash
+cd /Users/robert/Repos/GitHub/TicTacToe
+./start-aspire.sh
+```
+**Hva skjer:**
+1. ✅ Renser gamle build-filer
+2. ✅ Bygger backend
+3. ✅ Bygger frontend
+4. ✅ Bygger AppHost
+5. ✅ Starter AppHost som kjører begge tjenestene
+**Tjenestene kjører på:**
+- **Backend API**: https://localhost:7082
+- **Frontend UI**: https://localhost:7080
+**Stopp alt:**
+- Trykk `Ctrl+C` i terminalen hvor AppHost kjører
+**Deretter åpne spillet:**
+```bash
+open https://localhost:7080
+```
+> **✅ Løst:** AppHost bruker nå `AddExecutable` for begge tjenestene, som fullstendig unngår `browser-wasm` runtime-konflikten. Backend får fortsatt alle ServiceDefaults-fordelene!
+---
+## 🚨 Viktig: Løsning på PDB-feil
+Hvis du får feilmeldinger om manglende `.pdb` filer, følg **disse stegene nøyaktig**:
+### Løsning: Komplett rensing og rebuild
+**0. Kjør cleanup-scriptet (Anbefalt!):**
+```bash
+cd /Users/robert/Repos/GitHub/TicTacToe
+./cleanup.sh
+```
+Dette stopper alle prosesser og renser alle build-filer.
+**1. Start Backend først (Terminal 1):**
+```bash
+cd /Users/robert/Repos/GitHub/TicTacToe
+./start-backend.sh
+```
+Vent til du ser: `Now listening on: https://localhost:7082`
+**2. Start Frontend (Terminal 2):**
+```bash
+cd /Users/robert/Repos/GitHub/TicTacToe
+./start-frontend.sh
+```
+Vent til du ser: `Now listening on: https://localhost:7080`
+**3. Åpne nettleseren:**
+```bash
+open https://localhost:7080
+```
+Deretter: **Cmd+Shift+R** (hard refresh i nettleseren)
+---
+### Manuell metode (hvis scripts ikke fungerer)
+**1. Stopp alle kjørende prosesser:**
+```bash
+# Stopp frontend (Ctrl+C i terminal, eller:)
+pkill -f "dotnet.*TicTacToeUI"
+# Stopp backend (Ctrl+C i terminal, eller:)
+pkill -f "dotnet.*GameService"
+```
+**2. Rens Frontend KOMPLETT:**
+```bash
+cd /Users/robert/Repos/GitHub/TicTacToe/src/FrontEnd/TicTacToeUI
+rm -rf bin obj
+dotnet clean
+dotnet restore
+dotnet build
+```
+**3. Start Backend først:**
+```bash
+cd /Users/robert/Repos/GitHub/TicTacToe/src/Backend/GameService
+dotnet run
+```
+Vent til du ser: `Now listening on: https://localhost:7082`
+**4. Start Frontend i NY terminal:**
+```bash
+cd /Users/robert/Repos/GitHub/TicTacToe/src/FrontEnd/TicTacToeUI
+dotnet run
+```
+Vent til du ser: `Now listening on: https://localhost:7080`
+**5. Åpne nettleseren med hard refresh:**
+```bash
+open https://localhost:7080
+```
+Deretter: **Cmd+Shift+R** (hard refresh i nettleseren)
+## 🔧 Feilsøking
+### Problem: Frontend viser "Failed to fetch" eller "404 PDB error"
+**Årsak:** Frontend prøver å laste debug symbols (.pdb filer) som ikke er generert riktig.
+**Løsning:**
+1. Stopp både backend og frontend (Ctrl+C i begge terminaler)
+2. Rens alle build-filer:
+   ```bash
+   cd /Users/robert/Repos/GitHub/TicTacToe/src/FrontEnd/TicTacToeUI
+   rm -rf bin obj
+   ```
+3. Bygg på nytt:
+   ```bash
+   dotnet build
+   ```
+4. Start på nytt:
+   ```bash
+   dotnet run
+   ```
+5. I nettleseren: Gjør en **hard refresh** (Cmd+Shift+R på Mac)
+### Problem: "Address already in use" (port 7082 eller 7080)
+**Løsning:** Drep prosessene som bruker portene:
+```bash
+# Drep backend på port 7082
+lsof -ti :7082 | xargs kill -9
+# Drep frontend på port 7080
+lsof -ti :7080 | xargs kill -9
+```
+### Problem: Backend svarer ikke
+**Sjekk at backend kjører:**
+```bash
+curl https://localhost:7082/swagger
+```
+Hvis du får connection refused, start backend på nytt.
+### Problem: CORS-feil i nettleseren
+**Løsning:** Sjekk at backend kjører på port 7082 og frontend på port 7080.
+Backend er konfigurert til å tillate forespørsler fra disse portene.
+## ✅ Verifiser at alt fungerer
+### 1. Sjekk Backend API
+Åpne: https://localhost:7082/swagger
+Du skal se Swagger UI med 3 endpoints:
+- POST /api/games
+- GET /api/games/{gameId}
+- POST /api/games/{gameId}/moves
+### 2. Test Backend API via Swagger
+1. Klikk på "POST /api/games"
+2. Klikk "Try it out"
+3. Klikk "Execute"
+4. Du skal få en response med `gameId` og et tomt brett
+### 3. Sjekk Frontend
+Åpne: https://localhost:7080
+Du skal se:
+- TicTacToe tittel
+- "Player X's turn" melding
+- 3x3 brett med tomme celler
+- "New Game" knapp
+### 4. Spill et spill
+1. Klikk på en celle - den skal bli merket med "X"
+2. Klikk på en annen celle - den skal bli merket med "O"
+3. Spillet alternerer mellom X og O
+4. Når noen vinner eller det blir uavgjort, vises meldingen
+5. Klikk "New Game" for å starte på nytt
+## 🔍 Debugging Tips
+### Se nettverkstrafikk
+1. Åpne Developer Tools (F12 eller Cmd+Option+I)
+2. Gå til "Network" fanen
+3. Filtrer på "Fetch/XHR"
+4. Gjør et trekk i spillet
+5. Du skal se POST-forespørsler til `https://localhost:7082/api/games/.../moves`
+### Se Console-logger
+1. Åpne Developer Tools (F12)
+2. Gå til "Console" fanen
+3. Du skal IKKE se røde feilmeldinger
+4. Hvis du ser "Failed to fetch", betyr det at backend ikke kjører
+### Backend-logger
+I terminalen hvor backend kjører skal du se:
+```
+info: FastEndpoints.StartupTimer[0]
+      Registered 3 endpoints in XX milliseconds.
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: https://localhost:7082
+```
+## 📊 Arkitektur
+```
+Frontend (Blazor WASM)          Backend (FastEndpoints API)
+https://localhost:7080          https://localhost:7082
+        |                                |
+        |  POST /api/games               |
+        |  (Create new game)             |
+        |------------------------------->|
+        |<-------------------------------|
+        |  { gameId, board, ... }        |
+        |                                |
+        |  POST /api/games/{id}/moves    |
+        |  (Make move)                   |
+        |------------------------------->|
+        |     [GameLogicService]         |
+        |     - Validates move           |
+        |     - Updates board            |
+        |     - Checks winner            |
+        |<-------------------------------|
+        |  { updated game state }        |
+```
+## 🎯 Hva skjer når du klikker på en celle?
+1. `Cell.razor` - HandleClick() trigges
+2. `Index.razor` - HandleCellClick() kalles
+3. `GameService.cs` - MakeMoveAsync() kalles
+4. `GameApiClient.cs` - HTTP POST til backend
+5. **Backend API** - MakeMoveEndpoint mottar forespørsel
+6. **GameLogicService** - Validerer og oppdaterer spillet
+7. **Backend** - Returnerer oppdatert game state
+8. **Frontend** - Mottar response og oppdaterer UI
+9. **Blazor** - Re-renderer komponenten med nye data
+## 🚀 Neste steg
+Backend API kjører all spillogikk:
+- ✅ Opprette spill
+- ✅ Gjøre trekk
+- ✅ Validere trekk
+- ✅ Sjekke vinner
+- ✅ Sjekke uavgjort
+- ✅ Veksle mellom spillere
+Frontend er en ren UI-klient som:
+- ✅ Viser spillstatus
+- ✅ Sender HTTP-forespørsler
+- ✅ Viser resultater
+**Alt fungerer! 🎉**
