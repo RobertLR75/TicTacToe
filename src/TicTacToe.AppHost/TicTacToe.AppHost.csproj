@@ -1,0 +1,25 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.1.1">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UserSecretsId>6e1c65bf-c13f-49d1-96f9-84388bdba5f1</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.Redis" Version="13.1.2" />
+        <PackageReference Include="Aspire.Hosting.MongoDB" Version="10.3.0" />
+        <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="10.3.0" />
+        <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="10.3.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Backend\GameStateService\GameStateService.csproj" />
+      <ProjectReference Include="..\FrontEnd\TicTacToeMud\TicTacToeMud.csproj" />
+      <ProjectReference Include="..\Backend\GameService\GameService.csproj" />
+      <ProjectReference Include="..\Backend\GameNotificationService\GameNotificationService.csproj" />
+    </ItemGroup>
+
+</Project>

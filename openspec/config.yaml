@@ -1,20 +1,34 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Tech stack: c#, Azure Sql Server, Azure PostgreSql, Azure ServiceBus, RabbitMq, Redis Cache, Azure Blob Storage
+  API style: RESTful, documented in docs/api.md
+  API: FastEndpoints
+  Database: Entity Framework Core, Dapper
+  Database patching: FluentMigrator
+  Messaging: RabbitMq, Azure ServiceBus
+  Caching: Redis Cache
+  Storage: Azure Blob Storage
+  Logging: Serilog
+  Monitoring: Application Insights
+  CI/CD: Azure DevOps
+  Deployment: Azure App Service
+  Documentation: Markdown
+  Unit Testing: xUnit, Moq, FluentAssertions
+  Integration Testing: xUnit, FluentAssertions, TestContainers
+  We value backwards compatibility for all public APIs
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Include rollback plan
+    - Identify affected teams
+    - Include performance impact analysis
+
+  specs:
+    - Use Given/When/Then format
+    - Reference existing patterns before inventing new ones
+    - Use examples to illustrate patterns
+    - Use clear and concise language
+    - Use code examples
+    - Use real-world examples
+    - Use diagrams to illustrate complex concepts

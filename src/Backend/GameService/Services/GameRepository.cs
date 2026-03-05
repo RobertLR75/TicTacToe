@@ -1,33 +1,74 @@
+using System.Text.Json;
 using GameService.Models;
-using System.Collections.Concurrent;
+using StackExchange.Redis;
 
 namespace GameService.Services;
 
 public class GameRepository
 {
-    private readonly ConcurrentDictionary<string, GameState> _games = new();
+    private readonly IConnectionMultiplexer _redis;
+    private const string GameKeyPrefix = "game:";
+    private const string GameIndexKey = "game:index";
 
-    public GameState CreateGame()
+    private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        var game = new GameState();
-        _games[game.GameId] = game;
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+    };
+
+    public GameRepository(IConnectionMultiplexer redis)
+    {
+        _redis = redis;
+    }
+
+    private IDatabase Db => _redis.GetDatabase();
+
+    public async Task<GameModel> CreateGameAsync(GameModel game, CancellationToken ct = default)
+    {
+        var key = GameKeyPrefix + game.Id;
+        var json = JsonSerializer.Serialize(game, JsonOptions);
+
+        var db = Db;
+        await db.StringSetAsync(key, json);
+        await db.SetAddAsync(GameIndexKey, game.Id);
+
         return game;
     }
 
-    public GameState? GetGame(string gameId)
+    public async Task<GameModel?> GetGameAsync(string id, CancellationToken ct = default)
     {
-        _games.TryGetValue(gameId, out var game);
-        return game;
+        var key = GameKeyPrefix + id;
+        var json = await Db.StringGetAsync(key);
+
+        if (json.IsNullOrEmpty)
+            return null;
+
+        return JsonSerializer.Deserialize<GameModel>(json.ToString(), JsonOptions);
     }
 
-    public void UpdateGame(GameState game)
+    public async Task UpdateGameAsync(GameModel game, CancellationToken ct = default)
     {
-        _games[game.GameId] = game;
+        var key = GameKeyPrefix + game.Id;
+        var json = JsonSerializer.Serialize(game, JsonOptions);
+        await Db.StringSetAsync(key, json);
     }
 
-    public void DeleteGame(string gameId)
+    public async Task<List<GameModel>> GetGamesByStatusAsync(GameStatus status, CancellationToken ct = default)
     {
-        _games.TryRemove(gameId, out _);
+        var db = Db;
+        var gameIds = await db.SetMembersAsync(GameIndexKey);
+        var games = new List<GameModel>();
+
+        foreach (var id in gameIds)
+        {
+            if (id.IsNullOrEmpty) continue;
+
+            var game = await GetGameAsync(id!, ct);
+            if (game is not null && game.Status == status)
+            {
+                games.Add(game);
+            }
+        }
+
+        return games;
     }
 }
-

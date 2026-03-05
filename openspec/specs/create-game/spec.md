@@ -1,22 +1,28 @@
 # create-game Specification
 
 ## Purpose
-TBD - created by archiving change fix-create-game-response. Update Purpose after archive.
+Defines the behavior of the `POST /api/games` endpoint for creating new games.
+
 ## Requirements
 ### Requirement: Full game state returned on creation
 
-`POST /api/games` SHALL return all game state fields so that clients can initialize without a separate GET request.
+`POST /api/games` SHALL return `202 Accepted` with a minimal response containing only `gameId`. Full game state SHALL be delivered via the `GameCreated` SignalR notification to all connected clients.
 
-#### Scenario: New game response includes game-over fields
+#### Scenario: New game returns 202 with gameId only
 
 - **WHEN** a client sends `POST /api/games`
-- **THEN** the response body includes `winner`, `isDraw`, and `isOver`
-- **AND** `winner` equals `None` (0)
-- **AND** `isDraw` equals `false`
-- **AND** `isOver` equals `false`
+- **THEN** the response status code SHALL be `202 Accepted`
+- **AND** the response body SHALL contain only `{ "gameId": "<id>" }`
+- **AND** the response body SHALL NOT contain `currentPlayer`, `winner`, `isDraw`, `isOver`, or `board`
 
-#### Scenario: Create-game response shape matches get-game response shape
+#### Scenario: GameCreated notification sent after creation
 
-- **WHEN** a client compares the fields of `POST /api/games` and `GET /api/games/{id}`
-- **THEN** both responses contain the same top-level fields: `gameId`, `currentPlayer`, `winner`, `isDraw`, `isOver`, `board`
+- **WHEN** a client sends `POST /api/games`
+- **THEN** the server SHALL call `NotificationService.NotifyGameCreated` with the new game state
+- **AND** the `GameCreated` SignalR notification SHALL be sent to all connected clients
+- **AND** the notification payload SHALL include `gameId`, `currentPlayer`, `winner`, `isDraw`, `isOver`, and `board`
 
+#### Scenario: GameCreated notification shape matches GameUpdated shape
+
+- **WHEN** a `GameCreated` notification is sent
+- **THEN** its payload SHALL contain the same fields as `GameUpdateNotification`: `gameId`, `currentPlayer` (int), `winner` (int), `isDraw` (bool), `isOver` (bool), `board` (list of `{ row, col, mark }`)

@@ -4,114 +4,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B73B80C0-109
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Backend", "Backend", "{32D1B9E3-A702-4513-AC74-E76432A88F02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameService", "src\Backend\GameService\GameService.csproj", "{38766F61-3556-40CC-9A08-580BBA728422}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "agent-os", "agent-os", "{42EB40B1-BCE0-48CA-A992-3614123ACC2D}"
-	ProjectSection(SolutionItems) = preProject
-		agent-os\standards\backend\csharp-project-config.md = agent-os\standards\backend\csharp-project-config.md
-		agent-os\standards\backend\csharp-nullability.md = agent-os\standards\backend\csharp-nullability.md
-		agent-os\standards\index.yml = agent-os\standards\index.yml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "standards", "standards", "{C722959E-13F6-400D-BAB2-3B1351B3F6C6}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "api", "api", "{D36F3EDA-084F-4173-9086-E2528A1E5C30}"
-	ProjectSection(SolutionItems) = preProject
-		agent-os\standards\api\api-docs.md = agent-os\standards\api\api-docs.md
-		agent-os\standards\api\events.md = agent-os\standards\api\events.md
-		agent-os\standards\api\mappers.md = agent-os\standards\api\mappers.md
-		agent-os\standards\api\commands.md = agent-os\standards\api\commands.md
-		agent-os\standards\api\processors.md = agent-os\standards\api\processors.md
-		agent-os\standards\api\validators.md = agent-os\standards\api\validators.md
-		agent-os\standards\api\shared-event.md = agent-os\standards\api\shared-event.md
-		agent-os\standards\api\base-event-handler.md = agent-os\standards\api\base-event-handler.md
-		agent-os\standards\api\endpoint-structure.md = agent-os\standards\api\endpoint-structure.md
-		agent-os\standards\api\exception-handling.md = agent-os\standards\api\exception-handling.md
-		agent-os\standards\api\request-response-types.md = agent-os\standards\api\request-response-types.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspire", "aspire", "{A75BB52D-D3C7-4310-9BF8-A3E0FD1F04FF}"
-	ProjectSection(SolutionItems) = preProject
-		agent-os\standards\aspire\health-checks.md = agent-os\standards\aspire\health-checks.md
-		agent-os\standards\aspire\otlp-exporter.md = agent-os\standards\aspire\otlp-exporter.md
-		agent-os\standards\aspire\service-defaults.md = agent-os\standards\aspire\service-defaults.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "auth", "auth", "{8471DD79-6C35-410B-9995-93669CCECF22}"
-	ProjectSection(SolutionItems) = preProject
-		agent-os\standards\auth\cookie-naming.md = agent-os\standards\auth\cookie-naming.md
-		agent-os\standards\auth\auth-setup.md = agent-os\standards\auth\auth-setup.md
-		agent-os\standards\auth\cancel-deny-pattern.md = agent-os\standards\auth\cancel-deny-pattern.md
-		agent-os\standards\auth\event-sink.md = agent-os\standards\auth\event-sink.md
-		agent-os\standards\auth\jwt-validation.md = agent-os\standards\auth\jwt-validation.md
-		agent-os\standards\auth\security-headers.md = agent-os\standards\auth\security-headers.md
-		agent-os\standards\auth\events-and-metrics.md = agent-os\standards\auth\events-and-metrics.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "http-client", "http-client", "{4C042DE4-25A3-40F3-B04A-419CF3A3858F}"
-	ProjectSection(SolutionItems) = preProject
-		agent-os\standards\http-client\m2m-auth.md = agent-os\standards\http-client\m2m-auth.md
-		agent-os\standards\http-client\base-api-client.md = agent-os\standards\http-client\base-api-client.md
-		agent-os\standards\http-client\logging-handler.md = agent-os\standards\http-client\logging-handler.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "messaging", "messaging", "{AFA34D5A-251E-45CF-8942-BD5FFAE818A6}"
-	ProjectSection(SolutionItems) = preProject
-		agent-os\standards\messaging\rabbitmq-topology.md = agent-os\standards\messaging\rabbitmq-topology.md
-		agent-os\standards\messaging\broker-configuration.md = agent-os\standards\messaging\broker-configuration.md
-		agent-os\standards\messaging\masstransit-consumer.md = agent-os\standards\messaging\masstransit-consumer.md
-		agent-os\standards\messaging\rabbitmq-queue-naming.md = agent-os\standards\messaging\rabbitmq-queue-naming.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "oauth", "oauth", "{B94A8724-ABE6-44DF-B96B-0844EE6709F9}"
-	ProjectSection(SolutionItems) = preProject
-		agent-os\standards\oauth\scope-naming.md = agent-os\standards\oauth\scope-naming.md
-		agent-os\standards\oauth\api-scope-names.md = agent-os\standards\oauth\api-scope-names.md
-		agent-os\standards\oauth\standard-scopes.md = agent-os\standards\oauth\standard-scopes.md
-		agent-os\standards\oauth\client-grant-types.md = agent-os\standards\oauth\client-grant-types.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "razor-pages", "razor-pages", "{82981352-7F14-45B6-95AF-1CB183470884}"
-	ProjectSection(SolutionItems) = preProject
-		agent-os\standards\razor-pages\options-class.md = agent-os\standards\razor-pages\options-class.md
-		agent-os\standards\razor-pages\folder-structure.md = agent-os\standards\razor-pages\folder-structure.md
-		agent-os\standards\razor-pages\build-model-async.md = agent-os\standards\razor-pages\build-model-async.md
-		agent-os\standards\razor-pages\viewmodel-inputmodel.md = agent-os\standards\razor-pages\viewmodel-inputmodel.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{8E2358CE-8699-41A2-A02E-A0AEB1F69FDB}"
-	ProjectSection(SolutionItems) = preProject
-		agent-os\standards\services\mappers.md = agent-os\standards\services\mappers.md
-		agent-os\standards\services\exceptions.md = agent-os\standards\services\exceptions.md
-		agent-os\standards\services\base-service.md = agent-os\standards\services\base-service.md
-		agent-os\standards\services\base-publisher-service.md = agent-os\standards\services\base-publisher-service.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "storage", "storage", "{30D4AE54-BB8A-4D5C-8B4F-B0F46DCDBB50}"
-	ProjectSection(SolutionItems) = preProject
-		agent-os\standards\storage\entity-ids.md = agent-os\standards\storage\entity-ids.md
-		agent-os\standards\storage\mongodb-patterns.md = agent-os\standards\storage\mongodb-patterns.md
-		agent-os\standards\storage\redis-key-naming.md = agent-os\standards\storage\redis-key-naming.md
-		agent-os\standards\storage\storage-backends.md = agent-os\standards\storage\storage-backends.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "testing", "testing", "{1EC5E087-67AF-448A-A529-F08A96566CF5}"
-	ProjectSection(SolutionItems) = preProject
-		agent-os\standards\testing\naming.md = agent-os\standards\testing\naming.md
-		agent-os\standards\testing\test-clock.md = agent-os\standards\testing\test-clock.md
-		agent-os\standards\testing\sut-factory.md = agent-os\standards\testing\sut-factory.md
-		agent-os\standards\testing\testcontainers.md = agent-os\standards\testing\testcontainers.md
-		agent-os\standards\testing\integration-tests.md = agent-os\standards\testing\integration-tests.md
-		agent-os\standards\testing\http-client-helpers.md = agent-os\standards\testing\http-client-helpers.md
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameStateService", "src\Backend\GameStateService\GameStateService.csproj", "{38766F61-3556-40CC-9A08-580BBA728422}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FrontEnd", "FrontEnd", "{C531BACD-38A8-0C3F-351D-3D453C08E313}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToeUI", "src\FrontEnd\TicTacToeUI\TicTacToeUI.csproj", "{E49E8FD3-2179-4600-901A-1EAA06284BEB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToe.ServiceDefaults", "src\TicTacToe.ServiceDefaults\TicTacToe.ServiceDefaults.csproj", "{5119CD92-F74D-409F-8F11-585F256AB588}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceDefaults", "src\ServiceDefaults\ServiceDefaults.csproj", "{5119CD92-F74D-409F-8F11-585F256AB588}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToe.AppHost", "src\TicTacToe.AppHost\TicTacToe.AppHost.csproj", "{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppHost", "src\AppHost\AppHost.csproj", "{96C009D9-8EC8-437B-A432-695E0CA7107E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToeMud", "src\FrontEnd\TicTacToeMud\TicTacToeMud.csproj", "{CF2155D1-425D-4AE9-A686-A8A9315D201A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameService", "src\Backend\GameService\GameService.csproj", "{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configuration", "Configuration", "{0FE31838-4DB5-4B47-BC10-DF05027E7FCC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameNotificationService", "src\Backend\GameNotificationService\GameNotificationService.csproj", "{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameNotificationService.Tests", "tests\GameNotificationService.Tests\GameNotificationService.Tests.csproj", "{15FBDD58-B0DF-4DC6-9D27-11C841281212}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -135,18 +46,6 @@ Global
 		{38766F61-3556-40CC-9A08-580BBA728422}.Release|x64.Build.0 = Release|Any CPU
 		{38766F61-3556-40CC-9A08-580BBA728422}.Release|x86.ActiveCfg = Release|Any CPU
 		{38766F61-3556-40CC-9A08-580BBA728422}.Release|x86.Build.0 = Release|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Debug|x64.Build.0 = Debug|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Debug|x86.Build.0 = Debug|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Release|x64.ActiveCfg = Release|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Release|x64.Build.0 = Release|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Release|x86.ActiveCfg = Release|Any CPU
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB}.Release|x86.Build.0 = Release|Any CPU
 		{5119CD92-F74D-409F-8F11-585F256AB588}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5119CD92-F74D-409F-8F11-585F256AB588}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5119CD92-F74D-409F-8F11-585F256AB588}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -159,18 +58,66 @@ Global
 		{5119CD92-F74D-409F-8F11-585F256AB588}.Release|x64.Build.0 = Release|Any CPU
 		{5119CD92-F74D-409F-8F11-585F256AB588}.Release|x86.ActiveCfg = Release|Any CPU
 		{5119CD92-F74D-409F-8F11-585F256AB588}.Release|x86.Build.0 = Release|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Debug|x64.Build.0 = Debug|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Debug|x86.Build.0 = Debug|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Release|x64.ActiveCfg = Release|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Release|x64.Build.0 = Release|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Release|x86.ActiveCfg = Release|Any CPU
-		{96C009D9-8EC8-437B-A432-695E0CA7107E}.Release|x86.Build.0 = Release|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Debug|x64.Build.0 = Debug|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Debug|x86.Build.0 = Debug|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Release|x64.ActiveCfg = Release|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Release|x64.Build.0 = Release|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Release|x86.ActiveCfg = Release|Any CPU
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE}.Release|x86.Build.0 = Release|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Debug|x64.Build.0 = Debug|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Debug|x86.Build.0 = Debug|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Release|x64.ActiveCfg = Release|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Release|x64.Build.0 = Release|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Release|x86.ActiveCfg = Release|Any CPU
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A}.Release|x86.Build.0 = Release|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Debug|x64.Build.0 = Debug|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Debug|x86.Build.0 = Debug|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Release|x64.ActiveCfg = Release|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Release|x64.Build.0 = Release|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Release|x86.ActiveCfg = Release|Any CPU
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64}.Release|x86.Build.0 = Release|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Debug|x64.Build.0 = Debug|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Debug|x86.Build.0 = Debug|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Release|x64.ActiveCfg = Release|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Release|x64.Build.0 = Release|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Release|x86.ActiveCfg = Release|Any CPU
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1}.Release|x86.Build.0 = Release|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Debug|x64.Build.0 = Debug|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Debug|x86.Build.0 = Debug|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Release|x64.ActiveCfg = Release|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Release|x64.Build.0 = Release|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Release|x86.ActiveCfg = Release|Any CPU
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -178,20 +125,13 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{32D1B9E3-A702-4513-AC74-E76432A88F02} = {B73B80C0-109C-41E1-8FC3-ECBFDB3F0344}
 		{38766F61-3556-40CC-9A08-580BBA728422} = {32D1B9E3-A702-4513-AC74-E76432A88F02}
-		{C722959E-13F6-400D-BAB2-3B1351B3F6C6} = {42EB40B1-BCE0-48CA-A992-3614123ACC2D}
-		{D36F3EDA-084F-4173-9086-E2528A1E5C30} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
-		{A75BB52D-D3C7-4310-9BF8-A3E0FD1F04FF} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
-		{8471DD79-6C35-410B-9995-93669CCECF22} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
-		{4C042DE4-25A3-40F3-B04A-419CF3A3858F} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
-		{AFA34D5A-251E-45CF-8942-BD5FFAE818A6} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
-		{B94A8724-ABE6-44DF-B96B-0844EE6709F9} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
-		{82981352-7F14-45B6-95AF-1CB183470884} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
-		{8E2358CE-8699-41A2-A02E-A0AEB1F69FDB} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
-		{30D4AE54-BB8A-4D5C-8B4F-B0F46DCDBB50} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
-		{1EC5E087-67AF-448A-A529-F08A96566CF5} = {C722959E-13F6-400D-BAB2-3B1351B3F6C6}
 		{C531BACD-38A8-0C3F-351D-3D453C08E313} = {B73B80C0-109C-41E1-8FC3-ECBFDB3F0344}
-		{E49E8FD3-2179-4600-901A-1EAA06284BEB} = {C531BACD-38A8-0C3F-351D-3D453C08E313}
 		{5119CD92-F74D-409F-8F11-585F256AB588} = {B73B80C0-109C-41E1-8FC3-ECBFDB3F0344}
-		{96C009D9-8EC8-437B-A432-695E0CA7107E} = {B73B80C0-109C-41E1-8FC3-ECBFDB3F0344}
+		{87159E37-E859-4F4B-AEAD-EFCA87DF32AE} = {0FE31838-4DB5-4B47-BC10-DF05027E7FCC}
+		{CF2155D1-425D-4AE9-A686-A8A9315D201A} = {C531BACD-38A8-0C3F-351D-3D453C08E313}
+		{28BD7577-ECA7-409E-8F51-8BEF5FC61E64} = {32D1B9E3-A702-4513-AC74-E76432A88F02}
+		{0FE31838-4DB5-4B47-BC10-DF05027E7FCC} = {B73B80C0-109C-41E1-8FC3-ECBFDB3F0344}
+		{A927065B-C26E-4D01-BFDB-DC47E54F0EF1} = {32D1B9E3-A702-4513-AC74-E76432A88F02}
+		{15FBDD58-B0DF-4DC6-9D27-11C841281212} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

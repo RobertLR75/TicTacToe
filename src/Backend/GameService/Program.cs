@@ -1,33 +1,22 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using GameService.Services;
+using TicTacToe.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+builder.AddRedisClient("redis");
 
 builder.Services.AddSingleton<GameRepository>();
-builder.Services.AddSingleton<GameLogicService>();
 
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowBlazorUI", policy =>
-    {
-        policy.WithOrigins("https://localhost:7080", "http://localhost:5080")
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-
 var app = builder.Build();
 
-app.MapDefaultEndpoints();
-
-app.UseCors("AllowBlazorUI");
 app.UseFastEndpoints();
+app.MapDefaultEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
@@ -35,5 +24,3 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Run();
-
-
