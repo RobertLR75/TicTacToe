@@ -156,13 +156,31 @@
             var gameId = await GameApi.CreateGameAsync();
             _gameId = gameId;
 
+            // Allow the UI to be interactive immediately while we wait for state (hub or API)
+            _isLoading = false;
+
+            // Try to get initial state from API immediately so UI becomes interactive
+            try
+            {
+                var state = await GameApi.GetGameAsync(gameId);
+                if (state is not null)
+                {
+                    UpdateState(state);
+                    _isLoading = false;
+                }
+            }
+            catch
+            {
+                // Ignore - we'll wait for hub notification. UI is already enabled so user can interact.
+            }
+
             // Join new game group for real-time updates
             if (GameHub.IsConnected)
             {
                 await GameHub.JoinGame(gameId);
             }
 
-            // State will be populated by HandleGameCreated when notification arrives
+            // State will also be populated by HandleGameCreated when notification arrives
         }
         catch (Exception ex)
         {

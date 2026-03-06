@@ -1,18 +1,19 @@
 using FastEndpoints;
 using GameService.Models;
-using GameService.Services;
+using SharedLibrary.PostgreSql.EntityFramework;
 
 namespace GameService.Endpoints.Games.List;
 
-public class ListGamesEndpoint : EndpointWithoutRequest<ListGamesResponse>
+public class ListGamesEndpoint : Endpoint<ListGamesRequest, ListGamesResponse>
 {
-    private readonly GameRepository _repository;
+    
+    private readonly IPostgresSqlStorageService<GameModel> _gameStore;
 
-    public ListGamesEndpoint(GameRepository repository)
+    public ListGamesEndpoint(IPostgresSqlStorageService<GameModel> gameStore)
     {
-        _repository = repository;
+        _gameStore = gameStore;
     }
-
+    
     public override void Configure()
     {
         Get("/api/game-lobby");
@@ -24,9 +25,10 @@ public class ListGamesEndpoint : EndpointWithoutRequest<ListGamesResponse>
         });
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override async Task HandleAsync(ListGamesRequest request, CancellationToken ct)
     {
-        var games = await _repository.GetGamesByStatusAsync(GameStatus.Created, ct);
+        var specification = new SearchByStatusSpecification(request.Status, request.Page, request.PageSize);
+        var games = await _gameStore.SearchAsync(specification, ct);
 
         Response = new ListGamesResponse
         {
@@ -35,7 +37,7 @@ public class ListGamesEndpoint : EndpointWithoutRequest<ListGamesResponse>
                 Id = g.Id,
                 Status = g.Status,
                 CreatedAt = g.CreatedAt,
-                UpdatedAt = g.UpdatedAt,
+                UpdatedAt = g.UpdatedAt ?? g.CreatedAt,
                 Player1 = new PlayerDto { Id = g.Player1.Id, Name = g.Player1.Name },
                 Player2 = g.Player2 is not null
                     ? new PlayerDto { Id = g.Player2.Id, Name = g.Player2.Name }

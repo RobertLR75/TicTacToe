@@ -11,7 +11,11 @@ var mongo = builder.AddMongoDB("mongodb")
 var postgres = builder.AddPostgres("postgres")
     .AddDatabase("postgres-db");
 
-var rabbitmq = builder.AddRabbitMQ("rabbitmq");
+var username = builder.AddParameter("username", secret: true);
+var password = builder.AddParameter("password", secret: true);
+
+var rabbitmq = builder.AddRabbitMQ("messaging", username, password)
+    .WithManagementPlugin(); 
 
 // Backend API - managed by Aspire via AddProject, explicitly declare endpoints with unique names
 var gameservice = builder.AddProject<Projects.GameStateService>("gamestateservice")
@@ -21,10 +25,10 @@ var gameservice = builder.AddProject<Projects.GameStateService>("gamestateservic
     .WithReference(postgres)
     .WithReference(rabbitmq);
 
-// Game Service - lobby/matchmaking service backed by Redis
+// Game Service - lobby/matchmaking service backed by PostgreSQL
 var gameService = builder.AddProject<Projects.GameService>("gameservice")
-    .WithReference(redis)
-    .WaitFor(redis)
+    .WithReference(postgres)
+    .WaitFor(postgres)
     .WithHttpEndpoint(port: 5120, name: "gameservice-http");
 
 // Notification Service - stub API for future notification delivery

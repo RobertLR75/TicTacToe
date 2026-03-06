@@ -9,7 +9,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddGameEventConsumers(this IServiceCollection services, IConfiguration configuration)
     {
         var messagingOptions = configuration.GetSection(MessagingOptions.SectionName).Get<MessagingOptions>() ?? new MessagingOptions();
-        var rabbitMqConnectionString = configuration.GetConnectionString("rabbitmq");
+        var rabbitMqConnectionString =
+            configuration.GetConnectionString("rabbitmq") ??
+            configuration.GetConnectionString("messaging");
         ApplyRabbitMqConnectionStringFallback(messagingOptions, rabbitMqConnectionString);
 
         services.AddSingleton<IValidateOptions<MessagingOptions>, MessagingOptionsValidator>();

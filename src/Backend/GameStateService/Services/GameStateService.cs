@@ -1,10 +1,11 @@
+using GameStateService.Endpoints.Games.MakeMove;
 using GameStateService.Models;
 
 namespace GameStateService.Services;
 
 public class GameStateService(
     IGameRepository repository,
-    GameLogicService logicService,
+    IRequestHandler<GameLogicMoveRequest, GameLogicMoveResult> gameLogicMoveHandler,
     IGameEventPublisher eventPublisher)
 {
     public async Task<GameState> CreateGameAsync(CancellationToken ct = default)
@@ -26,7 +27,13 @@ public class GameStateService(
         if (!game.Board.IsEmpty(row, col))
             return GameMoveResult.CellOccupied();
 
-        logicService.MakeMove(game, row, col);
+        var logicResult = await gameLogicMoveHandler.HandleAsync(new GameLogicMoveRequest(game, row, col), ct);
+        if (logicResult.Status == GameLogicMoveStatus.GameOver)
+            return GameMoveResult.GameOver();
+
+        if (logicResult.Status == GameLogicMoveStatus.CellOccupied)
+            return GameMoveResult.CellOccupied();
+
         repository.UpdateGame(game);
 
         await eventPublisher.PublishGameStateUpdatedAsync(game, ct);

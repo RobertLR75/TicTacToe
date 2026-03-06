@@ -12,7 +12,7 @@ The system SHALL publish a `GameCreatedEvent` to RabbitMQ through MassTransit wh
 - **THEN** the system MUST NOT publish a `GameCreatedEvent`
 
 ### Requirement: Publish game state updated integration event
-The system SHALL publish a `GameStateUpdatedEvent` to RabbitMQ through MassTransit when `GameStateService` successfully persists a game state update.
+The system SHALL publish a `GameStateUpdatedEvent` to RabbitMQ through MassTransit when `GameStateService` successfully persists a game state update, including when game-state updates are orchestrated through `IRequest<TResponse>`-based game-logic handlers.
 
 #### Scenario: Game update succeeds and event is published
 - **WHEN** `GameStateService` applies and persists a valid game state update

@@ -1,9 +1,11 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using GameStateService.Configuration;
+using GameStateService.Endpoints.Games.Create;
+using GameStateService.Endpoints.Games.Get;
+using GameStateService.Endpoints.Games.MakeMove;
 using GameStateService.Services;
 using TicTacToe.ServiceDefaults;
-using GameStateWorkflowService = GameStateService.Services.GameStateService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,9 +14,13 @@ builder.AddServiceDefaults();
 builder.Services.AddGameEventPublishing(builder.Configuration);
 
 builder.Services.AddSingleton<IGameRepository, GameRepository>();
-builder.Services.AddSingleton<GameLogicService>();
-builder.Services.AddScoped<GameStateWorkflowService>();
 builder.Services.AddScoped<IGameEventPublisher, MassTransitGameEventPublisher>();
+builder.Services.AddScoped<IRequestHandler<CheckWinnerRequest, CheckWinnerResult>, CheckWinnerRequestHandler>();
+builder.Services.AddScoped<IRequestHandler<CheckDrawRequest, CheckDrawResult>, CheckDrawRequestHandler>();
+builder.Services.AddScoped<IRequestHandler<GameLogicMoveRequest, GameLogicMoveResult>, GameLogicMoveRequestHandler>();
+builder.Services.AddScoped<IRequestHandler<CreateGameCommand, CreateGameResponse>, CreateGameCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<GetGameQuery, GetGameQueryResult>, GetGameQueryHandler>();
+builder.Services.AddScoped<IRequestHandler<MakeMoveCommand, MakeMoveCommandResult>, MakeMoveCommandHandler>();
 
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();
@@ -52,3 +58,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Run();
+
+public partial class Program;

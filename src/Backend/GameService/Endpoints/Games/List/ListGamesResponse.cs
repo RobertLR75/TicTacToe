@@ -9,10 +9,10 @@ public record ListGamesResponse
 
 public record GameDto
 {
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
     public required GameStatus Status { get; init; }
-    public required DateTime CreatedAt { get; init; }
-    public required DateTime UpdatedAt { get; init; }
+    public required DateTimeOffset CreatedAt { get; init; }
+    public required DateTimeOffset? UpdatedAt { get; init; }
     public required PlayerDto Player1 { get; init; }
     public PlayerDto? Player2 { get; init; }
 }

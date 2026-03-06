@@ -1,16 +1,15 @@
 using FastEndpoints;
 using GameStateService.Services;
-using GameStateWorkflowService = GameStateService.Services.GameStateService;
 
 namespace GameStateService.Endpoints.Games.MakeMove;
 
 public class MakeMoveEndpoint : Endpoint<MakeMoveRequest>
 {
-    private readonly GameStateWorkflowService _gameStateService;
+    private readonly IRequestHandler<MakeMoveCommand, MakeMoveCommandResult> _handler;
 
-    public MakeMoveEndpoint(GameStateWorkflowService gameStateService)
+    public MakeMoveEndpoint(IRequestHandler<MakeMoveCommand, MakeMoveCommandResult> handler)
     {
-        _gameStateService = gameStateService;
+        _handler = handler;
     }
 
     public override void Configure()
@@ -21,22 +20,22 @@ public class MakeMoveEndpoint : Endpoint<MakeMoveRequest>
 
     public override async Task HandleAsync(MakeMoveRequest req, CancellationToken ct)
     {
-        var result = await _gameStateService.MakeMoveAsync(req.GameId, req.Row, req.Col, ct);
+        var result = await _handler.HandleAsync(new MakeMoveCommand(req.GameId, req.Row, req.Col), ct);
 
-        if (result.Status == GameMoveStatus.NotFound)
+        if (result.Status == MakeMoveCommandStatus.NotFound)
         {
             await Send.NotFoundAsync(ct);
             return;
         }
 
-        if (result.Status == GameMoveStatus.GameOver)
+        if (result.Status == MakeMoveCommandStatus.GameOver)
         {
             AddError("Game is already over");
             await Send.ErrorsAsync(cancellation: ct);
             return;
         }
 
-        if (result.Status == GameMoveStatus.CellOccupied)
+        if (result.Status == MakeMoveCommandStatus.CellOccupied)
         {
             AddError("Cell is already occupied");
             await Send.ErrorsAsync(cancellation: ct);

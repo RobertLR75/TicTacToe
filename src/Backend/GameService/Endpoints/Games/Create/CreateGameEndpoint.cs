@@ -1,16 +1,18 @@
 using FastEndpoints;
+using GameService.Contracts;
 using GameService.Models;
-using GameService.Services;
+using SharedLibrary.PostgreSql.EntityFramework;
+using PlayerModel = GameService.Models.PlayerModel;
 
 namespace GameService.Endpoints.Games.Create;
 
 public class CreateGameEndpoint : Endpoint<CreateGameRequest, CreateGameResponse>
 {
-    private readonly GameRepository _repository;
+    private readonly IPostgresSqlStorageService<GameModel> _gameStore;
 
-    public CreateGameEndpoint(GameRepository repository)
+    public CreateGameEndpoint(IPostgresSqlStorageService<GameModel> gameStore)
     {
-        _repository = repository;
+        _gameStore = gameStore;
     }
 
     public override void Configure()
@@ -28,25 +30,27 @@ public class CreateGameEndpoint : Endpoint<CreateGameRequest, CreateGameResponse
     {
         var player = new PlayerModel
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = req.PlayerId.ToString("D"),
             Name = req.PlayerName
         };
 
         var game = new GameModel
         {
-            Id = Guid.NewGuid().ToString(),
+            Id = Guid.NewGuid(),
             Player1 = player
         };
 
-        await _repository.CreateGameAsync(game, ct);
+        await _gameStore.CreateAsync(game, ct);
 
         Response = new CreateGameResponse
         {
             Id = game.Id,
-            Status = game.Status,
-            CreatedAt = game.CreatedAt,
-            UpdatedAt = game.UpdatedAt,
-            Player1 = new PlayerDto { Id = player.Id, Name = player.Name }
+            Player1 = new Contracts.PlayerModel()
+            {
+                Id = player.Id,
+                Name = player.Name
+            },
+            Status = GameStatusEnum.Created
         };
 
         await Send.CreatedAtAsync<CreateGameEndpoint>(null, Response, cancellation: ct);

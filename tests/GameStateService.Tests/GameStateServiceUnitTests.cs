@@ -1,3 +1,4 @@
+using GameStateService.Endpoints.Games.MakeMove;
 using GameStateService.Models;
 using GameStateService.Services;
 using Xunit;
@@ -11,7 +12,7 @@ public class GameStateServiceUnitTests
     {
         var repository = new FakeRepository();
         var publisher = new FakePublisher();
-        var sut = new GameStateService.Services.GameStateService(repository, new GameLogicService(), publisher);
+        var sut = new GameStateService.Services.GameStateService(repository, CreateGameLogicHandler(), publisher);
 
         var game = await sut.CreateGameAsync();
 
@@ -26,7 +27,7 @@ public class GameStateServiceUnitTests
     {
         var repository = new FakeRepository { ThrowOnCreate = true };
         var publisher = new FakePublisher();
-        var sut = new GameStateService.Services.GameStateService(repository, new GameLogicService(), publisher);
+        var sut = new GameStateService.Services.GameStateService(repository, CreateGameLogicHandler(), publisher);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => sut.CreateGameAsync());
 
@@ -38,7 +39,7 @@ public class GameStateServiceUnitTests
     {
         var repository = new FakeRepository();
         var publisher = new FakePublisher();
-        var sut = new GameStateService.Services.GameStateService(repository, new GameLogicService(), publisher);
+        var sut = new GameStateService.Services.GameStateService(repository, CreateGameLogicHandler(), publisher);
         var game = repository.CreateGame();
 
         var result = await sut.MakeMoveAsync(game.GameId, 0, 0);
@@ -54,7 +55,7 @@ public class GameStateServiceUnitTests
     {
         var repository = new FakeRepository();
         var publisher = new FakePublisher();
-        var sut = new GameStateService.Services.GameStateService(repository, new GameLogicService(), publisher);
+        var sut = new GameStateService.Services.GameStateService(repository, CreateGameLogicHandler(), publisher);
 
         var result = await sut.MakeMoveAsync("missing", 0, 0);
 
@@ -67,7 +68,7 @@ public class GameStateServiceUnitTests
     {
         var repository = new FakeRepository { ThrowOnUpdate = true };
         var publisher = new FakePublisher();
-        var sut = new GameStateService.Services.GameStateService(repository, new GameLogicService(), publisher);
+        var sut = new GameStateService.Services.GameStateService(repository, CreateGameLogicHandler(), publisher);
         var game = repository.CreateGame();
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => sut.MakeMoveAsync(game.GameId, 0, 0));
@@ -135,5 +136,10 @@ public class GameStateServiceUnitTests
             LastGameId = game.GameId;
             return Task.CompletedTask;
         }
+    }
+
+    private static IRequestHandler<GameLogicMoveRequest, GameLogicMoveResult> CreateGameLogicHandler()
+    {
+        return new GameLogicMoveRequestHandler(new CheckWinnerRequestHandler(), new CheckDrawRequestHandler());
     }
 }

@@ -1,11 +1,13 @@
+using SharedLibrary.Interfaces;
+
 namespace GameService.Models;
 
-public class GameModel
+public class GameModel : IEntity
 {
-    public required string Id { get; init; }
+    public required Guid Id { get; set; }
     public GameStatus Status { get; set; } = GameStatus.Created;
-    public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset? UpdatedAt { get; set; }
     public required PlayerModel Player1 { get; init; }
     public PlayerModel? Player2 { get; set; }
 }

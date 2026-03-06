@@ -5,11 +5,11 @@ namespace GameStateService.Endpoints.Games.Get;
 
 public class GetGameEndpoint : Endpoint<GetGameRequest, GetGameResponse>
 {
-    private readonly IGameRepository _repository;
+    private readonly IRequestHandler<GetGameQuery, GetGameQueryResult> _handler;
 
-    public GetGameEndpoint(IGameRepository repository)
+    public GetGameEndpoint(IRequestHandler<GetGameQuery, GetGameQueryResult> handler)
     {
-        _repository = repository;
+        _handler = handler;
     }
 
     public override void Configure()
@@ -20,25 +20,15 @@ public class GetGameEndpoint : Endpoint<GetGameRequest, GetGameResponse>
 
     public override async Task HandleAsync(GetGameRequest req, CancellationToken ct)
     {
-        var game = _repository.GetGame(req.GameId);
-        
-        if (game is null)
+        var result = await _handler.HandleAsync(new GetGameQuery(req.GameId), ct);
+
+        if (!result.Found || result.Response is null)
         {
             await Send.NotFoundAsync(ct);
             return;
         }
 
-        Response = new GetGameResponse
-        {
-            GameId = game.GameId,
-            CurrentPlayer = game.CurrentPlayer,
-            Winner = game.Winner,
-            IsDraw = game.IsDraw,
-            IsOver = game.IsOver,
-            Board = game.Board.GetAllCells()
-                .Select(c => new CellDto(c.Row, c.Col, c.Mark))
-                .ToList()
-        };
+        Response = result.Response;
 
         await Send.OkAsync(Response, ct);
     }

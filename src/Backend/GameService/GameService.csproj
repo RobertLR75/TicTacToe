@@ -7,12 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.StackExchange.Redis" Version="13.1.2" />
-    <PackageReference Include="FastEndpoints" Version="7.2.0" />
-    <PackageReference Include="FastEndpoints.Swagger" Version="7.2.0" />
+    <PackageReference Include="SharedLibrary" Version="1.0.8" />
+    <PackageReference Include="SharedLibrary.FastEndpoints" Version="1.0.1" />
+    <PackageReference Include="SharedLibrary.FlientMigration" Version="1.0.0" />
+    <PackageReference Include="SharedLibrary.PostgreSql.EntityFramework" Version="1.0.4" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Shared\GameService.Contracts\GameService.Contracts.csproj" />
     <ProjectReference Include="..\..\TicTacToe.ServiceDefaults\TicTacToe.ServiceDefaults.csproj" />
   </ItemGroup>
 

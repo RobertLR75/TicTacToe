@@ -1,26 +1,37 @@
 using FastEndpoints;
-using FastEndpoints.Swagger;
+using GameService.Models;
+using GameService.Persistence;
 using GameService.Services;
+using SharedLibrary.FastEndpoints;
+using SharedLibrary.PostgreSql.EntityFramework;
 using TicTacToe.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
-builder.AddRedisClient("redis");
+builder.Services.AddGamePersistence(builder.Configuration);
 
-builder.Services.AddSingleton<GameRepository>();
+var postgresConnectionString = builder.Configuration.GetConnectionString("postgres");
+if (string.IsNullOrWhiteSpace(postgresConnectionString))
+{
+    throw new InvalidOperationException("ConnectionStrings:postgres is required for GameService.");
+}
 
-builder.Services.AddFastEndpoints();
-builder.Services.SwaggerDocument();
+builder.Services.AddScoped<IPostgresSqlStorageService<GameModel>, GameStorageService>();
+builder.Services.AddScoped<IUpdateGameStatusCommandHandler, UpdateGameStatusCommand.UpdateUpdateGameStatusCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>, UpdateGameStatusCommand.UpdateUpdateGameStatusCommandHandler>();
+builder.Services.AddScoped<IUpdateUpdateGameStatusCommandHandler, ValidateGameStatusCommand.ValidateGameStatusCommandHandler>();
+
+builder.ConfigureFastEndPoints();
+
 
 var app = builder.Build();
+
+app.Services.ApplyGameMigrations();
 
 app.UseFastEndpoints();
 app.MapDefaultEndpoints();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwaggerGen();
-}
-
 app.Run();
+
+public partial class Program;
