@@ -11,3 +11,5 @@ public class Game : IEntity
     public required Player Player1 { get; init; }
     public Player? Player2 { get; set; }
 }
+
+

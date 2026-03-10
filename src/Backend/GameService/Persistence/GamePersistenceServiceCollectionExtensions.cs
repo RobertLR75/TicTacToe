@@ -1,5 +1,7 @@
- using FluentMigrator.Runner;
+using FluentMigrator.Runner;
+using GameService.Models;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.PostgreSql.EntityFramework;
 
 namespace GameService.Persistence;
 
@@ -13,9 +15,9 @@ public static class GamePersistenceServiceCollectionExtensions
             throw new InvalidOperationException("ConnectionStrings:postgres is required for game persistence.");
         }
 
-        services.AddDbContext<GameDbContext>(options =>
+        services.AddDbContext<GenericDbContext<Game>>(options =>
             options.UseNpgsql(connectionString));
-        services.AddScoped<DbContext>(sp => sp.GetRequiredService<GameDbContext>());
+        services.AddScoped<DbContext>(sp => sp.GetRequiredService<GenericDbContext<Game>>());
 
         services.AddFluentMigratorCore()
             .ConfigureRunner(runner => runner

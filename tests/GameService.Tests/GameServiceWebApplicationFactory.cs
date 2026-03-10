@@ -30,7 +30,7 @@ public sealed class GameServiceWebApplicationFactory(string connectionString) : 
     public async Task ResetDatabaseAsync()
     {
         using var scope = Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<GameDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<DbContext>();
         await db.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS game;");
         await db.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS player;");
         await db.Database.ExecuteSqlRawAsync("CREATE TABLE player (id varchar(36) PRIMARY KEY, name varchar(50) NOT NULL);");

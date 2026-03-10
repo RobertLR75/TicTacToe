@@ -2,6 +2,7 @@ using GameService.Endpoints.Games.List;
 using GameService.Models;
 using GameService.Persistence;
 using GameService.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -20,11 +21,11 @@ public sealed class GameStorageServiceIntegrationTests
     [Fact]
     public async Task Create_get_update_and_search_work_against_postgres()
     {
-        using var provider = _fixture.BuildServiceProvider();
+        await using var provider = _fixture.BuildServiceProvider();
         await PostgresTestContainerFixture.ResetDatabaseAsync(provider);
 
         using var scope = provider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<GameDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<DbContext>();
         var sut = new GameStorageService(db);
 
         var game = new Game

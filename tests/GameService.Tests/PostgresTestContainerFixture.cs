@@ -48,7 +48,7 @@ public sealed class PostgresTestContainerFixture : IAsyncLifetime
     public static async Task ResetDatabaseAsync(IServiceProvider provider)
     {
         using var scope = provider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<GameDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<DbContext>();
         await db.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS game;");
         await db.Database.ExecuteSqlRawAsync("DROP TABLE IF EXISTS player;");
         await db.Database.ExecuteSqlRawAsync("CREATE TABLE player (id varchar(36) PRIMARY KEY, name varchar(50) NOT NULL);");
