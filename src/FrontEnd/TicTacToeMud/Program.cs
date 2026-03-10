@@ -11,6 +11,7 @@ builder.AddServiceDefaults();
 
 // Add MudBlazor services
 builder.Services.AddMudServices();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {

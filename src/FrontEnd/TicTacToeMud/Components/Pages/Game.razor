@@ -7,13 +7,53 @@
 <MudSnackbarProvider/>
 
 @using TicTacToeMud.Services
+@using TicTacToeMud.Session
 @inject GameApiClient GameApi
 @inject GameHubClient GameHub
 @inject ISnackbar Snackbar
+@inject IHttpContextAccessor HttpContextAccessor
 
 <PageTitle>Tic-Tac-Toe</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Tic-Tac-Toe</MudText>
+
+<MudPaper Class="pa-4 mb-4" Outlined="true" Style="max-width: 640px;">
+    <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
+        <MudText Typo="Typo.h5">Created Games</MudText>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="OnNewGame"
+                   Disabled="_isLoading">
+            New Game
+        </MudButton>
+    </MudStack>
+
+    @if (_gamesError is not null)
+    {
+        <MudAlert Severity="Severity.Error" Dense="true">@_gamesError</MudAlert>
+    }
+    else if (_isGamesLoading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+    }
+    else if (_games.Count == 0)
+    {
+        <MudText Typo="Typo.body2">No games yet. Create one to get started.</MudText>
+    }
+    else
+    {
+        <MudList T="string" Dense="true">
+            @foreach (var game in _games)
+            {
+                <MudListItem T="string">
+                    <MudText Typo="Typo.body2">
+                        @game.Id - @GetStatusLabel(game.Status) - @game.Player1.Name - @game.CreatedAt.LocalDateTime.ToString("g")
+                    </MudText>
+                </MudListItem>
+            }
+        </MudList>
+    }
+</MudPaper>
 
 <MudText Typo="Typo.h5" Class="mb-4">@StatusMessage</MudText>
 
@@ -38,14 +78,6 @@
     }
 </MudGrid>
 
-<MudButton Variant="Variant.Filled"
-           Color="Color.Primary"
-           Class="mt-4"
-           OnClick="OnNewGame"
-           Disabled="_isLoading">
-    New Game
-</MudButton>
-
 @if (_isLoading)
 {
     <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mt-2" Style="max-width: 320px;" />
@@ -64,6 +96,11 @@
     private string? _winner;
     private string? _currentPlayer;
     private bool _isLoading;
+    private bool _isGamesLoading;
+    private string? _gamesError;
+    private string? _playerId;
+    private string? _playerName;
+    private List<TicTacToeMud.Models.GameListItem> _games = [];
 
     private string StatusMessage
     {
@@ -85,8 +122,24 @@
     {
         if (firstRender)
         {
+            ResolvePlayerIdentity();
             await ConnectToHub();
-            await StartNewGame();
+            await LoadGamesAsync();
+        }
+    }
+
+    private void ResolvePlayerIdentity()
+    {
+        var context = HttpContextAccessor.HttpContext;
+        if (context is null)
+        {
+            return;
+        }
+
+        if (SessionUserStore.TryRead(context, out var user))
+        {
+            _playerId = user.UserId.ToString();
+            _playerName = user.Name;
         }
     }
 
@@ -135,7 +188,26 @@
         });
     }
 
-    private async Task StartNewGame()
+    private async Task LoadGamesAsync()
+    {
+        _isGamesLoading = true;
+        _gamesError = null;
+
+        try
+        {
+            _games = (await GameApi.ListGamesAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            _gamesError = $"Failed to load games: {ex.Message}";
+        }
+        finally
+        {
+            _isGamesLoading = false;
+        }
+    }
+
+    private async Task StartNewGame(string playerId, string playerName)
     {
         _isLoading = true;
         try
@@ -153,7 +225,7 @@
             _winner = null;
             _currentPlayer = null;
 
-            var gameId = await GameApi.CreateGameAsync();
+            var gameId = await GameApi.CreateGameAsync(playerId, playerName);
             _gameId = gameId;
 
             // Allow the UI to be interactive immediately while we wait for state (hub or API)
@@ -191,7 +263,18 @@
 
     private async Task OnNewGame()
     {
-        await StartNewGame();
+        if (string.IsNullOrWhiteSpace(_playerId) || string.IsNullOrWhiteSpace(_playerName))
+        {
+            Snackbar.Add("Missing player identity. Please sign in again.", Severity.Error);
+            return;
+        }
+
+        await StartNewGame(_playerId, _playerName);
+
+        if (_gameId is not null)
+        {
+            await LoadGamesAsync();
+        }
     }
 
     private async Task OnCellClick(int row, int col)
@@ -242,6 +325,17 @@
     private bool IsCellDisabled(int row, int col)
     {
         return _isOver || _board[row, col] is not null || _gameId is null || _isLoading;
+    }
+
+    private static string GetStatusLabel(int status)
+    {
+        return status switch
+        {
+            0 => "Created",
+            1 => "InProgress",
+            2 => "Completed",
+            _ => $"Status {status}"
+        };
     }
 
     public async ValueTask DisposeAsync()

@@ -7,7 +7,7 @@ Defines the typed HttpClient used by the frontend to communicate with the GameSt
 
 ### Requirement: Typed HttpClient for GameAPI communication
 
-The frontend SHALL use a typed `GameApiClient` service that communicates with the GameStateService backend. Return types SHALL reflect the `202 Accepted` response pattern.
+The frontend SHALL use a typed `GameApiClient` service that communicates with the GameStateService backend. Return types SHALL reflect the `202 Accepted` response pattern for create and move operations while preserving typed response models for read operations.
 
 #### Scenario: GameApiClient is registered in DI
 
@@ -16,10 +16,16 @@ The frontend SHALL use a typed `GameApiClient` service that communicates with th
 
 #### Scenario: Create a new game
 
-- **WHEN** `GameApiClient.CreateGameAsync()` is called
-- **THEN** it SHALL send `POST /api/games` to the GameService
+- **WHEN** `GameApiClient.CreateGameAsync(playerId, playerName)` is called
+- **THEN** it SHALL send `POST /api/games` to the GameService with JSON body containing `playerId` and `playerName`
 - **AND** return a `string` containing the `gameId` from the `202 Accepted` response
 - **AND** SHALL NOT return full game state (no `GameResponse`)
+
+#### Scenario: List created games
+
+- **WHEN** `GameApiClient.ListGamesAsync()` is called
+- **THEN** it SHALL send `GET /api/games` to the GameService
+- **AND** return a typed list response containing created games
 
 #### Scenario: Get game state
 

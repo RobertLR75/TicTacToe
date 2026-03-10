@@ -3,7 +3,7 @@ using GameService.Services;
 using SharedLibrary.PostgreSql.EntityFramework;
 using Xunit;
 
-namespace GameService.Tests;
+namespace GameService.UnitTests;
 
 public sealed class GameStorageServiceUnitTests
 {

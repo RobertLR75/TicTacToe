@@ -2,16 +2,16 @@ using GameService.Models;
 using GameService.Services;
 using Xunit;
 
-namespace GameService.Tests;
+namespace GameService.UnitTests;
 
-public class ValidateGameStatusCommandHandlerUnitTests
+public class ValidateGameStatusCommandHandlerUnitTests : GameServiceUnitTestBase
 {
     private readonly ValidateGameStatusCommand.ValidateGameStatusCommandHandler _sut = new();
 
     [Fact]
     public async Task HandleAsync_returns_success_when_status_is_unchanged()
     {
-        var game = BuildGame(GameStatus.Created);
+        var game = CreateGame(GameStatus.Created, updatedAt: DateTimeOffset.UtcNow);
 
         var result = await _sut.HandleAsync(new ValidateGameStatusCommand(game, GameStatus.Created));
 
@@ -20,9 +20,20 @@ public class ValidateGameStatusCommandHandlerUnitTests
     }
 
     [Fact]
+    public async Task HandleAsync_returns_success_when_active_status_is_unchanged()
+    {
+        var game = CreateGame(GameStatus.Active, updatedAt: DateTimeOffset.UtcNow);
+
+        var result = await _sut.HandleAsync(new ValidateGameStatusCommand(game, GameStatus.Active));
+
+        Assert.True(result.Succeeded);
+        Assert.False(result.InvalidStatus);
+    }
+
+    [Fact]
     public async Task HandleAsync_returns_invalid_when_completed_is_requested_from_active()
     {
-        var game = BuildGame(GameStatus.Active);
+        var game = CreateGame(GameStatus.Active, updatedAt: DateTimeOffset.UtcNow);
 
         var result = await _sut.HandleAsync(new ValidateGameStatusCommand(game, GameStatus.Completed));
 
@@ -33,7 +44,7 @@ public class ValidateGameStatusCommandHandlerUnitTests
     [Fact]
     public async Task HandleAsync_returns_invalid_when_current_status_is_completed()
     {
-        var game = BuildGame(GameStatus.Completed);
+        var game = CreateGame(GameStatus.Completed, updatedAt: DateTimeOffset.UtcNow);
 
         var result = await _sut.HandleAsync(new ValidateGameStatusCommand(game, GameStatus.Active));
 
@@ -44,7 +55,7 @@ public class ValidateGameStatusCommandHandlerUnitTests
     [Fact]
     public async Task HandleAsync_returns_success_when_transition_is_created_to_active()
     {
-        var game = BuildGame(GameStatus.Created);
+        var game = CreateGame(GameStatus.Created, updatedAt: DateTimeOffset.UtcNow);
 
         var result = await _sut.HandleAsync(new ValidateGameStatusCommand(game, GameStatus.Active));
 
@@ -52,14 +63,16 @@ public class ValidateGameStatusCommandHandlerUnitTests
         Assert.False(result.InvalidStatus);
     }
 
-    private static Game BuildGame(GameStatus status)
+    [Fact]
+    public async Task HandleAsync_returns_success_for_other_transitions()
     {
-        return new Game
-        {
-            Id = Guid.NewGuid(),
-            Status = status,
-            UpdatedAt = DateTimeOffset.UtcNow,
-            Player1 = new Player { Id = "p1", Name = "Alice" }
-        };
+        var game = CreateGame(GameStatus.Created, updatedAt: DateTimeOffset.UtcNow);
+
+        var result = await _sut.HandleAsync(new ValidateGameStatusCommand(game, GameStatus.Completed));
+
+        Assert.True(result.Succeeded);
+        Assert.False(result.InvalidStatus);
+        Assert.Equal(game.Id, result.Id);
+        Assert.Equal(game.Status, result.Status);
     }
 }

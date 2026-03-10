@@ -4,7 +4,6 @@ using GameNotificationService.Notifications;
 using GameNotificationService.Persistence;
 using GameNotificationService.Services;
 using MassTransit;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -94,18 +93,16 @@ public sealed class ConsumerIntegrationTests
             var username = credentials.Length > 0 && !string.IsNullOrWhiteSpace(credentials[0]) ? credentials[0] : "guest";
             var password = credentials.Length > 1 && !string.IsNullOrWhiteSpace(credentials[1]) ? credentials[1] : "guest";
 
-            var configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    ["Messaging:EnableEventConsumers"] = "true",
-                    ["Messaging:RabbitMq:Host"] = rabbitUri.Host,
-                    ["Messaging:RabbitMq:Port"] = rabbitUri.Port.ToString(),
-                    ["Messaging:RabbitMq:VirtualHost"] = "/",
-                    ["Messaging:RabbitMq:Username"] = username,
-                    ["Messaging:RabbitMq:Password"] = password,
-                    ["ConnectionStrings:postgres"] = postgres.GetConnectionString()
-                })
-                .Build();
+            var configuration = global::TicTacToe.Testing.TestConfigurationFactory.Build(new Dictionary<string, string?>
+            {
+                ["Messaging:EnableEventConsumers"] = "true",
+                ["Messaging:RabbitMq:Host"] = rabbitUri.Host,
+                ["Messaging:RabbitMq:Port"] = rabbitUri.Port.ToString(),
+                ["Messaging:RabbitMq:VirtualHost"] = "/",
+                ["Messaging:RabbitMq:Username"] = username,
+                ["Messaging:RabbitMq:Password"] = password,
+                ["ConnectionStrings:postgres"] = postgres.GetConnectionString()
+            });
 
             var services = new ServiceCollection();
             services.AddLogging();
@@ -132,7 +129,7 @@ public sealed class ConsumerIntegrationTests
                 await publisher.Publish(BuildGameStateInitializedEvent(eventId));
 
                 var repository = provider.GetRequiredService<INotificationRepository>();
-                var persisted = await WaitForAsync(async () =>
+                var persisted = await global::TicTacToe.Testing.AsyncPolling.WaitForAsync(async () =>
                 {
                     var notifications = await repository.ListAsync(new NotificationQuery(1, 20, "game-1"));
                     return notifications.Any(x => x.EventId == eventId);
@@ -143,7 +140,7 @@ public sealed class ConsumerIntegrationTests
                     return;
                 }
 
-                Assert.True(persisted);
+                Assert.True(persisted == true);
             }
             finally
             {
@@ -155,22 +152,6 @@ public sealed class ConsumerIntegrationTests
             await postgres.DisposeAsync();
             await rabbitMq.DisposeAsync();
         }
-    }
-
-    private static async Task<bool> WaitForAsync(Func<Task<bool>> condition, TimeSpan timeout)
-    {
-        var started = DateTimeOffset.UtcNow;
-        while (DateTimeOffset.UtcNow - started < timeout)
-        {
-            if (await condition())
-            {
-                return true;
-            }
-
-            await Task.Delay(250);
-        }
-
-        return false;
     }
 
     private static GameStateInitialized BuildGameStateInitializedEvent(string? eventId = null)

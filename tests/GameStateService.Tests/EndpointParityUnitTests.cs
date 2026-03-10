@@ -2,8 +2,9 @@ using FastEndpoints;
 using GameStateService.Endpoints.Games.Create;
 using GameStateService.Endpoints.Games.Get;
 using GameStateService.Endpoints.Games.MakeMove;
-using GameStateService.Services;
+using GameStateService.GameState;
 using GameStateService.Models;
+using GameStateService.Services;
 using Xunit;
 
 namespace GameStateService.Tests;
@@ -35,9 +36,9 @@ public class EndpointParityUnitTests
         var getCtor = typeof(GetGameEndpoint).GetConstructors().Single();
         var moveCtor = typeof(MakeMoveEndpoint).GetConstructors().Single();
 
-        Assert.Equal(typeof(IRequestHandler<CreateGameCommand, GameState>), createCtor.GetParameters().Single().ParameterType);
-        Assert.Equal(typeof(IRequestHandler<GetGameQuery, GetGameQueryResult>), getCtor.GetParameters().Single().ParameterType);
-        Assert.Equal(typeof(IRequestHandler<MakeMoveCommand, MakeMoveCommandResult>), moveCtor.GetParameters().Single().ParameterType);
+        Assert.Equal(typeof(IRequestHandler<CreateGame, GameStateService.Models.GameState>), createCtor.GetParameters().Single().ParameterType);
+        Assert.Equal(typeof(IRequestHandler<GetGame, GetGameQueryResult>), getCtor.GetParameters().Single().ParameterType);
+        Assert.Equal(typeof(IRequestHandler<MakeMove, MakeMoveCommandResult>), moveCtor.GetParameters().Single().ParameterType);
     }
 
     [Fact]

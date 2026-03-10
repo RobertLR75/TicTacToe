@@ -5,10 +5,39 @@ using Service.Contracts.Shared;
 using Service.Contracts.UpdateGameStatus;
 using Xunit;
 
-namespace GameService.Tests;
+namespace GameService.UnitTests;
 
 public class ValidatorsUnitTests
 {
+    [Fact]
+    public void CreateGameValidator_accepts_valid_request()
+    {
+        var sut = new CreateGameValidator();
+
+        var result = sut.Validate(new CreateGameRequest
+        {
+            PlayerId = Guid.NewGuid(),
+            PlayerName = "Alice"
+        });
+
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void CreateGameValidator_rejects_empty_player_id()
+    {
+        var sut = new CreateGameValidator();
+
+        var result = sut.Validate(new CreateGameRequest
+        {
+            PlayerId = Guid.Empty,
+            PlayerName = "Alice"
+        });
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(CreateGameRequest.PlayerId));
+    }
+
     [Fact]
     public void CreateGameValidator_rejects_empty_player_name()
     {
@@ -36,6 +65,21 @@ public class ValidatorsUnitTests
         });
 
         Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public void UpdateGameStatusValidator_rejects_empty_id()
+    {
+        var sut = new UpdateGameStatusValidator();
+
+        var result = sut.Validate(new UpdateGameStatusRequest
+        {
+            Id = Guid.Empty,
+            Status = GameStatusEnum.Active
+        });
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(UpdateGameStatusRequest.Id));
     }
 
     [Fact]

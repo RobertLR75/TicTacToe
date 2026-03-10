@@ -4,20 +4,30 @@ namespace TicTacToeMud.Services;
 
 public class GameApiClient(HttpClient httpClient)
 {
-    public async Task<string> CreateGameAsync()
+    public virtual async Task<string> CreateGameAsync(string playerId, string playerName)
     {
-        var response = await httpClient.PostAsync("/api/games", null);
+        var response = await httpClient.PostAsJsonAsync("/api/games", new
+        {
+            playerId,
+            playerName
+        });
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<CreateGameApiResponse>();
         return result!.GameId;
     }
 
-    public async Task<GameResponse> GetGameAsync(string gameId)
+    public virtual async Task<IReadOnlyList<GameListItem>> ListGamesAsync()
+    {
+        var response = await httpClient.GetFromJsonAsync<ListGamesApiResponse>("/api/games");
+        return response?.Games ?? [];
+    }
+
+    public virtual async Task<GameResponse> GetGameAsync(string gameId)
     {
         return (await httpClient.GetFromJsonAsync<GameResponse>($"/api/games/{gameId}"))!;
     }
 
-    public async Task MakeMoveAsync(string gameId, int row, int col)
+    public virtual async Task MakeMoveAsync(string gameId, int row, int col)
     {
         var response = await httpClient.PostAsJsonAsync($"/api/games/{gameId}/moves", new
         {
@@ -31,5 +41,10 @@ public class GameApiClient(HttpClient httpClient)
     private record CreateGameApiResponse
     {
         public required string GameId { get; init; }
+    }
+
+    private record ListGamesApiResponse
+    {
+        public required List<GameListItem> Games { get; init; }
     }
 }

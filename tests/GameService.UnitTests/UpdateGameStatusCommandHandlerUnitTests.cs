@@ -2,20 +2,19 @@ using GameService.Endpoints.Games.UpdateStatus;
 using GameService.Models;
 using GameService.Services;
 using NSubstitute;
-using SharedLibrary.PostgreSql.EntityFramework;
 using Xunit;
 
-namespace GameService.Tests;
+namespace GameService.UnitTests;
 
-public class UpdateGameStatusCommandHandlerUnitTests
+public class UpdateGameStatusCommandHandlerUnitTests : GameServiceUnitTestBase
 {
     [Fact]
     public async Task HandleAsync_returns_not_found_when_game_does_not_exist()
     {
-        var store = Substitute.For<IPostgresSqlStorageService<Game>>();
+        var store = CreateStore();
         store.GetAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((Game?)null);
-        var validator = new FakeStatusValidator(GameStatusUpdateResult.SuccessResult(Guid.NewGuid(), GameStatus.Created, DateTimeOffset.UtcNow));
-        var publisher = Substitute.For<IGameEventPublisher>();
+        var validator = CreateStatusValidator(GameStatusUpdateResult.SuccessResult(Guid.NewGuid(), GameStatus.Created, DateTimeOffset.UtcNow));
+        var publisher = CreatePublisher();
         var sut = new UpdateGameStatusHandler(store, validator, publisher);
 
         var result = await sut.HandleAsync(new UpdateGameStatusCommand(Guid.NewGuid(), GameStatus.Active));
@@ -27,11 +26,11 @@ public class UpdateGameStatusCommandHandlerUnitTests
     [Fact]
     public async Task HandleAsync_updates_game_when_validator_allows_transition()
     {
-        var game = BuildGame(GameStatus.Created);
-        var store = Substitute.For<IPostgresSqlStorageService<Game>>();
+        var game = CreateGame(GameStatus.Created);
+        var store = CreateStore();
         store.GetAsync(game.Id, Arg.Any<CancellationToken>()).Returns(game);
         var validator = new ValidateGameStatusCommand.ValidateGameStatusCommandHandler();
-        var publisher = Substitute.For<IGameEventPublisher>();
+        var publisher = CreatePublisher();
         var sut = new UpdateGameStatusHandler(store, validator, publisher);
 
         var result = await sut.HandleAsync(new UpdateGameStatusCommand(game.Id, GameStatus.Active));
@@ -46,11 +45,11 @@ public class UpdateGameStatusCommandHandlerUnitTests
     [Fact]
     public async Task HandleAsync_returns_invalid_and_does_not_update_when_validator_rejects()
     {
-        var game = BuildGame(GameStatus.Created);
-        var store = Substitute.For<IPostgresSqlStorageService<Game>>();
+        var game = CreateGame(GameStatus.Created);
+        var store = CreateStore();
         store.GetAsync(game.Id, Arg.Any<CancellationToken>()).Returns(game);
-        var validator = new FakeStatusValidator(GameStatusUpdateResult.InvalidStatusResult());
-        var publisher = Substitute.For<IGameEventPublisher>();
+        var validator = CreateStatusValidator(GameStatusUpdateResult.InvalidStatusResult());
+        var publisher = CreatePublisher();
         var sut = new UpdateGameStatusHandler(store, validator, publisher);
 
         var result = await sut.HandleAsync(new UpdateGameStatusCommand(game.Id, GameStatus.Completed));
@@ -60,23 +59,5 @@ public class UpdateGameStatusCommandHandlerUnitTests
         Assert.Equal(GameStatus.Created, game.Status);
         await store.DidNotReceive().UpdateAsync(Arg.Any<Game>(), Arg.Any<CancellationToken>());
         await publisher.DidNotReceive().PublishStatusUpdatedAsync(Arg.Any<GameStatusUpdatedEvent>(), Arg.Any<CancellationToken>());
-    }
-
-    private static Game BuildGame(GameStatus status)
-    {
-        return new Game
-        {
-            Id = Guid.NewGuid(),
-            Status = status,
-            Player1 = new Player { Id = "p1", Name = "Alice" }
-        };
-    }
-
-    private sealed class FakeStatusValidator(GameStatusUpdateResult result) : IUpdateUpdateGameStatusCommandHandler
-    {
-        public Task<GameStatusUpdateResult> HandleAsync(ValidateGameStatusCommand request, CancellationToken ct = default)
-        {
-            return Task.FromResult(result);
-        }
     }
 }

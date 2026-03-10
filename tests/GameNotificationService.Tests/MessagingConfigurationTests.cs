@@ -2,6 +2,7 @@ using GameNotificationService.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using TicTacToe.Testing;
 using Xunit;
 
 namespace GameNotificationService.Tests;
@@ -45,8 +46,6 @@ public class MessagingConfigurationTests
 
     private static IConfiguration BuildConfiguration(Dictionary<string, string?> values)
     {
-        return new ConfigurationBuilder()
-            .AddInMemoryCollection(values)
-            .Build();
+        return TestConfigurationFactory.Build(values);
     }
 }

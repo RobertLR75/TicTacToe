@@ -9,7 +9,7 @@ using Service.Contracts.ListGames;
 using Service.Contracts.UpdateGameStatus;
 using Xunit;
 
-namespace GameService.Tests;
+namespace GameService.UnitTests;
 
 public class EndpointParityUnitTests
 {

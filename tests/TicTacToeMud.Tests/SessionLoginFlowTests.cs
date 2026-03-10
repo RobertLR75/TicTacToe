@@ -70,6 +70,22 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
         Assert.Equal("/", loginGetResponse.Headers.Location?.OriginalString);
     }
 
+    [Fact]
+    public async Task Game_page_renders_game_list_shell_with_new_game_action()
+    {
+        using var client = CreateClient(allowAutoRedirect: false);
+
+        using var loginResponse = await client.PostAsync("/login", BuildLoginContent("Charlie"));
+        Assert.Equal(HttpStatusCode.Redirect, loginResponse.StatusCode);
+
+        using var gameResponse = await client.GetAsync("/game");
+
+        Assert.Equal(HttpStatusCode.OK, gameResponse.StatusCode);
+        var content = await gameResponse.Content.ReadAsStringAsync();
+        Assert.Contains("Created Games", content);
+        Assert.Contains("New Game", content);
+    }
+
     private HttpClient CreateClient(bool allowAutoRedirect)
     {
         return _factory.CreateClient(new WebApplicationFactoryClientOptions

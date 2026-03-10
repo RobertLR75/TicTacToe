@@ -1,147 +1,44 @@
-using GameStateService.Contracts.Events;
-using GameStateService.Endpoints.Games.MakeMove;
+using GameStateService.Configuration;
 using GameStateService.Models;
 using GameStateService.Services;
+using MassTransit;
+using Microsoft.Extensions.Options;
+using NSubstitute;
 using Xunit;
 
 namespace GameStateService.Tests;
 
-public class GameStateServiceUnitTests
+public sealed class GameStateServiceUnitTests
 {
     [Fact]
-    public async Task CreateGameAsync_publishes_created_event_after_persistence()
+    public void GameRepository_create_get_update_and_delete_round_trip()
     {
-        var repository = new FakeRepository();
-        var publisher = new FakePublisher();
-        var sut = new GameStateService.Services.GameStateService(repository, CreateGameLogicHandler(), publisher);
+        IGameRepository sut = new GameRepository();
 
-        var game = await sut.CreateGameAsync();
+        var game = sut.CreateGame();
+        var loaded = sut.GetGame(game.GameId);
 
-        Assert.NotNull(game);
-        Assert.Equal(1, repository.CreateCalls);
-        Assert.Equal(1, publisher.InitializedPublishCalls);
-        Assert.Equal(game.GameId, publisher.LastGameId);
+        Assert.NotNull(loaded);
+        loaded!.Winner = PlayerMark.X;
+        sut.UpdateGame(loaded);
+
+        var updated = sut.GetGame(game.GameId);
+        Assert.Equal(PlayerMark.X, updated!.Winner);
+
+        sut.DeleteGame(game.GameId);
+
+        Assert.Null(sut.GetGame(game.GameId));
     }
 
     [Fact]
-    public async Task CreateGameAsync_does_not_publish_when_create_fails()
+    public async Task MassTransitGameEventPublisher_skips_publish_when_disabled()
     {
-        var repository = new FakeRepository { ThrowOnCreate = true };
-        var publisher = new FakePublisher();
-        var sut = new GameStateService.Services.GameStateService(repository, CreateGameLogicHandler(), publisher);
+        var publishEndpoint = Substitute.For<IPublishEndpoint>();
+        var options = Options.Create(new MessagingOptions { EnableEventPublishing = false });
+        var sut = new MassTransitGameEventPublisher(publishEndpoint, options);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => sut.CreateGameAsync());
+        await sut.PublishEventAsync(new { EventId = "evt-1" });
 
-        Assert.Equal(0, publisher.InitializedPublishCalls);
-    }
-
-    [Fact]
-    public async Task MakeMoveAsync_publishes_update_event_after_successful_update()
-    {
-        var repository = new FakeRepository();
-        var publisher = new FakePublisher();
-        var sut = new GameStateService.Services.GameStateService(repository, CreateGameLogicHandler(), publisher);
-        var game = repository.CreateGame();
-
-        var result = await sut.MakeMoveAsync(game.GameId, 0, 0);
-
-        Assert.Equal(GameMoveStatus.Success, result.Status);
-        Assert.Equal(1, repository.UpdateCalls);
-        Assert.Equal(1, publisher.UpdatedPublishCalls);
-        Assert.Equal(game.GameId, publisher.LastGameId);
-    }
-
-    [Fact]
-    public async Task MakeMoveAsync_does_not_publish_when_game_not_found()
-    {
-        var repository = new FakeRepository();
-        var publisher = new FakePublisher();
-        var sut = new GameStateService.Services.GameStateService(repository, CreateGameLogicHandler(), publisher);
-
-        var result = await sut.MakeMoveAsync("missing", 0, 0);
-
-        Assert.Equal(GameMoveStatus.NotFound, result.Status);
-        Assert.Equal(0, publisher.UpdatedPublishCalls);
-    }
-
-    [Fact]
-    public async Task MakeMoveAsync_does_not_publish_when_update_fails()
-    {
-        var repository = new FakeRepository { ThrowOnUpdate = true };
-        var publisher = new FakePublisher();
-        var sut = new GameStateService.Services.GameStateService(repository, CreateGameLogicHandler(), publisher);
-        var game = repository.CreateGame();
-
-        await Assert.ThrowsAsync<InvalidOperationException>(() => sut.MakeMoveAsync(game.GameId, 0, 0));
-
-        Assert.Equal(0, publisher.UpdatedPublishCalls);
-    }
-
-    private sealed class FakeRepository : IGameRepository
-    {
-        private readonly Dictionary<string, GameState> _games = new();
-
-        public int CreateCalls { get; private set; }
-        public int UpdateCalls { get; private set; }
-        public bool ThrowOnCreate { get; init; }
-        public bool ThrowOnUpdate { get; init; }
-
-        public GameState CreateGame()
-        {
-            if (ThrowOnCreate)
-                throw new InvalidOperationException("create failed");
-
-            CreateCalls++;
-            var game = new GameState();
-            _games[game.GameId] = game;
-            return game;
-        }
-
-        public GameState? GetGame(string gameId)
-        {
-            _games.TryGetValue(gameId, out var game);
-            return game;
-        }
-
-        public void UpdateGame(GameState game)
-        {
-            if (ThrowOnUpdate)
-                throw new InvalidOperationException("update failed");
-
-            UpdateCalls++;
-            _games[game.GameId] = game;
-        }
-
-        public void DeleteGame(string gameId)
-        {
-            _games.Remove(gameId);
-        }
-    }
-
-    private sealed class FakePublisher : IGameEventPublisher
-    {
-        public int InitializedPublishCalls { get; private set; }
-        public int UpdatedPublishCalls { get; private set; }
-        public string? LastGameId { get; private set; }
-
-        public Task PublishEventAsync<T>(T @event, CancellationToken ct = default) where T : class
-        {
-            if (@event is GameStateInitializedEvent e1)
-            {
-                InitializedPublishCalls++;
-                LastGameId = e1.GameId;
-            }
-            else if (@event is GameStateUpdatedEvent e2)
-            {
-                UpdatedPublishCalls++;
-                LastGameId = e2.GameId;
-            }
-            return Task.CompletedTask;
-        }
-    }
-
-    private static IRequestHandler<GameLogicMoveRequest, GameLogicMoveResult> CreateGameLogicHandler()
-    {
-        return new GameLogicMoveRequestHandler(new CheckWinnerRequestHandler(), new CheckDrawRequestHandler());
+        await publishEndpoint.DidNotReceiveWithAnyArgs().Publish(default(object)!, default(CancellationToken));
     }
 }

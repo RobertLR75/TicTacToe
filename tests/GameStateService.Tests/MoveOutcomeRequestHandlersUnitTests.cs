@@ -1,41 +1,41 @@
-using GameStateService.Endpoints.Games.MakeMove;
+using GameStateService.GameState;
 using GameStateService.Models;
 using Xunit;
 
 namespace GameStateService.Tests;
 
-public class MoveOutcomeRequestHandlersUnitTests
+public sealed class MoveOutcomeRequestHandlersUnitTests
 {
     [Fact]
-    public async Task CheckWinnerRequestHandler_returns_winner_for_matching_row()
+    public async Task CheckWinnerHandler_returns_winner_for_matching_row()
     {
         var board = new Board();
         board.SetCell(0, 0, PlayerMark.X);
         board.SetCell(0, 1, PlayerMark.X);
         board.SetCell(0, 2, PlayerMark.X);
-        var sut = new CheckWinnerRequestHandler();
+        var sut = new CheckWinnerHandler();
 
-        var result = await sut.HandleAsync(new CheckWinnerRequest(board));
+        var result = await sut.HandleAsync(new CheckWinner(board));
 
         Assert.Equal(PlayerMark.X, result.Winner);
     }
 
     [Fact]
-    public async Task CheckWinnerRequestHandler_returns_none_when_no_winner_exists()
+    public async Task CheckWinnerHandler_returns_none_when_no_winner_exists()
     {
         var board = new Board();
         board.SetCell(0, 0, PlayerMark.X);
         board.SetCell(0, 1, PlayerMark.O);
         board.SetCell(0, 2, PlayerMark.X);
-        var sut = new CheckWinnerRequestHandler();
+        var sut = new CheckWinnerHandler();
 
-        var result = await sut.HandleAsync(new CheckWinnerRequest(board));
+        var result = await sut.HandleAsync(new CheckWinner(board));
 
         Assert.Equal(PlayerMark.None, result.Winner);
     }
 
     [Fact]
-    public async Task CheckDrawRequestHandler_returns_true_for_full_board()
+    public async Task CheckDrawHandler_returns_true_for_full_board()
     {
         var board = new Board();
         var marks = new[]
@@ -54,21 +54,21 @@ public class MoveOutcomeRequestHandlersUnitTests
             }
         }
 
-        var sut = new CheckDrawRequestHandler();
+        var sut = new CheckDrawHandler();
 
-        var result = await sut.HandleAsync(new CheckDrawRequest(board));
+        var result = await sut.HandleAsync(new CheckDraw(board));
 
         Assert.True(result.IsDraw);
     }
 
     [Fact]
-    public async Task CheckDrawRequestHandler_returns_false_when_board_has_empty_cell()
+    public async Task CheckDrawHandler_returns_false_when_board_has_empty_cell()
     {
         var board = new Board();
         board.SetCell(0, 0, PlayerMark.X);
-        var sut = new CheckDrawRequestHandler();
+        var sut = new CheckDrawHandler();
 
-        var result = await sut.HandleAsync(new CheckDrawRequest(board));
+        var result = await sut.HandleAsync(new CheckDraw(board));
 
         Assert.False(result.IsDraw);
     }

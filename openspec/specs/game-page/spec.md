@@ -7,12 +7,19 @@ Defines the interactive Tic-Tac-Toe game page behavior, including board renderin
 
 ### Requirement: Game page displays interactive 3x3 board
 
-The game page at route `/game` SHALL render a 3x3 grid of clickable cells using MudBlazor components. Each cell SHALL display the current mark (`X`, `O`, or empty). The page SHALL use `@rendermode InteractiveServer`.
+The game page at route `/game` SHALL render a game list experience and a 3x3 grid of clickable cells using MudBlazor components. The page SHALL use `@rendermode InteractiveServer`.
 
-#### Scenario: Empty board displayed on new game
+#### Scenario: Game list is loaded when page opens
 
 - **WHEN** a user navigates to `/game`
-- **THEN** the page SHALL call `POST /api/games` to create a new game
+- **THEN** the page SHALL call `GET /api/games` to fetch created games
+- **AND** display the returned games in a GameList view
+- **AND** SHALL NOT automatically create a new game on initial page load
+
+#### Scenario: Empty board displayed after creating a new game
+
+- **WHEN** the user clicks the "New Game" button
+- **THEN** the page SHALL call `POST /api/games` with `playerId` and `playerName`
 - **AND** receive `202 Accepted` with `{ gameId }`
 - **AND** join the SignalR game group using the returned `gameId`
 - **AND** wait for the `GameCreated` notification to receive full game state
@@ -91,17 +98,14 @@ The page SHALL display the current game status: whose turn it is, the winner, or
 
 ### Requirement: User can start a new game
 
-The page SHALL provide a button to start a new game at any time.
+The page SHALL provide a "New Game" button that creates a game with creator identity and refreshes the list of created games.
 
-#### Scenario: New game button resets the board
+#### Scenario: New game button refreshes list after successful create
 
 - **WHEN** the user clicks the "New Game" button
-- **THEN** the system SHALL leave the previous SignalR game group
-- **AND** call `POST /api/games` to create a new game
-- **AND** join the new game's SignalR group using the returned `gameId`
-- **AND** wait for the `GameCreated` notification to receive full state
-- **AND** replace the board with the new game state
-- **AND** reset the displayed status to "Player X's turn"
+- **THEN** the system SHALL call `POST /api/games` with `playerId` and `playerName`
+- **AND** the system SHALL call `GET /api/games` after the create request succeeds
+- **AND** the refreshed GameList SHALL include the newly created game
 
 #### Scenario: New game during active game
 
