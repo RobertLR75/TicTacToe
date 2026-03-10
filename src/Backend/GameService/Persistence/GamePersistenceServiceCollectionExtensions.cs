@@ -13,9 +13,9 @@ public static class GamePersistenceServiceCollectionExtensions
             throw new InvalidOperationException("ConnectionStrings:postgres is required for game persistence.");
         }
 
-        services.AddDbContext<GamePersistenceDbContext>(options =>
+        services.AddDbContext<GameDbContext>(options =>
             options.UseNpgsql(connectionString));
-        services.AddScoped<DbContext>(sp => sp.GetRequiredService<GamePersistenceDbContext>());
+        services.AddScoped<DbContext>(sp => sp.GetRequiredService<GameDbContext>());
 
         services.AddFluentMigratorCore()
             .ConfigureRunner(runner => runner

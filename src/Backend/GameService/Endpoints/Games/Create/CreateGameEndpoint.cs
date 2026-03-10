@@ -1,18 +1,17 @@
 using FastEndpoints;
-using GameService.Contracts;
 using GameService.Models;
-using SharedLibrary.PostgreSql.EntityFramework;
-using PlayerModel = GameService.Models.PlayerModel;
+using GameService.Services;
+using Service.Contracts.CreateGame;
 
 namespace GameService.Endpoints.Games.Create;
 
-public class CreateGameEndpoint : Endpoint<CreateGameRequest, CreateGameResponse>
+public class CreateGameEndpoint : Endpoint<CreateGameRequest, CreateGameResponse, CreateGameMapper>
 {
-    private readonly IPostgresSqlStorageService<GameModel> _gameStore;
+    private readonly IRequestHandler<CreateGameCommand, Game> _handler;
 
-    public CreateGameEndpoint(IPostgresSqlStorageService<GameModel> gameStore)
+    public CreateGameEndpoint(IRequestHandler<CreateGameCommand, Game> handler)
     {
-        _gameStore = gameStore;
+        _handler = handler;
     }
 
     public override void Configure()
@@ -28,30 +27,11 @@ public class CreateGameEndpoint : Endpoint<CreateGameRequest, CreateGameResponse
 
     public override async Task HandleAsync(CreateGameRequest req, CancellationToken ct)
     {
-        var player = new PlayerModel
-        {
-            Id = req.PlayerId.ToString("D"),
-            Name = req.PlayerName
-        };
+        var command = Map.ToEntity(req);
+        var game = await _handler.HandleAsync(command, ct);
 
-        var game = new GameModel
-        {
-            Id = Guid.NewGuid(),
-            Player1 = player
-        };
 
-        await _gameStore.CreateAsync(game, ct);
-
-        Response = new CreateGameResponse
-        {
-            Id = game.Id,
-            Player1 = new Contracts.PlayerModel()
-            {
-                Id = player.Id,
-                Name = player.Name
-            },
-            Status = GameStatusEnum.Created
-        };
+        Response = Map.FromEntity(game);
 
         await Send.CreatedAtAsync<CreateGameEndpoint>(null, Response, cancellation: ct);
     }

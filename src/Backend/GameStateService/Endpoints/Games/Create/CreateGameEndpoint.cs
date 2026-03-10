@@ -1,14 +1,13 @@
 using FastEndpoints;
 using GameStateService.Services;
-using Microsoft.AspNetCore.Http;
 
 namespace GameStateService.Endpoints.Games.Create;
 
-public class CreateGameEndpoint : EndpointWithoutRequest<CreateGameResponse>
+public class CreateGameEndpoint : EndpointWithoutRequest<CreateGameResponse, CreateGameMapper>
 {
-    private readonly IRequestHandler<CreateGameCommand, CreateGameResponse> _handler;
+    private readonly IRequestHandler<CreateGame, Models.GameState> _handler;
 
-    public CreateGameEndpoint(IRequestHandler<CreateGameCommand, CreateGameResponse> handler)
+    public CreateGameEndpoint(IRequestHandler<CreateGame, Models.GameState> handler)
     {
         _handler = handler;
     }
@@ -21,9 +20,11 @@ public class CreateGameEndpoint : EndpointWithoutRequest<CreateGameResponse>
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        var response = await _handler.HandleAsync(new CreateGameCommand(), ct);
+        var game = await _handler.HandleAsync(new CreateGame(), ct);
+
+        Response = Map.FromEntity(game);
 
         HttpContext.Response.StatusCode = 202;
-        await HttpContext.Response.WriteAsJsonAsync(response, ct);
+        await HttpContext.Response.WriteAsJsonAsync(Response, ct);
     }
 }

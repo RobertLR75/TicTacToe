@@ -3,6 +3,7 @@ using GameStateService.Endpoints.Games.Create;
 using GameStateService.Endpoints.Games.Get;
 using GameStateService.Endpoints.Games.MakeMove;
 using GameStateService.Services;
+using GameStateService.Models;
 using Xunit;
 
 namespace GameStateService.Tests;
@@ -12,7 +13,7 @@ public class EndpointParityUnitTests
     [Fact]
     public void Create_endpoint_contract_remains_without_request_and_returns_create_response()
     {
-        Assert.Equal(typeof(EndpointWithoutRequest<CreateGameResponse>), typeof(CreateGameEndpoint).BaseType);
+        Assert.Equal(typeof(EndpointWithoutRequest<CreateGameResponse, CreateGameMapper>), typeof(CreateGameEndpoint).BaseType);
     }
 
     [Fact]
@@ -34,7 +35,7 @@ public class EndpointParityUnitTests
         var getCtor = typeof(GetGameEndpoint).GetConstructors().Single();
         var moveCtor = typeof(MakeMoveEndpoint).GetConstructors().Single();
 
-        Assert.Equal(typeof(IRequestHandler<CreateGameCommand, CreateGameResponse>), createCtor.GetParameters().Single().ParameterType);
+        Assert.Equal(typeof(IRequestHandler<CreateGameCommand, GameState>), createCtor.GetParameters().Single().ParameterType);
         Assert.Equal(typeof(IRequestHandler<GetGameQuery, GetGameQueryResult>), getCtor.GetParameters().Single().ParameterType);
         Assert.Equal(typeof(IRequestHandler<MakeMoveCommand, MakeMoveCommandResult>), moveCtor.GetParameters().Single().ParameterType);
     }

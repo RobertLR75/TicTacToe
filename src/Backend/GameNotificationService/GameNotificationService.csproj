@@ -15,7 +15,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Shared\Service.Contracts\Service.Contracts.csproj" />
     <ProjectReference Include="..\..\TicTacToe.ServiceDefaults\TicTacToe.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Contracts\Events\" />
   </ItemGroup>
 
 </Project>

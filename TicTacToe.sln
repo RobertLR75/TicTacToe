@@ -30,7 +30,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToeMud.Tests", "tests
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{A84D4A6A-1745-4C53-81F2-D8380EC05949}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameService.Contracts", "src\Shared\GameService.Contracts\GameService.Contracts.csproj", "{FDCEAEF0-F790-4EE0-BF6B-89781911D7EA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service.Contracts", "src\Shared\Service.Contracts\Service.Contracts.csproj", "{FDCEAEF0-F790-4EE0-BF6B-89781911D7EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

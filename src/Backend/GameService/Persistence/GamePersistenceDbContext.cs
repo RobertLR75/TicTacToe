@@ -1,28 +1,27 @@
 using GameService.Models;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.PostgreSql.EntityFramework;
 
 namespace GameService.Persistence;
 
-public sealed class GamePersistenceDbContext(DbContextOptions<GamePersistenceDbContext> options) : DbContext(options)
+public sealed class GameDbContext(DbContextOptions<GameDbContext> options) : GenericDbContext<Game>(options) 
 {
-    public DbSet<GameModel> Games => Set<GameModel>();
-    public DbSet<PlayerModel> Players => Set<PlayerModel>();
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<PlayerModel>(entity =>
+
+        modelBuilder.Entity<Player>(entity =>
         {
-            entity.ToTable("player_model");
+            entity.ToTable("player");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("id").HasMaxLength(36);
             entity.Property(x => x.Name).HasColumnName("name").HasMaxLength(50).IsRequired();
         });
 
-        modelBuilder.Entity<GameModel>(entity =>
+        modelBuilder.Entity<Game>(entity =>
         {
-            entity.ToTable("game_model");
+            entity.ToTable("game");
             entity.HasKey(x => x.Id);
-            entity.Property(x => x.Id).HasColumnName("id").HasMaxLength(36);
+            entity.Property(x => x.Id).HasColumnName("id");
             entity.Property(x => x.Status).HasConversion<string>().HasColumnName("status").HasMaxLength(20).IsRequired();
             entity.Property(x => x.CreatedAt).HasColumnName("created_at_utc").IsRequired();
             entity.Property(x => x.UpdatedAt).HasColumnName("updated_at_utc");
@@ -42,7 +41,8 @@ public sealed class GamePersistenceDbContext(DbContextOptions<GamePersistenceDbC
             entity.Navigation(x => x.Player1).AutoInclude();
             entity.Navigation(x => x.Player2).AutoInclude();
 
-            entity.HasIndex(x => x.Status).HasDatabaseName("ix_game_model_status");
+            entity.HasIndex(x => x.Status).HasDatabaseName("ix_game_status");
         });
     }
 }
+

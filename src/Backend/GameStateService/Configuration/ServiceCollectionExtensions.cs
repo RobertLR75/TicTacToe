@@ -1,3 +1,4 @@
+using GameStateService.Consumers;
 using MassTransit;
 using Microsoft.Extensions.Options;
 
@@ -22,9 +23,11 @@ public static class ServiceCollectionExtensions
 
         services.AddMassTransit(x =>
         {
+            x.AddConsumer<GameCreateConsumer>();
+
             if (messagingOptions.EnableEventPublishing)
             {
-                x.UsingRabbitMq((_, cfg) =>
+                x.UsingRabbitMq((context, cfg) =>
                 {
                     var virtualHost = messagingOptions.RabbitMq.VirtualHost?.Trim('/') ?? string.Empty;
                     var uri = string.IsNullOrWhiteSpace(virtualHost)
@@ -35,6 +38,11 @@ public static class ServiceCollectionExtensions
                     {
                         h.Username(messagingOptions.RabbitMq.Username);
                         h.Password(messagingOptions.RabbitMq.Password);
+                    });
+
+                    cfg.ReceiveEndpoint("gamestateservice-game-created", e =>
+                    {
+                        e.ConfigureConsumer<GameCreateConsumer>(context);
                     });
                 });
             }

@@ -1,4 +1,7 @@
 using FastEndpoints;
+using GameService.Endpoints.Games.Create;
+using GameService.Endpoints.Games.List;
+using GameService.Endpoints.Games.UpdateStatus;
 using GameService.Models;
 using GameService.Persistence;
 using GameService.Services;
@@ -17,10 +20,12 @@ if (string.IsNullOrWhiteSpace(postgresConnectionString))
     throw new InvalidOperationException("ConnectionStrings:postgres is required for GameService.");
 }
 
-builder.Services.AddScoped<IPostgresSqlStorageService<GameModel>, GameStorageService>();
-builder.Services.AddScoped<IUpdateGameStatusCommandHandler, UpdateGameStatusCommand.UpdateUpdateGameStatusCommandHandler>();
-builder.Services.AddScoped<IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>, UpdateGameStatusCommand.UpdateUpdateGameStatusCommandHandler>();
+builder.Services.AddScoped<IPostgresSqlStorageService<Game>, GameStorageService>();
+builder.Services.AddScoped<IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>, UpdateGameStatusHandler>();
 builder.Services.AddScoped<IUpdateUpdateGameStatusCommandHandler, ValidateGameStatusCommand.ValidateGameStatusCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<CreateGameCommand, Game>, CreateGameHandler>();
+builder.Services.AddScoped<IRequestHandler<ListGamesQuery, IEnumerable<Game>>, ListGamesQueryHandler>();
+builder.Services.AddScoped<IGameEventPublisher, FastEndpointsGameEventPublisher>();
 
 builder.ConfigureFastEndPoints();
 

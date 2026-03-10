@@ -1,7 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
-using GameService.Contracts;
-using GameService.Endpoints.Games.List;
+using Service.Contracts.CreateGame;
+using Service.Contracts.ListGames;
+using Service.Contracts.Shared;
+using Service.Contracts.UpdateGameStatus;
 using Xunit;
 
 namespace GameService.Tests;
@@ -19,7 +21,7 @@ public sealed class GameEndpointsIntegrationTests
     [Fact]
     public async Task Create_endpoint_persists_game_and_returns_created_response()
     {
-        using var factory = new GameServiceWebApplicationFactory(_fixture.ConnectionString);
+        await using var factory = new GameServiceWebApplicationFactory(_fixture.ConnectionString);
         await factory.ResetDatabaseAsync();
         using var client = factory.CreateClient();
 
@@ -57,7 +59,7 @@ public sealed class GameEndpointsIntegrationTests
         var payload = await response.Content.ReadFromJsonAsync<ListGamesResponse>();
         Assert.NotNull(payload);
         Assert.NotEmpty(payload!.Games);
-        Assert.All(payload.Games, g => Assert.Equal(GameService.Models.GameStatus.Created, g.Status));
+        Assert.All(payload.Games, g => Assert.Equal(GameStatusEnum.Created, g.Status));
     }
 
     [Fact]

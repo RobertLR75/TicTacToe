@@ -2,24 +2,24 @@ using System.Text.Json;
 using GameNotificationService.Configuration;
 using GameNotificationService.Persistence;
 using GameNotificationService.Services;
-using GameStateService.Contracts.Events;
 using MassTransit;
 using Microsoft.Extensions.Options;
+using Service.Contracts.GameState;
 
 namespace GameNotificationService.Consumers;
 
 public sealed class GameStateUpdatedConsumer(
-    // INotificationRepository notificationRepository,
+    INotificationRepository notificationRepository,
     IOptions<MessagingOptions> messagingOptions,
     IGameNotificationPublisher notificationPublisher,
-    ILogger<GameStateUpdatedConsumer> logger) : IConsumer<GameStateUpdatedEvent>
+    ILogger<GameStateUpdatedConsumer> logger) : IConsumer<GameStateUpdated>
 {
-    public Task Consume(ConsumeContext<GameStateUpdatedEvent> context)
+    public Task Consume(ConsumeContext<GameStateUpdated> context)
     {
         return ProcessAsync(context.Message, context.CancellationToken);
     }
 
-    internal async Task ProcessAsync(GameStateUpdatedEvent message, CancellationToken ct)
+    internal async Task ProcessAsync(GameStateUpdated message, CancellationToken ct)
     {
         if (!messagingOptions.Value.EnableEventConsumers)
         {
@@ -61,10 +61,10 @@ public sealed class GameStateUpdatedConsumer(
             ReceivedAtUtc = DateTimeOffset.UtcNow
         };
 
-        // var inserted = await notificationRepository.TryAddAsync(writeModel, ct);
-        // if (!inserted)
-        // {
-        //     logger.LogInformation("Skipped duplicate GameStateUpdatedEvent {EventId} for game {GameId}.", message.EventId, message.GameId);
-        // }
+        var inserted = await notificationRepository.TryAddAsync(writeModel, ct);
+        if (!inserted)
+        {
+            logger.LogInformation("Skipped duplicate GameStateUpdatedEvent {EventId} for game {GameId}.", message.EventId, message.GameId);
+        }
     }
 }

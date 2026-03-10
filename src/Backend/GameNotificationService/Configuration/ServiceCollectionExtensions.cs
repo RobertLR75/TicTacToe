@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<GameCreatedConsumer>();
+            x.AddConsumer<GameStateInitializedConsumer>();
             x.AddConsumer<GameStateUpdatedConsumer>();
 
             if (messagingOptions.EnableEventConsumers)
@@ -41,9 +41,9 @@ public static class ServiceCollectionExtensions
                         h.Password(messagingOptions.RabbitMq.Password);
                     });
 
-                    cfg.ReceiveEndpoint("gamenotificationservice-game-created", endpoint =>
+                    cfg.ReceiveEndpoint("gamenotificationservice-game-initialized", endpoint =>
                     {
-                        endpoint.ConfigureConsumer<GameCreatedConsumer>(context);
+                        endpoint.ConfigureConsumer<GameStateInitializedConsumer>(context);
                     });
 
                     cfg.ReceiveEndpoint("gamenotificationservice-game-state-updated", endpoint =>

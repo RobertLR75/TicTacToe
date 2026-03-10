@@ -1,5 +1,5 @@
 using GameNotificationService.Services;
-using GameStateService.Contracts.Events;
+using Service.Contracts.GameState;
 using Xunit;
 
 namespace GameNotificationService.Tests;
@@ -7,9 +7,9 @@ namespace GameNotificationService.Tests;
 public class GameNotificationMapperUnitTests
 {
     [Fact]
-    public void TryMap_game_created_event_maps_all_fields()
+    public void TryMap_game_initialized_event_maps_all_fields()
     {
-        var message = new GameCreatedEvent
+        var message = new GameStateInitialized
         {
             EventId = "evt-1",
             SchemaVersion = "1.0",
@@ -35,7 +35,7 @@ public class GameNotificationMapperUnitTests
     [Fact]
     public void TryMap_game_state_updated_event_returns_false_for_invalid_payload()
     {
-        var message = new GameStateUpdatedEvent
+        var message = new GameStateUpdated
         {
             EventId = string.Empty,
             SchemaVersion = "1.0",

@@ -1,3 +1,4 @@
+using GameStateService.Contracts.Events;
 using GameStateService.Endpoints.Games.Create;
 using GameStateService.Endpoints.Games.Get;
 using GameStateService.Endpoints.Games.MakeMove;
@@ -10,17 +11,15 @@ namespace GameStateService.Tests;
 public class RequestHandlersUnitTests
 {
     [Fact]
-    public async Task CreateGameCommandHandler_publishes_event_after_create()
+    public async Task CreateGameCommandHandler_creates_game_in_repository()
     {
         var repository = new FakeRepository();
-        var publisher = new FakePublisher();
-        var sut = new CreateGameCommandHandler(repository, publisher);
+        var sut = new CreateGameCommandHandler(repository);
 
         var response = await sut.HandleAsync(new CreateGameCommand());
 
         Assert.False(string.IsNullOrWhiteSpace(response.GameId));
         Assert.Equal(1, repository.CreateCalls);
-        Assert.Equal(1, publisher.CreatedPublishCalls);
     }
 
     [Fact]
@@ -100,6 +99,18 @@ public class RequestHandlersUnitTests
         Assert.Equal(0, publisher.UpdatedPublishCalls);
     }
 
+    [Fact]
+    public async Task GameCreatedEventHandler_publishes_event_via_publisher()
+    {
+        var publisher = new FakePublisher();
+        var sut = new GameCreatedEventHandler(publisher);
+        var game = new GameState();
+
+        await sut.HandleAsync(new GameCreatedEvent { Game = game }, CancellationToken.None);
+
+        Assert.Equal(1, publisher.InitializedPublishCalls);
+    }
+
     private sealed class FakeRepository : IGameRepository
     {
         private readonly Dictionary<string, GameState> _games = new();
@@ -135,18 +146,15 @@ public class RequestHandlersUnitTests
 
     private sealed class FakePublisher : IGameEventPublisher
     {
-        public int CreatedPublishCalls { get; private set; }
+        public int InitializedPublishCalls { get; private set; }
         public int UpdatedPublishCalls { get; private set; }
 
-        public Task PublishGameCreatedAsync(GameState game, CancellationToken ct = default)
+        public Task PublishEventAsync<T>(T @event, CancellationToken ct = default) where T : class
         {
-            CreatedPublishCalls++;
-            return Task.CompletedTask;
-        }
-
-        public Task PublishGameStateUpdatedAsync(GameState game, CancellationToken ct = default)
-        {
-            UpdatedPublishCalls++;
+            if (@event is GameStateInitializedEvent)
+                InitializedPublishCalls++;
+            else if (@event is GameStateUpdatedEvent)
+                UpdatedPublishCalls++;
             return Task.CompletedTask;
         }
     }

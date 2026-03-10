@@ -32,8 +32,8 @@ public static class NotificationPersistenceServiceCollectionExtensions
 
     public static void ApplyNotificationMigrations(this IServiceProvider serviceProvider)
     {
-        // using var scope = serviceProvider.CreateScope();
-        // var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        // runner.MigrateUp();
+        using var scope = serviceProvider.CreateScope();
+        var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.MigrateUp();
     }
 }

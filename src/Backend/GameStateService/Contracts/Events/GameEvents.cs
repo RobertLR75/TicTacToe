@@ -7,7 +7,7 @@ public static class EventSchemaVersion
     public const string V1 = "1.0";
 }
 
-public record GameCreatedEvent
+public record GameStateInitializedEvent
 {
     public required string EventId { get; init; }
     public required string SchemaVersion { get; init; }

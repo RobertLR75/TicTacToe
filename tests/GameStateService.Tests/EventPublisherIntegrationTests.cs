@@ -11,15 +11,15 @@ namespace GameStateService.Tests;
 public class EventPublisherIntegrationTests
 {
     [Fact]
-    public async Task MassTransit_in_memory_wiring_publishes_game_created_event()
+    public async Task MassTransit_in_memory_wiring_publishes_game_initialized_event()
     {
-        var consumed = new TaskCompletionSource<GameCreatedEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var consumed = new TaskCompletionSource<GameStateInitializedEvent>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         var bus = Bus.Factory.CreateUsingInMemory(cfg =>
         {
-            cfg.ReceiveEndpoint("game-created-events-test", e =>
+            cfg.ReceiveEndpoint("game-initialized-events-test", e =>
             {
-                e.Handler<GameCreatedEvent>(context =>
+                e.Handler<GameStateInitializedEvent>(context =>
                 {
                     consumed.TrySetResult(context.Message);
                     return Task.CompletedTask;
@@ -35,7 +35,7 @@ public class EventPublisherIntegrationTests
             var publisher = new MassTransitGameEventPublisher(bus, options);
 
             var game = new GameState();
-            await publisher.PublishGameCreatedAsync(game);
+            await publisher.PublishEventAsync(GameEventMapper.ToGameStateInitializedEvent(game));
 
             var completed = await Task.WhenAny(consumed.Task, Task.Delay(TimeSpan.FromSeconds(5)));
             Assert.Same(consumed.Task, completed);

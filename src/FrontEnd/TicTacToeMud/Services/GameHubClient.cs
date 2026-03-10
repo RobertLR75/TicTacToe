@@ -9,7 +9,7 @@ public class GameHubClient : IAsyncDisposable
     private readonly string _hubUrl;
 
     public event Action<GameResponse>? OnGameStateUpdated;
-    public event Action<GameResponse>? OnGameCreated;
+    public event Action<GameResponse>? OnGameStateInitialized;
 
     public GameHubClient(IConfiguration configuration)
     {
@@ -51,7 +51,7 @@ public class GameHubClient : IAsyncDisposable
             OnGameStateUpdated?.Invoke(response);
         });
 
-        _hubConnection.On<GameCreatedNotification>("GameCreatedNotification", notification =>
+        _hubConnection.On<GameStateInitializedNotification>("GameStateInitializedNotification", notification =>
         {
             var response = new GameResponse
             {
@@ -65,7 +65,7 @@ public class GameHubClient : IAsyncDisposable
                     .ToList()
             };
 
-            OnGameCreated?.Invoke(response);
+            OnGameStateInitialized?.Invoke(response);
         });
 
         await _hubConnection.StartAsync();
@@ -109,7 +109,7 @@ public record GameStateUpdatedNotification
 
 public record CellNotificationDto(int Row, int Col, int Mark);
 
-public record GameCreatedNotification
+public record GameStateInitializedNotification
 {
     public required string GameId { get; init; }
     public required int CurrentPlayer { get; init; }

@@ -1,12 +1,11 @@
 using GameNotificationService.Notifications;
-using GameCreatedEvent = GameStateService.Contracts.Events.GameCreatedEvent;
-using GameStateUpdatedEvent = GameStateService.Contracts.Events.GameStateUpdatedEvent;
+using Service.Contracts.GameState;
 
 namespace GameNotificationService.Services;
 
 public static class GameNotificationMapper
 {
-    public static bool TryMap(GameCreatedEvent message, out GameCreatedNotification? notification)
+    public static bool TryMap(GameStateInitialized message, out GameStateInitializedNotification? notification)
     {
         if (!IsValid(message.GameId, message.EventId, message.Board))
         {
@@ -14,7 +13,7 @@ public static class GameNotificationMapper
             return false;
         }
 
-        notification = new GameCreatedNotification
+        notification = new GameStateInitializedNotification
         {
             GameId = message.GameId,
             CurrentPlayer = message.CurrentPlayer,
@@ -29,7 +28,7 @@ public static class GameNotificationMapper
         return true;
     }
 
-    public static bool TryMap(GameStateUpdatedEvent message, out GameStateUpdatedNotification? notification)
+    public static bool TryMap(GameStateUpdated message, out GameStateUpdatedNotification? notification)
     {
         if (!IsValid(message.GameId, message.EventId, message.Board))
         {
@@ -52,7 +51,7 @@ public static class GameNotificationMapper
         return true;
     }
 
-    private static bool IsValid(string gameId, string eventId, IReadOnlyCollection<GameStateService.Contracts.Events.CellEventDto>? board)
+    private static bool IsValid(string gameId, string eventId, IReadOnlyCollection<CellEventDto>? board)
     {
         return !string.IsNullOrWhiteSpace(gameId) &&
                !string.IsNullOrWhiteSpace(eventId) &&

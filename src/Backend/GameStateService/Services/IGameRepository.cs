@@ -1,14 +1,12 @@
-using GameStateService.Models;
-
 namespace GameStateService.Services;
 
 public interface IGameRepository
 {
-    GameState CreateGame();
+    Models.GameState CreateGame();
 
-    GameState? GetGame(string gameId);
+    Models.GameState? GetGame(string gameId);
 
-    void UpdateGame(GameState game);
+    void UpdateGame(Models.GameState game);
 
     void DeleteGame(string gameId);
 }

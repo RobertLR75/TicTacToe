@@ -1,3 +1,5 @@
+using GameService.Endpoints.Games.Create;
+using GameService.Endpoints.Games.UpdateStatus;
 using GameService.Models;
 using GameService.Persistence;
 using GameService.Services;
@@ -25,7 +27,7 @@ public sealed class UpdateGameStatusHandlersIntegrationTests
         await PostgresTestContainerFixture.ResetDatabaseAsync(provider);
 
         using var scope = provider.CreateScope();
-        var sut = scope.ServiceProvider.GetRequiredService<IUpdateGameStatusCommandHandler>();
+        var sut = scope.ServiceProvider.GetRequiredService<UpdateGameStatusHandler>();
 
         var result = await sut.HandleAsync(new UpdateGameStatusCommand(Guid.NewGuid(), GameStatus.Active));
 
@@ -39,30 +41,30 @@ public sealed class UpdateGameStatusHandlersIntegrationTests
         using var provider = BuildServiceProvider();
         await PostgresTestContainerFixture.ResetDatabaseAsync(provider);
 
-        var game = new GameModel
+        var game = new Game
         {
             Id = Guid.NewGuid(),
             Status = GameStatus.Created,
-            Player1 = new PlayerModel { Id = "p1", Name = "Alice" }
+            Player1 = new Player { Id = "p1", Name = "Alice" }
         };
 
         using (var seedScope = provider.CreateScope())
         {
-            var seedStore = seedScope.ServiceProvider.GetRequiredService<IPostgresSqlStorageService<GameModel>>();
+            var seedStore = seedScope.ServiceProvider.GetRequiredService<IPostgresSqlStorageService<Game>>();
             await seedStore.CreateAsync(game);
         }
 
         GameStatusUpdateResult result;
         using (var handlerScope = provider.CreateScope())
         {
-            var sut = handlerScope.ServiceProvider.GetRequiredService<IUpdateGameStatusCommandHandler>();
+            var sut = handlerScope.ServiceProvider.GetRequiredService<UpdateGameStatusHandler>();
             result = await sut.HandleAsync(new UpdateGameStatusCommand(game.Id, GameStatus.Active));
         }
 
-        GameModel? updated;
+        Game? updated;
         using (var readScope = provider.CreateScope())
         {
-            var readStore = readScope.ServiceProvider.GetRequiredService<IPostgresSqlStorageService<GameModel>>();
+            var readStore = readScope.ServiceProvider.GetRequiredService<IPostgresSqlStorageService<Game>>();
             updated = await readStore.GetAsync(game.Id);
         }
 
@@ -83,9 +85,16 @@ public sealed class UpdateGameStatusHandlersIntegrationTests
             .Build();
 
         services.AddGamePersistence(config);
-        services.AddScoped<IPostgresSqlStorageService<GameModel>, GameStorageService>();
-        services.AddScoped<IUpdateGameStatusCommandHandler, UpdateGameStatusCommand.UpdateUpdateGameStatusCommandHandler>();
+        services.AddScoped<IPostgresSqlStorageService<Game>, GameStorageService>();
+        services.AddScoped<UpdateGameStatusHandler>();
         services.AddScoped<IUpdateUpdateGameStatusCommandHandler, ValidateGameStatusCommand.ValidateGameStatusCommandHandler>();
+        services.AddScoped<IGameEventPublisher, FakeGameEventPublisher>();
         return services.BuildServiceProvider();
+    }
+
+    private class FakeGameEventPublisher : IGameEventPublisher
+    {
+        public Task PublishGameCreatedAsync(GameCreatedEvent evt, CancellationToken ct = default) => Task.CompletedTask;
+        public Task PublishStatusUpdatedAsync(GameStatusUpdatedEvent evt, CancellationToken ct = default) => Task.CompletedTask;
     }
 }

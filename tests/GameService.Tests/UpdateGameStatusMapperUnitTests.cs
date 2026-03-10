@@ -1,6 +1,7 @@
-using GameService.Contracts;
 using GameService.Endpoints.Games.UpdateStatus;
 using GameService.Models;
+using Service.Contracts.Shared;
+using Service.Contracts.UpdateGameStatus;
 using Xunit;
 
 namespace GameService.Tests;

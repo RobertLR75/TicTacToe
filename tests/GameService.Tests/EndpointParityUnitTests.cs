@@ -1,11 +1,12 @@
 using FastEndpoints;
-using GameService.Contracts;
 using GameService.Endpoints.Games.Create;
 using GameService.Endpoints.Games.List;
 using GameService.Endpoints.Games.UpdateStatus;
 using GameService.Models;
 using GameService.Services;
-using SharedLibrary.PostgreSql.EntityFramework;
+using Service.Contracts.CreateGame;
+using Service.Contracts.ListGames;
+using Service.Contracts.UpdateGameStatus;
 using Xunit;
 
 namespace GameService.Tests;
@@ -15,13 +16,13 @@ public class EndpointParityUnitTests
     [Fact]
     public void Create_endpoint_contract_remains_request_response_pair()
     {
-        Assert.Equal(typeof(Endpoint<CreateGameRequest, CreateGameResponse>), typeof(CreateGameEndpoint).BaseType);
+        Assert.Equal(typeof(Endpoint<CreateGameRequest, CreateGameResponse, CreateGameMapper>), typeof(CreateGameEndpoint).BaseType);
     }
 
     [Fact]
     public void List_endpoint_contract_remains_request_response_pair()
     {
-        Assert.Equal(typeof(Endpoint<ListGamesRequest, ListGamesResponse>), typeof(ListGamesEndpoint).BaseType);
+        Assert.Equal(typeof(Endpoint<ListGamesRequest, ListGamesResponse, ListGamesMapper>), typeof(ListGamesEndpoint).BaseType);
     }
 
     [Fact]
@@ -39,8 +40,8 @@ public class EndpointParityUnitTests
         var listCtor = typeof(ListGamesEndpoint).GetConstructors().Single();
         var updateCtor = typeof(UpdateGameStatusEndpoint).GetConstructors().Single();
 
-        Assert.Equal(typeof(IPostgresSqlStorageService<GameModel>), createCtor.GetParameters().Single().ParameterType);
-        Assert.Equal(typeof(IPostgresSqlStorageService<GameModel>), listCtor.GetParameters().Single().ParameterType);
+        Assert.Equal(typeof(IRequestHandler<CreateGameCommand, Game>), createCtor.GetParameters().Single().ParameterType);
+        Assert.Equal(typeof(IRequestHandler<ListGamesQuery, IEnumerable<Game>>), listCtor.GetParameters().Single().ParameterType);
         Assert.Equal(typeof(IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>), updateCtor.GetParameters().Single().ParameterType);
     }
 }

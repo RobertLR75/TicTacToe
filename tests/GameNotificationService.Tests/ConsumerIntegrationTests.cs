@@ -3,12 +3,12 @@ using GameNotificationService.Consumers;
 using GameNotificationService.Notifications;
 using GameNotificationService.Persistence;
 using GameNotificationService.Services;
-using GameStateService.Contracts.Events;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using Service.Contracts.GameState;
 using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
 using Xunit;
@@ -18,16 +18,16 @@ namespace GameNotificationService.Tests;
 public sealed class ConsumerIntegrationTests
 {
     [Fact]
-    public async Task GameCreated_consumer_maps_and_persists_notification()
+    public async Task GameStateInitialized_consumer_maps_and_persists_notification()
     {
         var repository = new InMemoryNotificationRepository();
         var options = Options.Create(new MessagingOptions { EnableEventConsumers = true });
-        var sut = new GameCreatedConsumer(options, new FakeNotificationPublisher(), NullLogger<GameCreatedConsumer>.Instance);
+        var sut = new GameStateInitializedConsumer(repository, options, new FakeNotificationPublisher(), NullLogger<GameStateInitializedConsumer>.Instance);
 
-        await sut.ProcessAsync(BuildGameCreatedEvent(), CancellationToken.None);
+        await sut.ProcessAsync(BuildGameStateInitializedEvent(), CancellationToken.None);
 
         Assert.Single(repository.Writes);
-        Assert.Equal("GameCreated", repository.Writes[0].EventType);
+        Assert.Equal("GameStateInitialized", repository.Writes[0].EventType);
     }
 
     [Fact]
@@ -35,7 +35,7 @@ public sealed class ConsumerIntegrationTests
     {
         var repository = new InMemoryNotificationRepository { RejectDuplicates = true };
         var options = Options.Create(new MessagingOptions { EnableEventConsumers = true });
-        var sut = new GameStateUpdatedConsumer(options, new FakeNotificationPublisher(), NullLogger<GameStateUpdatedConsumer>.Instance);
+        var sut = new GameStateUpdatedConsumer(repository, options, new FakeNotificationPublisher(), NullLogger<GameStateUpdatedConsumer>.Instance);
         var message = BuildGameStateUpdatedEvent();
 
         await sut.ProcessAsync(message, CancellationToken.None);
@@ -45,13 +45,13 @@ public sealed class ConsumerIntegrationTests
     }
 
     [Fact]
-    public async Task GameCreated_consumer_skips_processing_when_toggle_is_off()
+    public async Task GameStateInitialized_consumer_skips_processing_when_toggle_is_off()
     {
         var repository = new InMemoryNotificationRepository();
         var options = Options.Create(new MessagingOptions { EnableEventConsumers = false });
-        var sut = new GameCreatedConsumer(options, new FakeNotificationPublisher(), NullLogger<GameCreatedConsumer>.Instance);
+        var sut = new GameStateInitializedConsumer(repository, options, new FakeNotificationPublisher(), NullLogger<GameStateInitializedConsumer>.Instance);
 
-        await sut.ProcessAsync(BuildGameCreatedEvent(), CancellationToken.None);
+        await sut.ProcessAsync(BuildGameStateInitializedEvent(), CancellationToken.None);
 
         Assert.Empty(repository.Writes);
     }
@@ -61,7 +61,7 @@ public sealed class ConsumerIntegrationTests
     {
         var repository = new InMemoryNotificationRepository();
         var options = Options.Create(new MessagingOptions { EnableEventConsumers = true });
-        var sut = new GameStateUpdatedConsumer(options, new FakeNotificationPublisher(), NullLogger<GameStateUpdatedConsumer>.Instance);
+        var sut = new GameStateUpdatedConsumer(repository, options, new FakeNotificationPublisher(), NullLogger<GameStateUpdatedConsumer>.Instance);
         var invalidMessage = BuildGameStateUpdatedEvent() with { EventId = string.Empty };
 
         await sut.ProcessAsync(invalidMessage, CancellationToken.None);
@@ -129,7 +129,7 @@ public sealed class ConsumerIntegrationTests
             {
                 var eventId = Guid.NewGuid().ToString("N");
                 var publisher = provider.GetRequiredService<IPublishEndpoint>();
-                await publisher.Publish(BuildGameCreatedEvent(eventId));
+                await publisher.Publish(BuildGameStateInitializedEvent(eventId));
 
                 var repository = provider.GetRequiredService<INotificationRepository>();
                 var persisted = await WaitForAsync(async () =>
@@ -173,9 +173,9 @@ public sealed class ConsumerIntegrationTests
         return false;
     }
 
-    private static GameCreatedEvent BuildGameCreatedEvent(string? eventId = null)
+    private static GameStateInitialized BuildGameStateInitializedEvent(string? eventId = null)
     {
-        return new GameCreatedEvent
+        return new GameStateInitialized
         {
             EventId = eventId ?? Guid.NewGuid().ToString("N"),
             SchemaVersion = "1.0",
@@ -190,9 +190,9 @@ public sealed class ConsumerIntegrationTests
         };
     }
 
-    private static GameStateUpdatedEvent BuildGameStateUpdatedEvent(string? eventId = null)
+    private static GameStateUpdated BuildGameStateUpdatedEvent(string? eventId = null)
     {
-        return new GameStateUpdatedEvent
+        return new GameStateUpdated
         {
             EventId = eventId ?? Guid.NewGuid().ToString("N"),
             SchemaVersion = "1.0",
@@ -233,7 +233,7 @@ public sealed class ConsumerIntegrationTests
 
     private sealed class FakeNotificationPublisher : IGameNotificationPublisher
     {
-        public Task PublishGameCreatedAsync(GameCreatedNotification notification, CancellationToken ct = default)
+        public Task PublishGameStateInitializedAsync(GameStateInitializedNotification notification, CancellationToken ct = default)
         {
             return Task.CompletedTask;
         }

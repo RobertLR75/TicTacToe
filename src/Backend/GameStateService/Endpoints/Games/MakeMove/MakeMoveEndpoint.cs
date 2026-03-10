@@ -5,9 +5,9 @@ namespace GameStateService.Endpoints.Games.MakeMove;
 
 public class MakeMoveEndpoint : Endpoint<MakeMoveRequest>
 {
-    private readonly IRequestHandler<MakeMoveCommand, MakeMoveCommandResult> _handler;
+    private readonly IRequestHandler<MakeMove, MakeMoveCommandResult> _handler;
 
-    public MakeMoveEndpoint(IRequestHandler<MakeMoveCommand, MakeMoveCommandResult> handler)
+    public MakeMoveEndpoint(IRequestHandler<MakeMove, MakeMoveCommandResult> handler)
     {
         _handler = handler;
     }
@@ -20,7 +20,7 @@ public class MakeMoveEndpoint : Endpoint<MakeMoveRequest>
 
     public override async Task HandleAsync(MakeMoveRequest req, CancellationToken ct)
     {
-        var result = await _handler.HandleAsync(new MakeMoveCommand(req.GameId, req.Row, req.Col), ct);
+        var result = await _handler.HandleAsync(new MakeMove(req.GameId, req.Row, req.Col), ct);
 
         if (result.Status == MakeMoveCommandStatus.NotFound)
         {

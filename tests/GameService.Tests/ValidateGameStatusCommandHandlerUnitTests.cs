@@ -52,14 +52,14 @@ public class ValidateGameStatusCommandHandlerUnitTests
         Assert.False(result.InvalidStatus);
     }
 
-    private static GameModel BuildGame(GameStatus status)
+    private static Game BuildGame(GameStatus status)
     {
-        return new GameModel
+        return new Game
         {
             Id = Guid.NewGuid(),
             Status = status,
             UpdatedAt = DateTimeOffset.UtcNow,
-            Player1 = new PlayerModel { Id = "p1", Name = "Alice" }
+            Player1 = new Player { Id = "p1", Name = "Alice" }
         };
     }
 }

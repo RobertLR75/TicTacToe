@@ -8,12 +8,12 @@ public class SignalRGameNotificationPublisher(
     IHubContext<GameHub> hubContext,
     ILogger<SignalRGameNotificationPublisher> logger) : IGameNotificationPublisher
 {
-    public async Task PublishGameCreatedAsync(GameCreatedNotification notification, CancellationToken ct = default)
+    public async Task PublishGameStateInitializedAsync(GameStateInitializedNotification notification, CancellationToken ct = default)
     {
-        logger.LogInformation("Publishing GameCreatedNotification for game {GameId}", notification.GameId);
+        logger.LogInformation("Publishing GameStateInitializedNotification for game {GameId}", notification.GameId);
 
         await hubContext.Clients.Group(notification.GameId)
-            .SendAsync("GameCreatedNotification", notification, ct);
+            .SendAsync("GameStateInitializedNotification", notification, ct);
     }
 
     public async Task PublishGameStateUpdatedAsync(GameStateUpdatedNotification notification, CancellationToken ct = default)

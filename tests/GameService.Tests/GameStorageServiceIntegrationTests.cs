@@ -24,14 +24,14 @@ public sealed class GameStorageServiceIntegrationTests
         await PostgresTestContainerFixture.ResetDatabaseAsync(provider);
 
         using var scope = provider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<GamePersistenceDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<GameDbContext>();
         var sut = new GameStorageService(db);
 
-        var game = new GameModel
+        var game = new Game
         {
             Id = Guid.NewGuid(),
             Status = GameStatus.Created,
-            Player1 = new PlayerModel { Id = "p1", Name = "Alice" }
+            Player1 = new Player { Id = "p1", Name = "Alice" }
         };
 
         await sut.CreateAsync(game);

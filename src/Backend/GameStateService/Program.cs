@@ -4,8 +4,10 @@ using GameStateService.Configuration;
 using GameStateService.Endpoints.Games.Create;
 using GameStateService.Endpoints.Games.Get;
 using GameStateService.Endpoints.Games.MakeMove;
+using GameStateService.GameState;
 using GameStateService.Services;
 using TicTacToe.ServiceDefaults;
+using GameState = GameStateService.GameState.GameState;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,12 +17,12 @@ builder.Services.AddGameEventPublishing(builder.Configuration);
 
 builder.Services.AddSingleton<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IGameEventPublisher, MassTransitGameEventPublisher>();
-builder.Services.AddScoped<IRequestHandler<CheckWinnerRequest, CheckWinnerResult>, CheckWinnerRequestHandler>();
-builder.Services.AddScoped<IRequestHandler<CheckDrawRequest, CheckDrawResult>, CheckDrawRequestHandler>();
-builder.Services.AddScoped<IRequestHandler<GameLogicMoveRequest, GameLogicMoveResult>, GameLogicMoveRequestHandler>();
-builder.Services.AddScoped<IRequestHandler<CreateGameCommand, CreateGameResponse>, CreateGameCommandHandler>();
-builder.Services.AddScoped<IRequestHandler<GetGameQuery, GetGameQueryResult>, GetGameQueryHandler>();
-builder.Services.AddScoped<IRequestHandler<MakeMoveCommand, MakeMoveCommandResult>, MakeMoveCommandHandler>();
+builder.Services.AddScoped<IRequestHandler<CheckWinner, CheckWinnerResult>, CheckWinnerHandler>();
+builder.Services.AddScoped<IRequestHandler<CheckDraw, CheckDrawResult>, CheckDrawHandler>();
+builder.Services.AddScoped<IRequestHandler<GameState, GameLogicMoveResult>, GameStateHandler>();
+builder.Services.AddScoped<IRequestHandler<CreateGame, GameStateService.Models.GameState>, CreateGame.CreateGameHandler>();
+builder.Services.AddScoped<IRequestHandler<GetGame, GetGameQueryResult>, GetGame.GetGameHandler>();
+builder.Services.AddScoped<IRequestHandler<MakeMove, MakeMoveCommandResult>, MakeMoveHandler>();
 
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();

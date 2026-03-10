@@ -1,17 +1,17 @@
 using FastEndpoints;
 using GameService.Models;
-using SharedLibrary.PostgreSql.EntityFramework;
+using GameService.Services;
+using Service.Contracts.ListGames;
 
 namespace GameService.Endpoints.Games.List;
 
-public class ListGamesEndpoint : Endpoint<ListGamesRequest, ListGamesResponse>
+public class ListGamesEndpoint : Endpoint<ListGamesRequest, ListGamesResponse, ListGamesMapper>
 {
-    
-    private readonly IPostgresSqlStorageService<GameModel> _gameStore;
+    private readonly IRequestHandler<ListGamesQuery, IEnumerable<Game>> _handler;
 
-    public ListGamesEndpoint(IPostgresSqlStorageService<GameModel> gameStore)
+    public ListGamesEndpoint(IRequestHandler<ListGamesQuery, IEnumerable<Game>> handler)
     {
-        _gameStore = gameStore;
+        _handler = handler;
     }
     
     public override void Configure()
@@ -27,23 +27,10 @@ public class ListGamesEndpoint : Endpoint<ListGamesRequest, ListGamesResponse>
 
     public override async Task HandleAsync(ListGamesRequest request, CancellationToken ct)
     {
-        var specification = new SearchByStatusSpecification(request.Status, request.Page, request.PageSize);
-        var games = await _gameStore.SearchAsync(specification, ct);
+        var query = Map.ToEntity(request);
+        var games = await _handler.HandleAsync(query, ct);
 
-        Response = new ListGamesResponse
-        {
-            Games = games.Select(g => new GameDto
-            {
-                Id = g.Id,
-                Status = g.Status,
-                CreatedAt = g.CreatedAt,
-                UpdatedAt = g.UpdatedAt ?? g.CreatedAt,
-                Player1 = new PlayerDto { Id = g.Player1.Id, Name = g.Player1.Name },
-                Player2 = g.Player2 is not null
-                    ? new PlayerDto { Id = g.Player2.Id, Name = g.Player2.Name }
-                    : null
-            }).ToList()
-        };
+        Response = Map.FromEntity(games);
 
         await Send.OkAsync(Response, ct);
     }

@@ -1,3 +1,4 @@
+using GameStateService.Contracts.Events;
 using GameStateService.Endpoints.Games.MakeMove;
 using GameStateService.Models;
 using GameStateService.Services;
@@ -18,7 +19,7 @@ public class GameStateServiceUnitTests
 
         Assert.NotNull(game);
         Assert.Equal(1, repository.CreateCalls);
-        Assert.Equal(1, publisher.CreatedPublishCalls);
+        Assert.Equal(1, publisher.InitializedPublishCalls);
         Assert.Equal(game.GameId, publisher.LastGameId);
     }
 
@@ -31,7 +32,7 @@ public class GameStateServiceUnitTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => sut.CreateGameAsync());
 
-        Assert.Equal(0, publisher.CreatedPublishCalls);
+        Assert.Equal(0, publisher.InitializedPublishCalls);
     }
 
     [Fact]
@@ -119,21 +120,22 @@ public class GameStateServiceUnitTests
 
     private sealed class FakePublisher : IGameEventPublisher
     {
-        public int CreatedPublishCalls { get; private set; }
+        public int InitializedPublishCalls { get; private set; }
         public int UpdatedPublishCalls { get; private set; }
         public string? LastGameId { get; private set; }
 
-        public Task PublishGameCreatedAsync(GameState game, CancellationToken ct = default)
+        public Task PublishEventAsync<T>(T @event, CancellationToken ct = default) where T : class
         {
-            CreatedPublishCalls++;
-            LastGameId = game.GameId;
-            return Task.CompletedTask;
-        }
-
-        public Task PublishGameStateUpdatedAsync(GameState game, CancellationToken ct = default)
-        {
-            UpdatedPublishCalls++;
-            LastGameId = game.GameId;
+            if (@event is GameStateInitializedEvent e1)
+            {
+                InitializedPublishCalls++;
+                LastGameId = e1.GameId;
+            }
+            else if (@event is GameStateUpdatedEvent e2)
+            {
+                UpdatedPublishCalls++;
+                LastGameId = e2.GameId;
+            }
             return Task.CompletedTask;
         }
     }

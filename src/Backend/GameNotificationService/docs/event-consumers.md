@@ -2,7 +2,7 @@
 
 ## Queue Endpoints
 
-- `gamenotificationservice-game-created`: consumes `GameCreatedEvent`
+- `gamenotificationservice-game-initialized`: consumes `GameStateInitializedEvent`
 - `gamenotificationservice-game-state-updated`: consumes `GameStateUpdatedEvent`
 
 ## Required Configuration
@@ -23,7 +23,7 @@ You can also provide `ConnectionStrings:rabbitmq`. When `EnableEventConsumers=tr
 1. Start infrastructure with Aspire (`TicTacToe.AppHost`) so RabbitMQ is available.
 2. Ensure `Messaging:EnableEventConsumers=true` for `GameNotificationService`.
 3. Start `GameNotificationService`.
-4. Publish `GameCreatedEvent` or `GameStateUpdatedEvent` from `GameStateService`.
+4. Publish `GameStateInitializedEvent` or `GameStateUpdatedEvent` from `GameStateService`.
 5. Verify console output in `GameNotificationService` for received events.
 
 ## Rollback

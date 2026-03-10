@@ -1,7 +1,6 @@
 using FastEndpoints;
-using GameService.Contracts;
 using GameService.Services;
-using GameService.Models;
+using Service.Contracts.UpdateGameStatus;
 
 namespace GameService.Endpoints.Games.UpdateStatus;
 
@@ -44,12 +43,7 @@ public class UpdateGameStatusEndpoint : Endpoint<UpdateGameStatusRequest, Update
             return;
         }
 
-        Response = new UpdateGameStatusResponse
-        {
-            Id = result.Id,
-            Status = result.Status!.Value.ToString(),
-            UpdatedAt = result.UpdatedAt!.Value
-        };
+        Response = Map.FromEntity(result);
 
         await Send.OkAsync(Response, ct);
     }

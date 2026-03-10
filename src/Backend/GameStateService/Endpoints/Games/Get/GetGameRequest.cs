@@ -1,5 +1,3 @@
-using FastEndpoints;
-
 namespace GameStateService.Endpoints.Games.Get;
 
 public class GetGameRequest

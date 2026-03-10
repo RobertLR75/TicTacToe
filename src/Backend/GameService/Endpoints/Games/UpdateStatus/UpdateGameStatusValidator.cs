@@ -1,7 +1,7 @@
 using FastEndpoints;
 using FluentValidation;
-using GameService.Contracts;
-using GameService.Models;
+using Service.Contracts.Shared;
+using Service.Contracts.UpdateGameStatus;
 
 namespace GameService.Endpoints.Games.UpdateStatus;
 

@@ -7,14 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SharedLibrary" Version="1.0.8" />
     <PackageReference Include="SharedLibrary.FastEndpoints" Version="1.0.1" />
     <PackageReference Include="SharedLibrary.FlientMigration" Version="1.0.0" />
-    <PackageReference Include="SharedLibrary.PostgreSql.EntityFramework" Version="1.0.4" />
+    <PackageReference Include="SharedLibrary.FluentMigration" Version="1.0.10" />
+    <PackageReference Include="SharedLibrary.PostgreSql.EntityFramework" Version="1.0.32" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Shared\GameService.Contracts\GameService.Contracts.csproj" />
+    <ProjectReference Include="..\..\Shared\Service.Contracts\Service.Contracts.csproj" />
+    <ProjectReference Include="..\..\Shared\Service.Contracts\Service.Contracts.csproj" />
     <ProjectReference Include="..\..\TicTacToe.ServiceDefaults\TicTacToe.ServiceDefaults.csproj" />
   </ItemGroup>
 

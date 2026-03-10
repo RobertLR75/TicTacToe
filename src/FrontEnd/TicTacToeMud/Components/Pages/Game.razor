@@ -95,7 +95,7 @@
         try
         {
             GameHub.OnGameStateUpdated += HandleGameStateUpdated;
-            GameHub.OnGameCreated += HandleGameCreated;
+            GameHub.OnGameStateInitialized += HandleGameStateInitialized;
             await GameHub.StartAsync();
 
             if (_gameId is not null)
@@ -123,7 +123,7 @@
         });
     }
 
-    private void HandleGameCreated(TicTacToeMud.Models.GameResponse response)
+    private void HandleGameStateInitialized(TicTacToeMud.Models.GameResponse response)
     {
         if (response.GameId != _gameId) return;
 
@@ -180,7 +180,7 @@
                 await GameHub.JoinGame(gameId);
             }
 
-            // State will also be populated by HandleGameCreated when notification arrives
+            // State will also be populated by HandleGameStateInitialized when notification arrives
         }
         catch (Exception ex)
         {
@@ -246,12 +246,15 @@
 
     public async ValueTask DisposeAsync()
     {
-        GameHub.OnGameStateUpdated -= HandleGameStateUpdated;
-        GameHub.OnGameCreated -= HandleGameCreated;
-
-        if (_gameId is not null && GameHub.IsConnected)
+        if (GameHub is not null)
         {
-            await GameHub.LeaveGame(_gameId);
+            GameHub.OnGameStateUpdated -= HandleGameStateUpdated;
+            GameHub.OnGameStateInitialized -= HandleGameStateInitialized;
+
+            if (_gameId is not null && GameHub.IsConnected)
+            {
+                await GameHub.LeaveGame(_gameId);
+            }
         }
     }
 }

@@ -10,7 +10,7 @@ public record GameStateUpdatedNotification
     public required List<CellNotification> Board { get; init; }
 }
 
-public record GameCreatedNotification
+public record GameStateInitializedNotification
 {
     public required string GameId { get; init; }
     public required int CurrentPlayer { get; init; }

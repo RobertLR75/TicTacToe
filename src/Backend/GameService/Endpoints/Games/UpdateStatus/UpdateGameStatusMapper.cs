@@ -1,7 +1,7 @@
 using FastEndpoints;
-using GameService.Contracts;
 using GameService.Models;
-using GameService.Services;
+using Service.Contracts.Shared;
+using Service.Contracts.UpdateGameStatus;
 
 namespace GameService.Endpoints.Games.UpdateStatus;
 
@@ -12,6 +12,16 @@ public sealed class UpdateGameStatusMapper : Mapper<UpdateGameStatusRequest, Upd
         if (req is null) throw new ArgumentNullException(nameof(req));
 
         return new UpdateGameStatusCommand(req.Id, ParseStatus(req.Status));
+    }
+
+    public UpdateGameStatusResponse FromEntity(GameStatusUpdateResult result)
+    {
+        return new UpdateGameStatusResponse
+        {
+            Id = result.Id,
+            Status = result.Status!.Value.ToString(),
+            UpdatedAt = result.UpdatedAt!.Value
+        };
     }
 
     private static GameStatus ParseStatus(GameStatusEnum statusValue)

@@ -4,7 +4,7 @@ using SharedLibrary.Interfaces;
 
 namespace GameService.Endpoints.Games.List;
 
-public class SearchByStatusSpecification : StorageSpecification<GameModel>
+public class SearchByStatusSpecification : StorageSpecification<Game>
 {
     public SearchByStatusSpecification(GameStatus status, int page, int pageSize)
     {

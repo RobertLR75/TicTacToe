@@ -5,9 +5,9 @@ namespace GameStateService.Endpoints.Games.Get;
 
 public class GetGameEndpoint : Endpoint<GetGameRequest, GetGameResponse>
 {
-    private readonly IRequestHandler<GetGameQuery, GetGameQueryResult> _handler;
+    private readonly IRequestHandler<GetGame, GetGameQueryResult> _handler;
 
-    public GetGameEndpoint(IRequestHandler<GetGameQuery, GetGameQueryResult> handler)
+    public GetGameEndpoint(IRequestHandler<GetGame, GetGameQueryResult> handler)
     {
         _handler = handler;
     }
@@ -20,7 +20,7 @@ public class GetGameEndpoint : Endpoint<GetGameRequest, GetGameResponse>
 
     public override async Task HandleAsync(GetGameRequest req, CancellationToken ct)
     {
-        var result = await _handler.HandleAsync(new GetGameQuery(req.GameId), ct);
+        var result = await _handler.HandleAsync(new GetGame(req.GameId), ct);
 
         if (!result.Found || result.Response is null)
         {
