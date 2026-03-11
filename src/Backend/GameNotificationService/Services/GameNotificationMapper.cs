@@ -1,5 +1,5 @@
-using GameNotificationService.Notifications;
-using Service.Contracts.GameState;
+using Service.Contracts.Events;
+using Service.Contracts.Notifications;
 
 namespace GameNotificationService.Services;
 

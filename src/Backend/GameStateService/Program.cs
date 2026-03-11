@@ -1,7 +1,7 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using GameStateService.Configuration;
-using GameStateService.Endpoints.Games.Create;
+using GameStateService.Consumers;
 using GameStateService.Endpoints.Games.Get;
 using GameStateService.Endpoints.Games.MakeMove;
 using GameStateService.GameState;
@@ -16,11 +16,11 @@ builder.AddServiceDefaults();
 builder.Services.AddGameEventPublishing(builder.Configuration);
 
 builder.Services.AddSingleton<IGameRepository, GameRepository>();
-builder.Services.AddScoped<IGameEventPublisher, MassTransitGameEventPublisher>();
+builder.Services.AddScoped<IGameEventPublisher, MassTransitGameStateEventPublisher>();
 builder.Services.AddScoped<IRequestHandler<CheckWinner, CheckWinnerResult>, CheckWinnerHandler>();
 builder.Services.AddScoped<IRequestHandler<CheckDraw, CheckDrawResult>, CheckDrawHandler>();
 builder.Services.AddScoped<IRequestHandler<GameState, GameLogicMoveResult>, GameStateHandler>();
-builder.Services.AddScoped<IRequestHandler<CreateGame, GameStateService.Models.GameState>, CreateGame.CreateGameHandler>();
+builder.Services.AddScoped<IRequestHandler<InitializeGame, GameStateService.Models.GameState>, InitializeGame.InitializeGameHandler>();
 builder.Services.AddScoped<IRequestHandler<GetGame, GetGameQueryResult>, GetGame.GetGameHandler>();
 builder.Services.AddScoped<IRequestHandler<MakeMove, MakeMoveCommandResult>, MakeMoveHandler>();
 

@@ -1,6 +1,6 @@
 using GameNotificationService.Hubs;
-using GameNotificationService.Notifications;
 using Microsoft.AspNetCore.SignalR;
+using Service.Contracts.Notifications;
 
 namespace GameNotificationService.Services;
 

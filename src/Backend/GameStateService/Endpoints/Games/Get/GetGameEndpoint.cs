@@ -1,5 +1,7 @@
 using FastEndpoints;
 using GameStateService.Services;
+using Service.Contracts.Requests;
+using Service.Contracts.Responses;
 
 namespace GameStateService.Endpoints.Games.Get;
 

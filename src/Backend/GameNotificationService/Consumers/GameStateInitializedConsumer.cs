@@ -4,7 +4,7 @@ using GameNotificationService.Persistence;
 using GameNotificationService.Services;
 using MassTransit;
 using Microsoft.Extensions.Options;
-using Service.Contracts.GameState;
+using Service.Contracts.Events;
 
 namespace GameNotificationService.Consumers;
 

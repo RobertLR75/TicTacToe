@@ -1,6 +1,6 @@
 using GameService.Endpoints.Games.Create;
-using GameService.Models;
 using NSubstitute;
+using Service.Contracts.Events;
 using Xunit;
 
 namespace GameService.UnitTests;
@@ -8,27 +8,23 @@ namespace GameService.UnitTests;
 public class CreateGameHandlerUnitTests : GameServiceUnitTestBase
 {
     [Fact]
-    public async Task HandleAsync_creates_game_persists_it_and_publishes_event()
+    public async Task GameCreatedEventHandler_publishes_mapped_shared_event()
     {
-        var store = CreateStore();
         var publisher = CreatePublisher();
-        var sut = new CreateGameHandler(store, publisher);
+        var sut = new GameCreatedEvent.GameCreatedEventHandler(publisher);
         var playerId = Guid.NewGuid();
+        var game = CreateGame(player1: CreatePlayer(playerId.ToString("D")));
 
-        var result = await sut.HandleAsync(new CreateGameCommand(playerId, "Alice"));
+        await sut.HandleAsync(new GameCreatedEvent { Game = game }, CancellationToken.None);
 
-        Assert.NotEqual(Guid.Empty, result.Id);
-        Assert.Equal(GameStatus.Created, result.Status);
-        Assert.Equal(playerId.ToString("D"), result.Player1.Id);
-        Assert.Equal("Alice", result.Player1.Name);
-        Assert.True(result.CreatedAt <= DateTimeOffset.UtcNow);
-
-        await store.Received(1).CreateAsync(result, Arg.Any<CancellationToken>());
-        await publisher.Received(1).PublishGameCreatedAsync(
-            Arg.Is<GameCreatedEvent>(evt =>
-                evt.GameId == result.Id &&
-                evt.Player1Id == result.Player1.Id &&
-                evt.CreatedAt == result.CreatedAt),
+        await publisher.Received(1).PublishEventAsync(
+            Arg.Is<GameCreated>(evt =>
+                evt.GameId == game.Id &&
+                evt.Player1 == game.Player1.Id &&
+                evt.CreatedAt == game.CreatedAt &&
+                evt.SchemaVersion == "1.0" &&
+                !string.IsNullOrWhiteSpace(evt.EventId) &&
+                evt.OccurredAtUtc >= game.CreatedAt),
             Arg.Any<CancellationToken>());
     }
 }

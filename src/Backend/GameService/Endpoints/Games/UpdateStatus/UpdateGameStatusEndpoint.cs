@@ -1,6 +1,7 @@
 using FastEndpoints;
 using GameService.Services;
-using Service.Contracts.UpdateGameStatus;
+using Service.Contracts.Requests;
+using Service.Contracts.Responses;
 
 namespace GameService.Endpoints.Games.UpdateStatus;
 

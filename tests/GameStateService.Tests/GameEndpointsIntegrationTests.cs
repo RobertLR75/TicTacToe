@@ -1,10 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
-using GameStateService.Endpoints.Games.Create;
 using GameStateService.Endpoints.Games.Get;
 using GameStateService.Endpoints.Games.MakeMove;
-using GameStateService.Models;
+using GameStateService.Services;
 using GameStateService.Tests.Testing;
+using Service.Contracts.Responses;
+using Service.Contracts.Shared;
 using Xunit;
 
 namespace GameStateService.Tests;
@@ -20,38 +21,35 @@ public sealed class GameEndpointsIntegrationTests : IntegrationTestBase
     }
 
     [Fact]
-    public async Task Endpoints_create_get_and_make_move_round_trip()
+    public async Task Endpoints_get_and_make_move_round_trip_for_initialized_game()
     {
-        using var factory = new GameStateServiceWebApplicationFactory(_fixture.ConnectionString, enableEventPublishing: false);
+        var repository = new GameRepository();
+        var initialized = repository.CreateGame();
+
+        using var factory = new GameStateServiceWebApplicationFactory(_fixture.ConnectionString, repository, enableEventPublishing: false);
         using var client = factory.CreateClient();
 
-        var createResponse = await client.PostAsync("/api/games", JsonContent.Create(new { }));
-
-        Assert.Equal(HttpStatusCode.Accepted, createResponse.StatusCode);
-        var created = await createResponse.Content.ReadFromJsonAsync<CreateGameResponse>();
-        Assert.NotNull(created);
-
-        var getResponse = await client.GetAsync($"/api/games/{created!.GameId}");
+        var getResponse = await client.GetAsync($"/api/games/{initialized.GameId}");
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var game = await getResponse.Content.ReadFromJsonAsync<GetGameResponse>();
         Assert.NotNull(game);
-        Assert.Equal(created.GameId, game!.GameId);
+        Assert.Equal(initialized.GameId, game!.GameId);
 
-        var moveResponse = await client.PostAsJsonAsync($"/api/games/{created.GameId}/moves", new MakeMoveRequest
+        var moveResponse = await client.PostAsJsonAsync($"/api/games/{initialized.GameId}/moves", new MakeMoveRequest
         {
-            GameId = created.GameId,
+            GameId = initialized.GameId,
             Row = 0,
             Col = 0
         });
 
-        Assert.Equal(HttpStatusCode.Accepted, moveResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, moveResponse.StatusCode);
 
-        var getUpdatedResponse = await client.GetAsync($"/api/games/{created.GameId}");
+        var getUpdatedResponse = await client.GetAsync($"/api/games/{initialized.GameId}");
         var updated = await getUpdatedResponse.Content.ReadFromJsonAsync<GetGameResponse>();
 
         Assert.NotNull(updated);
-        Assert.Equal(PlayerMark.X, updated!.Board.Single(c => c.Row == 0 && c.Col == 0).Mark);
-        Assert.Equal(PlayerMark.O, updated.CurrentPlayer);
+        Assert.Equal(PlayerMarkEnum.X, updated!.Board.Single(c => c.Row == 0 && c.Col == 0).MarkEnum);
+        Assert.Equal(PlayerMarkEnum.O, updated.CurrentPlayer);
     }
 }

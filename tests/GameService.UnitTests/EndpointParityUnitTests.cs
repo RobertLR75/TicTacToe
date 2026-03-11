@@ -4,9 +4,8 @@ using GameService.Endpoints.Games.List;
 using GameService.Endpoints.Games.UpdateStatus;
 using GameService.Models;
 using GameService.Services;
-using Service.Contracts.CreateGame;
-using Service.Contracts.ListGames;
-using Service.Contracts.UpdateGameStatus;
+using Service.Contracts.Requests;
+using Service.Contracts.Responses;
 using Xunit;
 
 namespace GameService.UnitTests;

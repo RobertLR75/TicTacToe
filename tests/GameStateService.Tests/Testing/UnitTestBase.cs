@@ -1,4 +1,5 @@
-using GameStateService.Contracts.Events;
+using Service.Contracts.Events;
+using Service.Contracts.Shared;
 using GameStateService.GameState;
 using GameStateService.Models;
 using GameStateService.Services;
@@ -59,14 +60,14 @@ public abstract class UnitTestBase
         public int UpdatedPublishCalls { get; private set; }
         public string? LastGameId { get; private set; }
 
-        public Task PublishEventAsync<T>(T @event, CancellationToken ct = default) where T : class
+        public Task PublishEventAsync<T>(T @event, CancellationToken ct = default) where T : class, ISharedEvent
         {
-            if (@event is GameStateInitializedEvent initialized)
+            if (@event is GameStateInitialized initialized)
             {
                 InitializedPublishCalls++;
                 LastGameId = initialized.GameId;
             }
-            else if (@event is GameStateUpdatedEvent updated)
+            else if (@event is GameStateUpdated updated)
             {
                 UpdatedPublishCalls++;
                 LastGameId = updated.GameId;

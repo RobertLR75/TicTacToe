@@ -1,6 +1,7 @@
 using FastEndpoints;
 using GameService.Models;
-using Service.Contracts.ListGames;
+using Service.Contracts.Requests;
+using Service.Contracts.Responses;
 using Service.Contracts.Shared;
 
 namespace GameService.Endpoints.Games.List;

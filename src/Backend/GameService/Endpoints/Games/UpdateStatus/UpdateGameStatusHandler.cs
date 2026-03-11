@@ -18,8 +18,7 @@ public sealed record GameStatusUpdateResult(bool Succeeded, bool NotFound, bool 
 
 public class UpdateGameStatusHandler(
     IPostgresSqlStorageService<Game> gameStore,
-    IUpdateUpdateGameStatusCommandHandler statusValidator,
-    IGameEventPublisher eventPublisher) 
+    IUpdateUpdateGameStatusCommandHandler statusValidator)
     : IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>
 {
     public async Task<GameStatusUpdateResult> HandleAsync(UpdateGameStatusCommand request, CancellationToken ct = default)
@@ -42,15 +41,13 @@ public class UpdateGameStatusHandler(
 
         game.Status = status;
         game.UpdatedAt = DateTimeOffset.UtcNow;
-            
+
         await gameStore.UpdateAsync(game, ct);
 
-        await eventPublisher.PublishStatusUpdatedAsync(new GameStatusUpdatedEvent
+        await new GameStatusUpdatedEvent
         {
-            GameId = game.Id,
-            NewStatus = game.Status.ToString(),
-            UpdatedAt = game.UpdatedAt.Value
-        }, ct);
+            Game = game,
+        }.PublishAsync(Mode.WaitForNone, ct);
 
         return GameStatusUpdateResult.SuccessResult(gameId, status, game.UpdatedAt);
     }

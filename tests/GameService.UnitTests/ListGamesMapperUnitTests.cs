@@ -1,6 +1,6 @@
 using GameService.Endpoints.Games.List;
 using GameService.Models;
-using Service.Contracts.ListGames;
+using Service.Contracts.Requests;
 using Service.Contracts.Shared;
 using Xunit;
 

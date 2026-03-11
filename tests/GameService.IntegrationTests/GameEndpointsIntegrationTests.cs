@@ -2,10 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using GameService.Models;
-using Service.Contracts.CreateGame;
-using Service.Contracts.ListGames;
+using Service.Contracts.Requests;
+using Service.Contracts.Responses;
 using Service.Contracts.Shared;
-using Service.Contracts.UpdateGameStatus;
 using Xunit;
 
 namespace GameService.IntegrationTests;

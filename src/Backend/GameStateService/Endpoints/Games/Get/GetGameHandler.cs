@@ -1,4 +1,6 @@
 using GameStateService.Services;
+using Service.Contracts.Responses;
+using Service.Contracts.Shared;
 
 namespace GameStateService.Endpoints.Games.Get;
 
@@ -18,12 +20,12 @@ public sealed record GetGame(string GameId) : IRequest<GetGameQueryResult>
             var response = new GetGameResponse
             {
                 GameId = game.GameId,
-                CurrentPlayer = game.CurrentPlayer,
-                Winner = game.Winner,
+                CurrentPlayer = (PlayerMarkEnum)game.CurrentPlayer,
+                Winner = (PlayerMarkEnum)game.Winner,
                 IsDraw = game.IsDraw,
                 IsOver = game.IsOver,
                 Board = game.Board.GetAllCells()
-                    .Select(c => new CellDto(c.Row, c.Col, c.Mark))
+                    .Select(c => new CellDto(c.Row, c.Col, (PlayerMarkEnum)c.Mark))
                     .ToList()
             };
 

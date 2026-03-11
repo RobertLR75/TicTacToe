@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
 
         services.AddMassTransit(x =>
         {
-            x.AddConsumer<GameCreateConsumer>();
+            x.AddConsumer<GameCreatedConsumer>();
 
             if (messagingOptions.EnableEventPublishing)
             {
@@ -42,7 +42,7 @@ public static class ServiceCollectionExtensions
 
                     cfg.ReceiveEndpoint("gamestateservice-game-created", e =>
                     {
-                        e.ConfigureConsumer<GameCreateConsumer>(context);
+                        e.ConfigureConsumer<GameCreatedConsumer>(context);
                     });
                 });
             }

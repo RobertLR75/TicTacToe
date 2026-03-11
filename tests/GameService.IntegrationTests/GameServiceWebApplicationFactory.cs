@@ -1,10 +1,14 @@
 using GameService.Persistence;
+using GameService.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Service.Contracts.Shared;
 using TicTacToe.Testing;
 
 namespace GameService.IntegrationTests;
@@ -27,10 +31,21 @@ public sealed class GameServiceWebApplicationFactory(string connectionString) : 
                 ["ConnectionStrings:postgres"] = connectionString
             });
         });
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<IGameEventPublisher>();
+            services.AddScoped<IGameEventPublisher, NoOpGameEventPublisher>();
+        });
     }
 
     public Task ResetDatabaseAsync()
     {
         return DatabaseSchemaReset.ResetAsync(Services);
+    }
+
+    private sealed class NoOpGameEventPublisher : IGameEventPublisher
+    {
+        public Task PublishEventAsync<T>(T @event, CancellationToken ct = default) where T : class, ISharedEvent
+            => Task.CompletedTask;
     }
 }

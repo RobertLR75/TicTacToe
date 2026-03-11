@@ -1,4 +1,5 @@
 using FastEndpoints;
+using GameService.Configuration;
 using GameService.Endpoints.Games.Create;
 using GameService.Endpoints.Games.List;
 using GameService.Endpoints.Games.UpdateStatus;
@@ -13,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 builder.Services.AddGamePersistence(builder.Configuration);
+builder.Services.AddGameEventPublishing(builder.Configuration);
 
 var postgresConnectionString = builder.Configuration.GetConnectionString("postgres");
 if (string.IsNullOrWhiteSpace(postgresConnectionString))
@@ -25,7 +27,7 @@ builder.Services.AddScoped<IRequestHandler<UpdateGameStatusCommand, GameStatusUp
 builder.Services.AddScoped<IUpdateUpdateGameStatusCommandHandler, ValidateGameStatusCommand.ValidateGameStatusCommandHandler>();
 builder.Services.AddScoped<IRequestHandler<CreateGameCommand, Game>, CreateGameHandler>();
 builder.Services.AddScoped<IRequestHandler<ListGamesQuery, IEnumerable<Game>>, ListGamesQueryHandler>();
-builder.Services.AddScoped<IGameEventPublisher, FastEndpointsGameEventPublisher>();
+builder.Services.AddScoped<IGameEventPublisher, MassTransitGameEventPublisher>();
 
 builder.ConfigureFastEndPoints();
 
@@ -39,4 +41,7 @@ app.MapDefaultEndpoints();
 
 app.Run();
 
-public partial class Program;
+namespace GameService
+{
+    public partial class Program;
+}

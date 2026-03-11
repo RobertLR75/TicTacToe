@@ -1,4 +1,4 @@
-using GameNotificationService.Notifications;
+using Service.Contracts.Notifications;
 
 namespace GameNotificationService.Services;
 

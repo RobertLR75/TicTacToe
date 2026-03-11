@@ -4,6 +4,7 @@ using GameStateService.Services;
 using MassTransit;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using Service.Contracts.Events;
 using Xunit;
 
 namespace GameStateService.Tests;
@@ -31,13 +32,24 @@ public sealed class GameStateServiceUnitTests
     }
 
     [Fact]
-    public async Task MassTransitGameEventPublisher_skips_publish_when_disabled()
+    public async Task MassTransitGameStateEventPublisher_skips_publish_when_disabled()
     {
         var publishEndpoint = Substitute.For<IPublishEndpoint>();
         var options = Options.Create(new MessagingOptions { EnableEventPublishing = false });
-        var sut = new MassTransitGameEventPublisher(publishEndpoint, options);
+        var sut = new MassTransitGameStateEventPublisher(publishEndpoint, options);
 
-        await sut.PublishEventAsync(new { EventId = "evt-1" });
+        await sut.PublishEventAsync(new GameStateInitialized
+        {
+            EventId = "evt-1",
+            SchemaVersion = "1.0",
+            GameId = "game-1",
+            CurrentPlayer = Service.Contracts.Shared.PlayerMarkEnum.X,
+            Winner = Service.Contracts.Shared.PlayerMarkEnum.None,
+            IsDraw = false,
+            IsOver = false,
+            Board = [],
+            OccurredAtUtc = DateTimeOffset.UtcNow
+        });
 
         await publishEndpoint.DidNotReceiveWithAnyArgs().Publish(default(object)!, default(CancellationToken));
     }

@@ -1,6 +1,7 @@
 using FastEndpoints;
 using GameService.Models;
-using Service.Contracts.CreateGame;
+using Service.Contracts.Requests;
+using Service.Contracts.Responses;
 using Service.Contracts.Shared;
 using PlayerModel = Service.Contracts.Shared.PlayerModel;
 

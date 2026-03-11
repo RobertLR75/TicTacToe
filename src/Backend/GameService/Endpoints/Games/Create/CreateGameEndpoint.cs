@@ -1,7 +1,8 @@
 using FastEndpoints;
 using GameService.Models;
 using GameService.Services;
-using Service.Contracts.CreateGame;
+using Service.Contracts.Requests;
+using Service.Contracts.Responses;
 
 namespace GameService.Endpoints.Games.Create;
 

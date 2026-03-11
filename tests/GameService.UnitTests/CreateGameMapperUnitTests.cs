@@ -1,6 +1,6 @@
 using GameService.Endpoints.Games.Create;
 using GameService.Models;
-using Service.Contracts.CreateGame;
+using Service.Contracts.Requests;
 using Service.Contracts.Shared;
 using Xunit;
 

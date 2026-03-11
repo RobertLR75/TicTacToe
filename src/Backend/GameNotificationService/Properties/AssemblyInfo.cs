@@ -1,3 +1,3 @@
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("GameNotificationService.Tests")]
+[assembly: InternalsVisibleTo("GameNotificationService.UnitTests")]

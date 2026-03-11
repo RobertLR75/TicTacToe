@@ -1,3 +1,4 @@
+using FastEndpoints;
 using GameStateService.GameState;
 using GameStateService.Services;
 
@@ -31,13 +32,13 @@ public sealed class MakeMoveHandler(
 {
     public async Task<MakeMoveCommandResult> HandleAsync(MakeMove request, CancellationToken ct = default)
     {
-        var game = repository.GetGame(request.GameId);
-        if (game is null)
+        var gameState = repository.GetGame(request.GameId);
+        if (gameState is null)
         {
             return MakeMoveCommandResult.NotFound();
         }
 
-        var logicResult = await gameLogicMoveHandler.HandleAsync(new GameState.GameState(game, request.Row, request.Col), ct);
+        var logicResult = await gameLogicMoveHandler.HandleAsync(new GameState.GameState(gameState, request.Row, request.Col), ct);
         if (logicResult.Status == GameLogicMoveStatus.GameOver)
         {
             return MakeMoveCommandResult.GameOver();
@@ -48,11 +49,14 @@ public sealed class MakeMoveHandler(
             return MakeMoveCommandResult.CellOccupied();
         }
 
-        repository.UpdateGame(game);
+        repository.UpdateGame(gameState);
 
-        await eventPublisher.PublishEventAsync(GameEventMapper.ToGameStateUpdatedEvent(game), ct);
+        await new GameStateUpdatedEvent
+        {
+            GameState = gameState
+        }.PublishAsync(Mode.WaitForNone, ct);
 
-        return MakeMoveCommandResult.Success(game);
+        return MakeMoveCommandResult.Success(gameState);
     }
 }
 

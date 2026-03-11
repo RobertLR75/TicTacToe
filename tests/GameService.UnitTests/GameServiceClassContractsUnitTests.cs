@@ -4,9 +4,9 @@ using GameService.Endpoints.Games.UpdateStatus;
 using GameService.Models;
 using GameService.Persistence.Migrations;
 using GameService.Services;
+using NSubstitute;
 using SharedLibrary.FluentMigration;
 using SharedLibrary.Interfaces;
-using Service.Contracts.CreateGame;
 using Xunit;
 using DomainGame = GameService.Models.Game;
 using DomainPlayer = GameService.Models.Player;
@@ -64,33 +64,36 @@ public class GameServiceClassContractsUnitTests
     [Fact]
     public async Task Placeholder_event_handlers_complete_successfully()
     {
-        var createdHandler = new GameCreatedEventHandler();
-        var statusHandler = new GameStatusUpdatedEvent.GameStatusUpdatedEventHandler();
+        var publisher = Substitute.For<IGameEventPublisher>();
+        var createdHandler = new GameCreatedEvent.GameCreatedEventHandler(publisher);
+        var statusHandler = new GameStatusUpdatedEvent.GameStatusUpdatedEventHandler(publisher);
+        var game = new DomainGame
+        {
+            Id = Guid.NewGuid(),
+            Status = GameStatus.Active,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow,
+            Player1 = new DomainPlayer { Id = "p1", Name = "Alice" }
+        };
 
         await createdHandler.HandleAsync(new GameCreatedEvent
         {
-            GameId = Guid.NewGuid(),
-            CreatedAt = DateTimeOffset.UtcNow,
-            Player1Id = "p1"
+            Game = game
         }, CancellationToken.None);
 
         await statusHandler.HandleAsync(new GameStatusUpdatedEvent
         {
-            GameId = Guid.NewGuid(),
-            NewStatus = GameStatus.Active.ToString(),
-            UpdatedAt = DateTimeOffset.UtcNow
+            Game = game
         }, CancellationToken.None);
     }
 
     [Fact]
     public void Infrastructure_types_keep_expected_contracts()
     {
-        Assert.True(typeof(GameCreated).IsAssignableFrom(typeof(GameCreatedEvent)));
         Assert.Contains(typeof(IEvent), typeof(GameCreatedEvent).GetInterfaces());
-        Assert.Contains(typeof(IEventHandler<GameCreatedEvent>), typeof(GameCreatedEventHandler).GetInterfaces());
+        Assert.Contains(typeof(IEventHandler<GameCreatedEvent>), typeof(GameCreatedEvent.GameCreatedEventHandler).GetInterfaces());
         Assert.Contains(typeof(IEventHandler<GameStatusUpdatedEvent>), typeof(GameStatusUpdatedEvent.GameStatusUpdatedEventHandler).GetInterfaces());
-        Assert.Contains(typeof(IGameEventPublisher), typeof(FastEndpointsGameEventPublisher).GetInterfaces());
+        Assert.Contains(typeof(IGameEventPublisher), typeof(MassTransitGameEventPublisher).GetInterfaces());
         Assert.True(typeof(GenericTableMigration<DomainGame>).IsAssignableFrom(typeof(CreateGameAndPlayerTables)));
     }
 }
-

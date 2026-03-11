@@ -27,14 +27,12 @@ public class CreateGameHandler(
         };
 
         await gameStore.CreateAsync(game, ct);
-
-        await eventPublisher.PublishGameCreatedAsync(new GameCreatedEvent
+        
+        await new GameCreatedEvent
         {
-            GameId = game.Id,
-            CreatedAt = game.CreatedAt,
-            Player1Id = game.Player1.Id
-        }, ct);
-
+            Game = game,
+        }.PublishAsync(Mode.WaitForNone, ct);
+        
         return game;
     }
 }

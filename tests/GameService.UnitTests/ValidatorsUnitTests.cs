@@ -1,8 +1,7 @@
 using GameService.Endpoints.Games.Create;
 using GameService.Endpoints.Games.UpdateStatus;
-using Service.Contracts.CreateGame;
+using Service.Contracts.Requests;
 using Service.Contracts.Shared;
-using Service.Contracts.UpdateGameStatus;
 using Xunit;
 
 namespace GameService.UnitTests;

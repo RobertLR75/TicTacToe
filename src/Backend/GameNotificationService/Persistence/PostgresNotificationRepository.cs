@@ -47,7 +47,7 @@ public sealed class PostgresNotificationRepository(string connectionString) : IN
         await connection.OpenAsync(ct);
 
         await using var command = new NpgsqlCommand(sql, connection);
-        command.Parameters.AddWithValue("gameId", (object?)query.GameId ?? DBNull.Value);
+        command.Parameters.Add("gameId", NpgsqlDbType.Text).Value = (object?)query.GameId ?? DBNull.Value;
         command.Parameters.AddWithValue("limit", query.PageSize);
         command.Parameters.AddWithValue("offset", offset);
 

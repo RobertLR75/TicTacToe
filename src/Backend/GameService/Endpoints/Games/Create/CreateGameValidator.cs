@@ -1,6 +1,6 @@
 using FastEndpoints;
 using FluentValidation;
-using Service.Contracts.CreateGame;
+using Service.Contracts.Requests;
 
 namespace GameService.Endpoints.Games.Create;
 

@@ -1,19 +1,20 @@
 using FastEndpoints;
-using Service.Contracts.CreateGame;
+using GameService.Services;
 
 namespace GameService.Endpoints.Games.Create;
 
-public record GameCreatedEvent : GameCreated, IEvent
+public record GameCreatedEvent : IEvent
 {
 
-}
-
-public class GameCreatedEventHandler : IEventHandler<GameCreatedEvent>
-{
-    public async Task HandleAsync(GameCreatedEvent model, CancellationToken ct)
+    public required Models.Game Game { get; init; }
+    public class GameCreatedEventHandler(IGameEventPublisher eventPublisher) : IEventHandler<GameCreatedEvent>
     {
-        // Placeholder for future logic (e.g. notifications, analytics)
-        await Task.CompletedTask;
+        public async Task HandleAsync(GameCreatedEvent model, CancellationToken ct)
+        {
+            await eventPublisher.PublishEventAsync(GameEventMapper.ToGameCreated(model.Game), ct);
+        }
     }
 }
+
+
 
