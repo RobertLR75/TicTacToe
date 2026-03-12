@@ -8,8 +8,7 @@ namespace GameService.Endpoints.Games.Create;
 public sealed record CreateGameCommand(Guid PlayerId, string PlayerName) : IRequest<Game>;
 
 public class CreateGameHandler(
-    IPostgresSqlStorageService<Game> gameStore,
-    IGameEventPublisher eventPublisher) 
+    IPostgresSqlStorageService<Game> gameStore) 
     : IRequestHandler<CreateGameCommand, Game>
 {
     public async Task<Game> HandleAsync(CreateGameCommand request, CancellationToken ct = default)

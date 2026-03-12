@@ -39,8 +39,14 @@ public class EndpointParityUnitTests
         var listCtor = typeof(ListGamesEndpoint).GetConstructors().Single();
         var updateCtor = typeof(UpdateGameStatusEndpoint).GetConstructors().Single();
 
-        Assert.Equal(typeof(IRequestHandler<CreateGameCommand, Game>), createCtor.GetParameters().Single().ParameterType);
-        Assert.Equal(typeof(IRequestHandler<ListGamesQuery, IEnumerable<Game>>), listCtor.GetParameters().Single().ParameterType);
-        Assert.Equal(typeof(IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>), updateCtor.GetParameters().Single().ParameterType);
+        Assert.Equal(
+            new[] { typeof(IRequestHandler<CreateGameCommand, Game>) },
+            createCtor.GetParameters().Select(parameter => parameter.ParameterType).ToArray());
+        Assert.Equal(
+            new[] { typeof(IRequestHandler<ListGamesQuery, IEnumerable<Game>>) },
+            listCtor.GetParameters().Select(parameter => parameter.ParameterType).ToArray());
+        Assert.Equal(
+            new[] { typeof(IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>) },
+            updateCtor.GetParameters().Select(parameter => parameter.ParameterType).ToArray());
     }
 }

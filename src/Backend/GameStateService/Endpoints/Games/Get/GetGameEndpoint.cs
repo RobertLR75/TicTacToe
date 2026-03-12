@@ -16,7 +16,7 @@ public class GetGameEndpoint : Endpoint<GetGameRequest, GetGameResponse>
 
     public override void Configure()
     {
-        Get("/api/games/{GameId}");
+        Get("/api/game-states/{GameId}");
         AllowAnonymous();
     }
 

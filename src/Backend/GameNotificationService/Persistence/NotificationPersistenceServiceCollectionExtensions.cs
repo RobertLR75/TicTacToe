@@ -19,6 +19,9 @@ public static class NotificationPersistenceServiceCollectionExtensions
             .Bind(configuration.GetSection(NotificationQueryOptions.SectionName))
             .ValidateOnStart();
 
+        services.AddSingleton<NotificationPersistenceReadinessState>();
+        services.AddSingleton<INotificationPersistenceInitializer, NotificationPersistenceInitializer>();
+        services.AddHostedService<NotificationPersistenceInitializerHostedService>();
         services.AddSingleton<INotificationRepository>(_ => new PostgresNotificationRepository(connectionString));
 
         services.AddFluentMigratorCore()
@@ -27,13 +30,9 @@ public static class NotificationPersistenceServiceCollectionExtensions
                 .WithGlobalConnectionString(connectionString)
                 .ScanIn(typeof(NotificationPersistenceServiceCollectionExtensions).Assembly).For.Migrations());
 
-        return services;
-    }
+        services.AddHealthChecks()
+            .AddCheck<NotificationPersistenceHealthCheck>("notification_persistence");
 
-    public static void ApplyNotificationMigrations(this IServiceProvider serviceProvider)
-    {
-        using var scope = serviceProvider.CreateScope();
-        var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        runner.MigrateUp();
+        return services;
     }
 }

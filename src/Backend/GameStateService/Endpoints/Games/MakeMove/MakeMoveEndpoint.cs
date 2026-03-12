@@ -14,7 +14,7 @@ public class MakeMoveEndpoint : Endpoint<MakeMoveRequest>
 
     public override void Configure()
     {
-        Post("/api/games/{GameId}/moves");
+        Post("/api/game-states/{GameId}/moves");
         AllowAnonymous();
     }
 

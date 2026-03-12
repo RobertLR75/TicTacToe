@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="5a716c5c-3718-4f16-b6ab-f5347f24f777" name="@Mac 2026-03-12 23:34:08" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2026-03-12T23:34:08.2245880+01:00" queuing="2026-03-12T23:34:08.2245880+01:00" start="2026-03-12T23:34:04.7518050+01:00" finish="2026-03-12T23:34:08.2269430+01:00" />
+  <TestSettings name="default" id="c906c08e-0e63-4445-870e-32a5516c6d51">
+    <Deployment runDeploymentRoot="_Mac_2026-03-12_23_34_08" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="45d2acb2-0ce1-473e-8d79-bd3845a752da" testId="0b1f7420-e6e0-e916-5ffe-f88a2dcd1780" testName="GameService.IntegrationTests.GamePersistenceMigrationIntegrationTests.EnsureInitializedAsync_applies_expected_game_and_player_tables" computerName="Mac" duration="00:00:00.5677816" startTime="2026-03-12T23:34:07.9090700+01:00" endTime="2026-03-12T23:34:07.9090960+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="45d2acb2-0ce1-473e-8d79-bd3845a752da" />
+    <UnitTestResult executionId="ad6c0d74-8380-495d-8137-c8184c91f94c" testId="891e6331-8a3b-4632-011d-99532acb0a7f" testName="GameService.IntegrationTests.GamePersistenceMigrationIntegrationTests.EnsureInitializedAsync_creates_player_foreign_keys_and_status_index" computerName="Mac" duration="00:00:00.0756241" startTime="2026-03-12T23:34:07.9851330+01:00" endTime="2026-03-12T23:34:07.9851330+01:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="ad6c0d74-8380-495d-8137-c8184c91f94c" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="GameService.IntegrationTests.GamePersistenceMigrationIntegrationTests.EnsureInitializedAsync_applies_expected_game_and_player_tables" storage="/users/robert/repos/github/tictactoe/tests/gameservice.integrationtests/bin/debug/net10.0/gameservice.integrationtests.dll" id="0b1f7420-e6e0-e916-5ffe-f88a2dcd1780">
+      <Execution id="45d2acb2-0ce1-473e-8d79-bd3845a752da" />
+      <TestMethod codeBase="/Users/robert/Repos/GitHub/TicTacToe/tests/GameService.IntegrationTests/bin/Debug/net10.0/GameService.IntegrationTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="GameService.IntegrationTests.GamePersistenceMigrationIntegrationTests" name="EnsureInitializedAsync_applies_expected_game_and_player_tables" />
+    </UnitTest>
+    <UnitTest name="GameService.IntegrationTests.GamePersistenceMigrationIntegrationTests.EnsureInitializedAsync_creates_player_foreign_keys_and_status_index" storage="/users/robert/repos/github/tictactoe/tests/gameservice.integrationtests/bin/debug/net10.0/gameservice.integrationtests.dll" id="891e6331-8a3b-4632-011d-99532acb0a7f">
+      <Execution id="ad6c0d74-8380-495d-8137-c8184c91f94c" />
+      <TestMethod codeBase="/Users/robert/Repos/GitHub/TicTacToe/tests/GameService.IntegrationTests/bin/Debug/net10.0/GameService.IntegrationTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="GameService.IntegrationTests.GamePersistenceMigrationIntegrationTests" name="EnsureInitializedAsync_creates_player_foreign_keys_and_status_index" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="0b1f7420-e6e0-e916-5ffe-f88a2dcd1780" executionId="45d2acb2-0ce1-473e-8d79-bd3845a752da" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="891e6331-8a3b-4632-011d-99532acb0a7f" executionId="ad6c0d74-8380-495d-8137-c8184c91f94c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="2" executed="2" passed="2" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.8.2+699d445a1a (64-bit .NET 10.0.0)
+[xUnit.net 00:00:00.05]   Discovering: GameService.IntegrationTests
+[xUnit.net 00:00:00.07]   Discovered:  GameService.IntegrationTests
+[xUnit.net 00:00:00.08]   Starting:    GameService.IntegrationTests
+[testcontainers.org 00:00:00.07] Connected to Docker:
+  Host: unix:///var/run/docker.sock
+  Server Version: 29.2.1
+  Kernel Version: 6.12.69-linuxkit
+  API Version: 1.53
+  Operating System: Docker Desktop
+  Total Memory: 7.65 GB
+  Labels: 
+    com.docker.desktop.address=unix:///Users/robert/Library/Containers/com.docker.docker/Data/docker-cli.sock
+[testcontainers.org 00:00:00.15] Docker container 0f8d249dffcf created
+[testcontainers.org 00:00:00.19] Start Docker container 0f8d249dffcf
+[testcontainers.org 00:00:00.56] Wait for Docker container 0f8d249dffcf to complete readiness checks
+[testcontainers.org 00:00:00.57] Docker container 0f8d249dffcf ready
+[testcontainers.org 00:00:00.66] Docker container 8403711a8ac8 created
+[testcontainers.org 00:00:00.69] Start Docker container 8403711a8ac8
+[testcontainers.org 00:00:00.93] Wait for Docker container 8403711a8ac8 to complete readiness checks
+[testcontainers.org 00:00:00.94] Execute "pg_isready --host localhost --dbname postgres --username postgres" at Docker container 8403711a8ac8
+[testcontainers.org 00:00:02.02] Execute "pg_isready --host localhost --dbname postgres --username postgres" at Docker container 8403711a8ac8
+[testcontainers.org 00:00:02.11] Docker container 8403711a8ac8 ready
+[testcontainers.org 00:00:02.77] Delete Docker container 8403711a8ac8
+[xUnit.net 00:00:03.12]   Finished:    GameService.IntegrationTests
+</StdOut>
+    </Output>
+  </ResultSummary>
+</TestRun>

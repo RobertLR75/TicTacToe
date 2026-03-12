@@ -17,7 +17,7 @@ public class ListGamesEndpoint : Endpoint<ListGamesRequest, ListGamesResponse, L
     
     public override void Configure()
     {
-        Get("/api/game-lobby");
+        Get("/api/games");
         AllowAnonymous();
         Summary(s =>
         {
@@ -28,6 +28,7 @@ public class ListGamesEndpoint : Endpoint<ListGamesRequest, ListGamesResponse, L
 
     public override async Task HandleAsync(ListGamesRequest request, CancellationToken ct)
     {
+
         var query = Map.ToEntity(request);
         var games = await _handler.HandleAsync(query, ct);
 

@@ -1,4 +1,5 @@
 using FastEndpoints;
+using FastEndpoints.Swagger;
 using GameService.Configuration;
 using GameService.Endpoints.Games.Create;
 using GameService.Endpoints.Games.List;
@@ -6,7 +7,6 @@ using GameService.Endpoints.Games.UpdateStatus;
 using GameService.Models;
 using GameService.Persistence;
 using GameService.Services;
-using SharedLibrary.FastEndpoints;
 using SharedLibrary.PostgreSql.EntityFramework;
 using TicTacToe.ServiceDefaults;
 
@@ -16,12 +16,6 @@ builder.AddServiceDefaults();
 builder.Services.AddGamePersistence(builder.Configuration);
 builder.Services.AddGameEventPublishing(builder.Configuration);
 
-var postgresConnectionString = builder.Configuration.GetConnectionString("postgres");
-if (string.IsNullOrWhiteSpace(postgresConnectionString))
-{
-    throw new InvalidOperationException("ConnectionStrings:postgres is required for GameService.");
-}
-
 builder.Services.AddScoped<IPostgresSqlStorageService<Game>, GameStorageService>();
 builder.Services.AddScoped<IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>, UpdateGameStatusHandler>();
 builder.Services.AddScoped<IUpdateUpdateGameStatusCommandHandler, ValidateGameStatusCommand.ValidateGameStatusCommandHandler>();
@@ -29,15 +23,21 @@ builder.Services.AddScoped<IRequestHandler<CreateGameCommand, Game>, CreateGameH
 builder.Services.AddScoped<IRequestHandler<ListGamesQuery, IEnumerable<Game>>, ListGamesQueryHandler>();
 builder.Services.AddScoped<IGameEventPublisher, MassTransitGameEventPublisher>();
 
-builder.ConfigureFastEndPoints();
+builder.Services.AddFastEndpoints();
+builder.Services.SwaggerDocument();
 
 
 var app = builder.Build();
 
-app.Services.ApplyGameMigrations();
+await app.Services.EnsureGamePersistenceReadyBeforeStartupAsync(app.Logger, app.Lifetime.ApplicationStopping);
 
 app.UseFastEndpoints();
 app.MapDefaultEndpoints();
+
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Testing"))
+{
+    app.UseSwaggerGen();
+}
 
 app.Run();
 

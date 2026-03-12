@@ -78,7 +78,6 @@ public sealed class GameNotificationServiceIntegrationTestFixture : IAsyncLifeti
         configureServices?.Invoke(services);
 
         var provider = services.BuildServiceProvider();
-        provider.ApplyNotificationMigrations();
         return provider;
     }
 
@@ -91,7 +90,26 @@ public sealed class GameNotificationServiceIntegrationTestFixture : IAsyncLifeti
         command.CommandText = "DROP SCHEMA IF EXISTS \"public\" CASCADE; CREATE SCHEMA \"public\";";
         await command.ExecuteNonQueryAsync();
 
-        provider.ApplyNotificationMigrations();
+        await WaitForPersistenceReadyAsync(provider);
+    }
+
+    private static async Task WaitForPersistenceReadyAsync(IServiceProvider provider)
+    {
+        var initializer = provider.GetRequiredService<INotificationPersistenceInitializer>();
+        var readinessState = provider.GetRequiredService<NotificationPersistenceReadinessState>();
+
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            if (await initializer.EnsureInitializedAsync())
+            {
+                return;
+            }
+
+            await Task.Delay(200);
+        }
+
+        throw new InvalidOperationException(
+            $"Notification persistence initializer could not prepare the integration test database. Last error: {readinessState.LastErrorMessage ?? "unknown"}");
     }
 
     private void ApplyRabbitMqSettings(IDictionary<string, string?> values)

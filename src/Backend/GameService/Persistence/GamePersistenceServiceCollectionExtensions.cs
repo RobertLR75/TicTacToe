@@ -9,11 +9,10 @@ public static class GamePersistenceServiceCollectionExtensions
 {
     public static IServiceCollection AddGamePersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("postgres");
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            throw new InvalidOperationException("ConnectionStrings:postgres is required for game persistence.");
-        }
+        var connectionString = PostgresConnectionStringResolver.ResolveRequired(configuration, "game persistence");
+
+        services.AddSingleton<GamePersistenceReadinessState>();
+        services.AddSingleton<IGamePersistenceInitializer, GamePersistenceInitializer>();
 
         services.AddDbContext<GenericDbContext<Game>>(options =>
             options.UseNpgsql(connectionString));
@@ -24,6 +23,9 @@ public static class GamePersistenceServiceCollectionExtensions
                 .AddPostgres()
                 .WithGlobalConnectionString(connectionString)
                 .ScanIn(typeof(GamePersistenceServiceCollectionExtensions).Assembly).For.Migrations());
+
+        services.AddHealthChecks()
+            .AddCheck<GamePersistenceHealthCheck>("game_persistence");
 
         return services;
     }

@@ -17,6 +17,20 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
     }
 
     [Fact]
+    public async Task Swagger_page_is_available_in_testing_environment()
+    {
+        await using var factory = CreateFactory();
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/swagger/index.html");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Swagger UI", content);
+    }
+
+    [Fact]
     public async Task Create_endpoint_persists_game_and_returns_created_response()
     {
         await using var factory = CreateFactory();
@@ -29,7 +43,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
             PlayerName = "Alice"
         };
 
-        var response = await client.PostAsJsonAsync("/api/game-lobby", request);
+        var response = await client.PostAsJsonAsync("/api/games", request);
 
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
@@ -52,7 +66,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         await factory.ResetDatabaseAsync();
         using var client = factory.CreateClient();
 
-        var response = await client.PostAsJsonAsync("/api/game-lobby", new CreateGameRequest
+        var response = await client.PostAsJsonAsync("/api/games", new CreateGameRequest
         {
             PlayerId = Guid.Empty,
             PlayerName = string.Empty
@@ -72,7 +86,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         await factory.ResetDatabaseAsync();
         using var client = factory.CreateClient();
 
-        var response = await client.PostAsJsonAsync("/api/game-lobby", new CreateGameRequest
+        var response = await client.PostAsJsonAsync("/api/games", new CreateGameRequest
         {
             PlayerId = Guid.NewGuid(),
             PlayerName = new string('a', 51)
@@ -97,7 +111,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         await SeedGameAsync(factory.Services, GameStatus.Created);
         await SeedGameAsync(factory.Services, GameStatus.Active, "p2", "Bob");
 
-        var response = await client.GetAsync("/api/game-lobby");
+        var response = await client.GetAsync("/api/games");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
@@ -118,7 +132,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         await SeedGameAsync(factory.Services, GameStatus.Created, "p2", "Bob");
         await SeedGameAsync(factory.Services, GameStatus.Active, "p3", "Carol");
 
-        var response = await client.GetAsync("/api/game-lobby?status=Created&page=2&pageSize=1");
+        var response = await client.GetAsync("/api/games?status=Created&page=2&pageSize=1");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
@@ -153,8 +167,8 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
             player1: CreatePlayer("p4", "Dave"),
             createdAt: new DateTimeOffset(2026, 3, 10, 10, 15, 0, TimeSpan.Zero)));
 
-        var page1Response = await client.GetAsync("/api/game-lobby?status=Created&page=1&pageSize=2");
-        var page3Response = await client.GetAsync("/api/game-lobby?status=Created&page=3&pageSize=1");
+        var page1Response = await client.GetAsync("/api/games?status=Created&page=1&pageSize=2");
+        var page3Response = await client.GetAsync("/api/games?status=Created&page=3&pageSize=1");
 
         Assert.Equal(HttpStatusCode.OK, page1Response.StatusCode);
         Assert.Equal(HttpStatusCode.OK, page3Response.StatusCode);
@@ -169,6 +183,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         Assert.Equal(new[] { newest.Id }, page3.Games.Select(x => x.Id).ToArray());
     }
 
+
     [Fact]
     public async Task Update_status_endpoint_updates_status_to_active_and_persists_change()
     {
@@ -176,7 +191,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         await factory.ResetDatabaseAsync();
         using var client = factory.CreateClient();
 
-        var createResponse = await client.PostAsJsonAsync("/api/game-lobby", new CreateGameRequest
+        var createResponse = await client.PostAsJsonAsync("/api/games", new CreateGameRequest
         {
             PlayerId = Guid.NewGuid(),
             PlayerName = "Alice"
@@ -185,7 +200,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         var created = await createResponse.Content.ReadFromJsonAsync<CreateGameResponse>();
         Assert.NotNull(created);
 
-        var updateResponse = await client.PutAsJsonAsync($"/api/game-lobby/{created.Id}/status", new UpdateGameStatusRequest
+        var updateResponse = await client.PutAsJsonAsync($"/api/games/{created.Id}/status", new UpdateGameStatusRequest
         {
             Id = created.Id,
             Status = GameStatusEnum.Active
@@ -213,7 +228,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
 
         var game = await SeedGameAsync(factory.Services, GameStatus.Created);
 
-        var updateResponse = await client.PutAsJsonAsync($"/api/game-lobby/{game.Id}/status", new UpdateGameStatusRequest
+        var updateResponse = await client.PutAsJsonAsync($"/api/games/{game.Id}/status", new UpdateGameStatusRequest
         {
             Id = game.Id,
             Status = GameStatusEnum.Completed
@@ -239,7 +254,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         await factory.ResetDatabaseAsync();
         using var client = factory.CreateClient();
 
-        var response = await client.PutAsJsonAsync($"/api/game-lobby/{Guid.NewGuid()}/status", new UpdateGameStatusRequest
+        var response = await client.PutAsJsonAsync($"/api/games/{Guid.NewGuid()}/status", new UpdateGameStatusRequest
         {
             Id = Guid.NewGuid(),
             Status = GameStatusEnum.Active
@@ -256,7 +271,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         using var client = factory.CreateClient();
 
         var missingId = Guid.NewGuid();
-        var response = await client.PutAsJsonAsync($"/api/game-lobby/{missingId}/status", new UpdateGameStatusRequest
+        var response = await client.PutAsJsonAsync($"/api/games/{missingId}/status", new UpdateGameStatusRequest
         {
             Id = missingId,
             Status = GameStatusEnum.Active
@@ -275,7 +290,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
 
         var game = await SeedGameAsync(factory.Services, GameStatus.Created);
 
-        var response = await client.PutAsJsonAsync($"/api/game-lobby/{game.Id}/status", new UpdateGameStatusRequest
+        var response = await client.PutAsJsonAsync($"/api/games/{game.Id}/status", new UpdateGameStatusRequest
         {
             Id = game.Id,
             Status = GameStatusEnum.Created
@@ -295,7 +310,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         using var client = factory.CreateClient();
 
         var game = await SeedGameAsync(factory.Services, GameStatus.Created);
-        using var request = new HttpRequestMessage(HttpMethod.Put, $"/api/game-lobby/{game.Id}/status");
+        using var request = new HttpRequestMessage(HttpMethod.Put, $"/api/games/{game.Id}/status");
         request.Content = new StringContent($"{{\"id\":\"{game.Id}\"}}", Encoding.UTF8, "application/json");
 
         using var response = await client.SendAsync(request);
@@ -319,7 +334,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
 
         var game = await SeedGameAsync(factory.Services, GameStatus.Active);
 
-        var response = await client.PutAsJsonAsync($"/api/game-lobby/{game.Id}/status", new UpdateGameStatusRequest
+        var response = await client.PutAsJsonAsync($"/api/games/{game.Id}/status", new UpdateGameStatusRequest
         {
             Id = game.Id,
             Status = GameStatusEnum.Completed
@@ -344,7 +359,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
 
         var game = await SeedGameAsync(factory.Services, GameStatus.Active);
 
-        var response = await client.PutAsJsonAsync($"/api/game-lobby/{game.Id}/status", new UpdateGameStatusRequest
+        var response = await client.PutAsJsonAsync($"/api/games/{game.Id}/status", new UpdateGameStatusRequest
         {
             Id = game.Id,
             Status = GameStatusEnum.Active
@@ -372,7 +387,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         var routeGame = await SeedGameAsync(factory.Services, GameStatus.Created);
         var bodyGame = await SeedGameAsync(factory.Services, GameStatus.Created, "p2", "Bob");
 
-        var response = await client.PutAsJsonAsync($"/api/game-lobby/{routeGame.Id}/status", new UpdateGameStatusRequest
+        var response = await client.PutAsJsonAsync($"/api/games/{routeGame.Id}/status", new UpdateGameStatusRequest
         {
             Id = bodyGame.Id,
             Status = GameStatusEnum.Active
@@ -396,7 +411,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
     private static async Task<ListGamesResponse> CreateGamesQuery(GameServiceWebApplicationFactory factory)
     {
         using var client = factory.CreateClient();
-        var response = await client.GetAsync("/api/game-lobby");
+        var response = await client.GetAsync("/api/games");
         response.EnsureSuccessStatusCode();
         var payload = await response.Content.ReadFromJsonAsync<ListGamesResponse>();
         Assert.NotNull(payload);

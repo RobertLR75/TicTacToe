@@ -17,7 +17,7 @@ public class CreateGameEndpoint : Endpoint<CreateGameRequest, CreateGameResponse
 
     public override void Configure()
     {
-        Post("/api/game-lobby");
+        Post("/api/games");
         AllowAnonymous();
         Summary(s =>
         {
@@ -28,6 +28,7 @@ public class CreateGameEndpoint : Endpoint<CreateGameRequest, CreateGameResponse
 
     public override async Task HandleAsync(CreateGameRequest req, CancellationToken ct)
     {
+
         var command = Map.ToEntity(req);
         var game = await _handler.HandleAsync(command, ct);
 

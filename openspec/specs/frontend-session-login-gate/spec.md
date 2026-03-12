@@ -19,7 +19,7 @@ The system SHALL require a session user object containing `UserId` (GUID) and `N
 - **THEN** the system serves the homepage without redirecting to login
 
 ### Requirement: Login submission creates session identity
-The system SHALL provide a login page that accepts a username. On valid submission, the system MUST create a session user with a new GUID `UserId` and submitted `Name`, persist it to session storage, and redirect the user to the homepage.
+The system SHALL provide a MudBlazor-themed login page that accepts a username. On valid submission, the system MUST create a session user with a new GUID `UserId` and submitted `Name`, persist it to session storage, and redirect the user to the homepage.
 
 #### Scenario: Successful login creates session and redirects
 - **GIVEN** no valid session user exists

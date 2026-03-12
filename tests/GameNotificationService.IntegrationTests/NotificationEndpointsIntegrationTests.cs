@@ -69,4 +69,20 @@ public sealed class NotificationEndpointsIntegrationTests : GameNotificationServ
         Assert.Equal(2, payload.Count);
         Assert.Equal(["evt-3", "evt-2"], payload.Select(x => x.EventId).ToArray());
     }
+
+    [Fact]
+    public async Task List_notifications_endpoint_returns_service_unavailable_when_persistence_is_not_ready()
+    {
+        await using var factory = CreateFactory(new Dictionary<string, string?>
+        {
+            ["ConnectionStrings:postgres"] = "Host=127.0.0.1;Port=1;Database=postgres;Username=postgres;Password=postgres"
+        });
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/api/notifications");
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Notification persistence is temporarily unavailable", content);
+    }
 }

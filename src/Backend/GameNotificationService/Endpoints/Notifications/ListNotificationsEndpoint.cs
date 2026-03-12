@@ -31,6 +31,7 @@ public sealed record ListNotificationsResponse
 
 public sealed class ListNotificationsEndpoint(
     INotificationRepository notificationRepository,
+    NotificationPersistenceReadinessState readinessState,
     IOptions<NotificationQueryOptions> queryOptions) : Endpoint<ListNotificationsRequest, List<ListNotificationsResponse>>
 {
     public override void Configure()
@@ -41,6 +42,15 @@ public sealed class ListNotificationsEndpoint(
 
     public override async Task HandleAsync(ListNotificationsRequest request, CancellationToken ct)
     {
+        if (!readinessState.IsReady)
+        {
+            await Send.StringAsync(
+                "Notification persistence is temporarily unavailable. Please retry once PostgreSQL initialization succeeds.",
+                StatusCodes.Status503ServiceUnavailable,
+                cancellation: ct);
+            return;
+        }
+
         var options = queryOptions.Value;
         var page = request.Page.GetValueOrDefault(1);
         if (page < 1)

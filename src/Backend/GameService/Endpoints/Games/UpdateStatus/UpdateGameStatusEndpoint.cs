@@ -9,7 +9,8 @@ public class UpdateGameStatusEndpoint : Endpoint<UpdateGameStatusRequest, Update
 {
     private readonly IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult> _statusUpdateHandler;
 
-    public UpdateGameStatusEndpoint(IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult> statusUpdateHandler)
+    public UpdateGameStatusEndpoint(
+        IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult> statusUpdateHandler)
     {
         _statusUpdateHandler = statusUpdateHandler;
     }
@@ -17,7 +18,7 @@ public class UpdateGameStatusEndpoint : Endpoint<UpdateGameStatusRequest, Update
     public override void Configure()
     {
         Verbs(Http.PUT);
-        Routes("/api/game-lobby/{Id}/status");
+        Routes("/api/games/{Id}/status");
         AllowAnonymous();
         Summary(s =>
         {
@@ -28,6 +29,7 @@ public class UpdateGameStatusEndpoint : Endpoint<UpdateGameStatusRequest, Update
 
     public override async Task HandleAsync(UpdateGameStatusRequest req, CancellationToken ct)
     {
+
         var command = Map.ToEntity(req);
         var result = await _statusUpdateHandler.HandleAsync(command, ct);
 

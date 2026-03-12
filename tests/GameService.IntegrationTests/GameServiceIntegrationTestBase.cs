@@ -53,9 +53,7 @@ public abstract class GameServiceIntegrationTestBase
         services.AddGamePersistence(config);
         configureServices?.Invoke(services);
 
-        var provider = services.BuildServiceProvider();
-        provider.ApplyGameMigrations();
-        return provider;
+        return services.BuildServiceProvider();
     }
 
     protected static Task ResetDatabaseAsync(IServiceProvider provider)

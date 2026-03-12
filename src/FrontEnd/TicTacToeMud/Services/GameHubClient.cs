@@ -20,7 +20,7 @@ public class GameHubClient : IAsyncDisposable
 
     public bool IsConnected => _hubConnection?.State == HubConnectionState.Connected;
 
-    public async Task StartAsync(string? hubBaseUrl = null)
+    public virtual async Task StartAsync(string? hubBaseUrl = null)
     {
         if (_hubConnection is not null)
         {
@@ -71,7 +71,7 @@ public class GameHubClient : IAsyncDisposable
         await _hubConnection.StartAsync();
     }
 
-    public async Task JoinGame(string gameId)
+    public virtual async Task JoinGame(string gameId)
     {
         if (_hubConnection is not null)
         {
@@ -79,7 +79,7 @@ public class GameHubClient : IAsyncDisposable
         }
     }
 
-    public async Task LeaveGame(string gameId)
+    public virtual async Task LeaveGame(string gameId)
     {
         if (_hubConnection is not null)
         {

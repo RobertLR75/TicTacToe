@@ -43,4 +43,9 @@ public static class SessionUserStore
     {
         session.SetString(SessionKey, JsonSerializer.Serialize(sessionUser));
     }
+
+    public static void Clear(ISession session)
+    {
+        session.Remove(SessionKey);
+    }
 }

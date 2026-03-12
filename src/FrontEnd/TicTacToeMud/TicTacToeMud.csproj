@@ -16,4 +16,8 @@
     <ItemGroup>
         <ProjectReference Include="..\..\TicTacToe.ServiceDefaults\TicTacToe.ServiceDefaults.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="TicTacToeMud.Tests" />
+    </ItemGroup>
 </Project>

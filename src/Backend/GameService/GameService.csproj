@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SharedLibrary.FastEndpoints" Version="1.0.1" />
+    <PackageReference Include="FastEndpoints" Version="7.2.0" />
+    <PackageReference Include="FastEndpoints.Swagger" Version="7.2.0" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.2" />
     <PackageReference Include="SharedLibrary.FlientMigration" Version="1.0.0" />
     <PackageReference Include="SharedLibrary.FluentMigration" Version="1.0.10" />
     <PackageReference Include="SharedLibrary.PostgreSql.EntityFramework" Version="1.0.50" />

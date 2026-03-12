@@ -9,8 +9,9 @@
 @using TicTacToeMud.Services
 @using TicTacToeMud.Session
 @inject GameApiClient GameApi
+@inject GameStateServiceClient GameStateApi
 @inject GameHubClient GameHub
-@inject ISnackbar Snackbar
+@inject INotificationService NotificationService
 @inject IHttpContextAccessor HttpContextAccessor
 
 <PageTitle>Tic-Tac-Toe</PageTitle>
@@ -160,7 +161,7 @@
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Failed to connect to game hub: {ex.Message}", Severity.Warning);
+            NotificationService.ShowWarning($"Failed to connect to game hub: {ex.Message}");
         }
     }
 
@@ -234,7 +235,7 @@
             // Try to get initial state from API immediately so UI becomes interactive
             try
             {
-                var state = await GameApi.GetGameAsync(gameId);
+                var state = await GameStateApi.GetGameAsync(gameId);
                 if (state is not null)
                 {
                     UpdateState(state);
@@ -257,7 +258,7 @@
         catch (Exception ex)
         {
             _isLoading = false;
-            Snackbar.Add($"Failed to create game: {ex.Message}", Severity.Error);
+            NotificationService.ShowError($"Failed to create game: {ex.Message}");
         }
     }
 
@@ -265,7 +266,7 @@
     {
         if (string.IsNullOrWhiteSpace(_playerId) || string.IsNullOrWhiteSpace(_playerName))
         {
-            Snackbar.Add("Missing player identity. Please sign in again.", Severity.Error);
+            NotificationService.ShowError("Missing player identity. Please sign in again.");
             return;
         }
 
@@ -285,14 +286,30 @@
         _isLoading = true;
         try
         {
-            await GameApi.MakeMoveAsync(_gameId, row, col);
+            await GameStateApi.MakeMoveAsync(_gameId, row, col);
             // State will be updated by HandleGameStateUpdated when notification arrives
         }
         catch (Exception ex)
         {
             _isLoading = false;
-            Snackbar.Add($"Failed to make move: {ex.Message}", Severity.Error);
+            NotificationService.ShowError($"Failed to make move: {ex.Message}");
         }
+    }
+
+    internal Task TriggerNewGameForTestAsync(string playerId, string playerName)
+    {
+        return StartNewGame(playerId, playerName);
+    }
+
+    internal Task TriggerCellClickForTestAsync(int row, int col)
+    {
+        return OnCellClick(row, col);
+    }
+
+    internal void SetGameStateForTest(string gameId, TicTacToeMud.Models.GameResponse response)
+    {
+        _gameId = gameId;
+        UpdateState(response);
     }
 
     private void UpdateState(TicTacToeMud.Models.GameResponse response)

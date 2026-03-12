@@ -39,8 +39,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.Services.ApplyNotificationMigrations();
-
 app.UseCors("AllowBlazorUI");
 
 app.UseFastEndpoints();
