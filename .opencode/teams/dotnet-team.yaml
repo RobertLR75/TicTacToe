@@ -1,0 +1,20 @@
+
+name: dotnet-architecture-team
+
+description: Coordinated AI architecture team for .NET Aspire + FastEndpoints + Blazor systems
+
+agents:
+  - system-solution-architect
+  - csharp-backend-architect
+  - blazor-frontend-architect
+  - distributed-messaging-architect
+  - testing-quality-agent
+  - aspire-devops-platform-agent
+
+routing:
+  system_design: system-solution-architect
+  api_design: csharp-backend-architect
+  ui_design: blazor-frontend-architect
+  messaging: distributed-messaging-architect
+  testing: testing-quality-agent
+  infrastructure: aspire-devops-platform-agent
