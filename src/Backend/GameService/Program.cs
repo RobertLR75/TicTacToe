@@ -16,11 +16,11 @@ builder.AddServiceDefaults();
 builder.Services.AddGamePersistence(builder.Configuration);
 builder.Services.AddGameEventPublishing(builder.Configuration);
 
-builder.Services.AddScoped<IPostgresSqlStorageService<Game>, GameStorageService>();
-builder.Services.AddScoped<IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>, UpdateGameStatusHandler>();
+builder.Services.AddScoped<IGameStorageService, GameStorageService>();
+builder.Services.AddScoped<IUpdateGameStatusHandler, UpdateGameStatusHandler>();
 builder.Services.AddScoped<IUpdateUpdateGameStatusCommandHandler, ValidateGameStatusCommand.ValidateGameStatusCommandHandler>();
-builder.Services.AddScoped<IRequestHandler<CreateGameCommand, Game>, CreateGameHandler>();
-builder.Services.AddScoped<IRequestHandler<ListGamesQuery, IEnumerable<Game>>, ListGamesQueryHandler>();
+builder.Services.AddScoped<ICreateGameHandler, CreateGameHandler>();
+builder.Services.AddScoped<IListGamesHandler, ListGamesHandler>();
 builder.Services.AddScoped<IGameEventPublisher, MassTransitGameEventPublisher>();
 
 builder.Services.AddFastEndpoints();

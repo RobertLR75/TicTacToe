@@ -4,10 +4,12 @@ using Service.Contracts.Shared;
 
 namespace GameStateService.Endpoints.Games.Get;
 
+public interface IGetGameHandler : IRequestHandler<GetGame, GetGameQueryResult>;
+
 public sealed record GetGame(string GameId) : IRequest<GetGameQueryResult>
 {
     public sealed class GetGameHandler(IGameRepository repository)
-        : IRequestHandler<GetGame, GetGameQueryResult>
+        : IGetGameHandler
     {
         public Task<GetGameQueryResult> HandleAsync(GetGame request, CancellationToken ct = default)
         {

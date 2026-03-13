@@ -7,10 +7,10 @@ namespace GameService.Endpoints.Games.UpdateStatus;
 
 public class UpdateGameStatusEndpoint : Endpoint<UpdateGameStatusRequest, UpdateGameStatusResponse, UpdateGameStatusMapper>
 {
-    private readonly IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult> _statusUpdateHandler;
+    private readonly IUpdateGameStatusHandler _statusUpdateHandler;
 
     public UpdateGameStatusEndpoint(
-        IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult> statusUpdateHandler)
+       IUpdateGameStatusHandler statusUpdateHandler)
     {
         _statusUpdateHandler = statusUpdateHandler;
     }

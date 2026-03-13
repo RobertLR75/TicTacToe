@@ -75,7 +75,7 @@ public sealed class UpdateGameStatusHandlersIntegrationTests : GameServiceIntegr
 
     private static void ConfigureHandlerServices(IServiceCollection services)
     {
-        services.AddScoped<IPostgresSqlStorageService<Game>, GameStorageService>();
+        services.AddScoped<IGameStorageService, GameStorageService>();
         services.AddScoped<UpdateGameStatusHandler>();
         services.AddScoped<IUpdateUpdateGameStatusCommandHandler, ValidateGameStatusCommand.ValidateGameStatusCommandHandler>();
         services.AddScoped<IGameEventPublisher, FakeGameEventPublisher>();

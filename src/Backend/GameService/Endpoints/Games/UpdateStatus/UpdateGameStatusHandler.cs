@@ -5,6 +5,8 @@ using SharedLibrary.PostgreSql.EntityFramework;
 
 namespace GameService.Endpoints.Games.UpdateStatus;
 
+public interface IUpdateGameStatusHandler : IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>;
+    
 public sealed record UpdateGameStatusCommand(Guid GameId, GameStatus Status) : IRequest<GameStatusUpdateResult>;
 
 public sealed record GameStatusUpdateResult(bool Succeeded, bool NotFound, bool InvalidStatus, Guid Id, GameStatus? Status, DateTimeOffset? UpdatedAt)
@@ -17,9 +19,9 @@ public sealed record GameStatusUpdateResult(bool Succeeded, bool NotFound, bool 
 }
 
 public class UpdateGameStatusHandler(
-    IPostgresSqlStorageService<Game> gameStore,
+    IGameStorageService gameStore,
     IUpdateUpdateGameStatusCommandHandler statusValidator)
-    : IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>
+    : IUpdateGameStatusHandler
 {
     public async Task<GameStatusUpdateResult> HandleAsync(UpdateGameStatusCommand request, CancellationToken ct = default)
     {

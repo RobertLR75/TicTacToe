@@ -20,7 +20,7 @@ public class ListGamesQueryHandlerUnitTests : GameServiceUnitTestBase
         store.SearchAsync(Arg.Any<SearchByStatusSpecification>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(expected));
 
-        var sut = new ListGamesQueryHandler(store);
+        var sut = new ListGamesHandler(store);
 
         var result = await sut.HandleAsync(new ListGamesQuery(GameStatus.Created, 2, 5));
 

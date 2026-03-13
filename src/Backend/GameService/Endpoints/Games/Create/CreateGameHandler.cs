@@ -5,11 +5,13 @@ using SharedLibrary.PostgreSql.EntityFramework;
 
 namespace GameService.Endpoints.Games.Create;
 
+public interface ICreateGameHandler : IRequestHandler<CreateGameCommand, Game>;
+
 public sealed record CreateGameCommand(Guid PlayerId, string PlayerName) : IRequest<Game>;
 
 public class CreateGameHandler(
-    IPostgresSqlStorageService<Game> gameStore) 
-    : IRequestHandler<CreateGameCommand, Game>
+    IGameStorageService gameStore) 
+    : ICreateGameHandler
 {
     public async Task<Game> HandleAsync(CreateGameCommand request, CancellationToken ct = default)
     {
@@ -24,7 +26,7 @@ public class CreateGameHandler(
             Id = Guid.NewGuid(),
             Player1 = player
         };
-
+        
         await gameStore.CreateAsync(game, ct);
         
         await new GameCreatedEvent

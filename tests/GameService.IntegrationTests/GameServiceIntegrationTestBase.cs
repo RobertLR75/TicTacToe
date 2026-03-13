@@ -1,5 +1,6 @@
 using GameService.Models;
 using GameService.Persistence;
+using GameService.Services;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.PostgreSql.EntityFramework;
 using TicTacToe.Testing;
@@ -62,7 +63,7 @@ public abstract class GameServiceIntegrationTestBase
     protected static async Task<Game> PersistGameAsync(IServiceProvider services, Game game)
     {
         using var scope = services.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<IPostgresSqlStorageService<Game>>();
+        var store = scope.ServiceProvider.GetRequiredService<IGameStorageService>();
         await store.CreateAsync(game);
         return game;
     }
@@ -70,7 +71,7 @@ public abstract class GameServiceIntegrationTestBase
     protected static async Task<Game> SeedGameAsync(IServiceProvider services, GameStatus status, string playerId = "p1", string playerName = "Alice")
     {
         using var scope = services.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<IPostgresSqlStorageService<Game>>();
+        var store = scope.ServiceProvider.GetRequiredService<IGameStorageService>();
 
         var game = new Game
         {
@@ -91,7 +92,7 @@ public abstract class GameServiceIntegrationTestBase
     protected static async Task<Game?> GetGameAsync(IServiceProvider services, Guid id)
     {
         using var scope = services.CreateScope();
-        var store = scope.ServiceProvider.GetRequiredService<IPostgresSqlStorageService<Game>>();
+        var store = scope.ServiceProvider.GetRequiredService<IGameStorageService>();
         return await store.GetAsync(id);
     }
 }

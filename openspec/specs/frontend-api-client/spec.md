@@ -1,13 +1,13 @@
 # frontend-api-client Specification
 
 ## Purpose
-Defines the typed HttpClient used by the frontend to communicate with the GameStateService backend.
+Defines the typed HttpClient used by the frontend to communicate with the GameService backend for game creation and listing.
 
 ## Requirements
 
-### Requirement: Typed HttpClient for GameAPI communication
+### Requirement: Typed HttpClient for GameService communication
 
-The frontend SHALL use a typed `GameApiClient` service that communicates with the GameStateService backend. Return types SHALL reflect the `202 Accepted` response pattern for create and move operations while preserving typed response models for read operations.
+The frontend SHALL use a typed `GameApiClient` service that communicates with the GameService backend for game creation and listing. `GameApiClient` SHALL NOT own game-state reads or move submission.
 
 #### Scenario: GameApiClient is registered in DI
 
@@ -27,15 +27,8 @@ The frontend SHALL use a typed `GameApiClient` service that communicates with th
 - **THEN** it SHALL send `GET /api/games` to the GameService
 - **AND** return a typed list response containing created games
 
-#### Scenario: Get game state
+#### Scenario: GameApiClient excludes game-state reads and move submission
 
-- **WHEN** `GameApiClient.GetGameAsync(gameId)` is called
-- **THEN** it SHALL send `GET /api/games/{gameId}` to the GameService
-- **AND** return a `GameResponse` with the current game state
-
-#### Scenario: Make a move
-
-- **WHEN** `GameApiClient.MakeMoveAsync(gameId, row, col)` is called
-- **THEN** it SHALL send `POST /api/games/{gameId}/moves` with `{ gameId, row, col }` as JSON body
-- **AND** ensure the response is `202 Accepted`
-- **AND** return `void` (no response body to parse)
+- **WHEN** the frontend needs to load a game state or submit a move during gameplay
+- **THEN** those operations SHALL be handled by a dedicated GameStateService client
+- **AND** `GameApiClient` SHALL remain scoped to create/list operations only

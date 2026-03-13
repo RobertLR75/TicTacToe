@@ -8,9 +8,9 @@ namespace GameService.Endpoints.Games.Create;
 
 public class CreateGameEndpoint : Endpoint<CreateGameRequest, CreateGameResponse, CreateGameMapper>
 {
-    private readonly IRequestHandler<CreateGameCommand, Game> _handler;
+    private readonly ICreateGameHandler _handler;
 
-    public CreateGameEndpoint(IRequestHandler<CreateGameCommand, Game> handler)
+    public CreateGameEndpoint(ICreateGameHandler handler)
     {
         _handler = handler;
     }

@@ -8,9 +8,9 @@ namespace GameService.Endpoints.Games.List;
 
 public class ListGamesEndpoint : Endpoint<ListGamesRequest, ListGamesResponse, ListGamesMapper>
 {
-    private readonly IRequestHandler<ListGamesQuery, IEnumerable<Game>> _handler;
+    private readonly IListGamesHandler _handler;
 
-    public ListGamesEndpoint(IRequestHandler<ListGamesQuery, IEnumerable<Game>> handler)
+    public ListGamesEndpoint(IListGamesHandler handler)
     {
         _handler = handler;
     }

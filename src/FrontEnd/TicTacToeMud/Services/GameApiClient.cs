@@ -1,3 +1,4 @@
+using Service.Contracts.Responses;
 using TicTacToeMud.Models;
 
 namespace TicTacToeMud.Services;
@@ -12,23 +13,16 @@ public class GameApiClient(HttpClient httpClient)
             playerName
         });
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<CreateGameApiResponse>();
-        return result!.GameId;
+        var result = await response.Content.ReadFromJsonAsync<CreateGameResponse>();
+        return result!.Id.ToString();
     }
 
     public virtual async Task<IReadOnlyList<GameListItem>> ListGamesAsync()
     {
-        var response = await httpClient.GetFromJsonAsync<ListGamesApiResponse>("/api/games");
-        return response?.Games ?? [];
+        var response = await httpClient.GetFromJsonAsync<ListGamesResponse>("/api/games");
+        return response?.Games.Select(game => game.ToGameListItem()).ToList() ?? [];
     }
 
-    private record CreateGameApiResponse
-    {
-        public required string GameId { get; init; }
-    }
-
-    private record ListGamesApiResponse
-    {
-        public required List<GameListItem> Games { get; init; }
-    }
+    
+   
 }

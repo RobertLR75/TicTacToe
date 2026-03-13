@@ -21,7 +21,7 @@ public abstract class GameServiceUnitTestBase
         DateTimeOffset? updatedAt = null)
         => Fixture.CreateGame(status, id, player1, player2, createdAt, updatedAt);
 
-    protected IPostgresSqlStorageService<Game> CreateStore()
+    protected IGameStorageService CreateStore()
         => Fixture.CreateStore();
 
     protected IGameEventPublisher CreatePublisher()

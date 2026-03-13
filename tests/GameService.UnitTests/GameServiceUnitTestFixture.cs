@@ -36,8 +36,8 @@ public sealed class GameServiceUnitTestFixture
         };
     }
 
-    public IPostgresSqlStorageService<Game> CreateStore()
-        => Substitute.For<IPostgresSqlStorageService<Game>>();
+    public IGameStorageService CreateStore()
+        => Substitute.For<IGameStorageService>();
 
     public IGameEventPublisher CreatePublisher()
         => Substitute.For<IGameEventPublisher>();

@@ -16,6 +16,6 @@ public sealed class GameStorageServiceUnitTests
     [Fact]
     public void Storage_service_implements_expected_storage_contract()
     {
-        Assert.Contains(typeof(IPostgresSqlStorageService<Game>), typeof(GameStorageService).GetInterfaces());
+        Assert.Contains(typeof(IGameStorageService), typeof(GameStorageService).GetInterfaces());
     }
 }

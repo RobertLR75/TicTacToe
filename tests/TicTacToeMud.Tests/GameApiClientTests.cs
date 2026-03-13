@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
+using TicTacToeMud.Models;
 using TicTacToeMud.Services;
 using Xunit;
 
@@ -20,7 +21,10 @@ public class GameApiClientTests
 
             return new HttpResponseMessage(HttpStatusCode.Accepted)
             {
-                Content = new StringContent("{\"gameId\":\"game-123\"}", Encoding.UTF8, "application/json")
+                Content = new StringContent(
+                    "{\"id\":\"2a08ef26-61f1-4304-8db3-9b43db8ad547\",\"status\":0,\"player1\":{\"id\":\"player-1\",\"name\":\"Alice\"}}",
+                    Encoding.UTF8,
+                    "application/json")
             };
         });
 
@@ -28,7 +32,7 @@ public class GameApiClientTests
 
         var gameId = await sut.CreateGameAsync("player-1", "Alice");
 
-        Assert.Equal("game-123", gameId);
+        Assert.Equal("2a08ef26-61f1-4304-8db3-9b43db8ad547", gameId);
         Assert.NotNull(capturedRequest);
         Assert.Equal(HttpMethod.Post, capturedRequest!.Method);
         Assert.Equal("https://example.test/api/games", capturedRequest.RequestUri!.ToString());
@@ -65,7 +69,12 @@ public class GameApiClientTests
         Assert.Equal(HttpMethod.Get, capturedRequest!.Method);
         Assert.Equal("https://example.test/api/games", capturedRequest.RequestUri!.ToString());
         Assert.Single(games);
+        Assert.IsType<GameListItem>(games[0]);
+        Assert.Equal(Guid.Parse("2a08ef26-61f1-4304-8db3-9b43db8ad547"), games[0].Id);
+        Assert.Equal(0, games[0].Status);
         Assert.Equal("Alice", games[0].Player1.Name);
+        Assert.Equal("player-1", games[0].Player1.Id);
+        Assert.Null(games[0].Player2);
     }
 
     private static HttpClient CreateHttpClient(Func<HttpRequestMessage, Task<HttpResponseMessage>> responder)
