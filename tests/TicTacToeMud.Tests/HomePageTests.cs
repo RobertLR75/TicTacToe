@@ -49,8 +49,24 @@ public sealed class HomePageTests : TestContext
             Assert.Equal(1, api.ListGamesCalls);
             var markup = cut.Markup;
             Assert.Contains("Created Games", markup);
+            Assert.Contains("Game Id", markup);
+            Assert.Contains("Status", markup);
+            Assert.Contains("Player", markup);
+            Assert.Contains("Created", markup);
+            Assert.Contains("Actions", markup);
             Assert.Contains("Alice", markup);
+            Assert.Contains("Play Game", markup);
+            Assert.DoesNotContain("data-testid=\"home-play-game-button\"", markup);
         });
+
+        Assert.Single(cut.FindAll("[data-testid='home-games-row']"));
+        var playLink = cut.Find("[data-testid='home-game-row-play-link']");
+        Assert.Equal("/game/2a08ef26-61f1-4304-8db3-9b43db8ad547", playLink.GetAttribute("href"));
+
+        var listMarkupIndex = cut.Markup.IndexOf("data-testid=\"home-games-list\"", StringComparison.Ordinal);
+        var newGameMarkupIndex = cut.Markup.IndexOf("data-testid=\"home-new-game-button\"", StringComparison.Ordinal);
+        Assert.True(listMarkupIndex >= 0);
+        Assert.True(newGameMarkupIndex > listMarkupIndex);
     }
 
     [Fact]
@@ -64,7 +80,12 @@ public sealed class HomePageTests : TestContext
 
         var cut = RenderComponent<Home>();
 
-        cut.WaitForAssertion(() => Assert.Contains("No games yet. Create one to get started.", cut.Markup));
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Contains("No games yet. Create one to get started.", cut.Markup);
+            Assert.Empty(cut.FindAll("[data-testid='home-game-row-play-link']"));
+            Assert.DoesNotContain("data-testid=\"home-play-game-button\"", cut.Markup);
+        });
     }
 
     [Fact]

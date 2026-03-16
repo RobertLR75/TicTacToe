@@ -1,0 +1,101 @@
+.login-page-shell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 1.5rem;
+}
+
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: calc(100vh - 3rem);
+}
+
+.login-panel {
+    width: min(100%, 32rem);
+    border-radius: 1rem;
+    background: color-mix(in srgb, #1e1e2d 92%, black);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.42);
+}
+
+.login-title {
+    letter-spacing: 0.02em;
+}
+
+.login-subtitle {
+    color: #92929f;
+}
+
+.login-form {
+    width: 100%;
+}
+
+.login-input-field {
+    width: 100%;
+}
+
+.login-input-field :global(input) {
+    min-height: 1.5rem;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #b2b0bf;
+}
+
+.login-input-field :global(input::placeholder) {
+    color: #92929f;
+}
+
+.login-input-field :global(.mud-input-root) {
+    border-radius: .75rem;
+    background: color-mix(in srgb, #1e1e2d 88%, black);
+}
+
+.login-input-field :global(.mud-input-outlined-border) {
+    border-color: #33323e;
+}
+
+.login-input-field :global(.mud-input-label-outlined) {
+    color: #92929f;
+}
+
+.login-input-field :global(.mud-input-adornment) {
+    color: #92929f;
+}
+
+.login-input-field :global(.mud-input-control-input-container:focus-within .mud-input-outlined-border),
+.login-input-field :global(.mud-input-control:focus-within .mud-input-outlined-border) {
+    border-color: #7e6fff;
+}
+
+.login-input-field :global(input:focus-visible) {
+    outline: 3px solid color-mix(in srgb, #7e6fff 40%, white);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(126, 111, 255, 0.12);
+}
+
+.login-error {
+    border: 1px solid color-mix(in srgb, #ff3f5f 45%, black);
+    border-radius: .75rem;
+    padding: .85rem 1rem;
+    color: color-mix(in srgb, #ff3f5f 72%, white);
+    background: color-mix(in srgb, #ff3f5f 16%, transparent);
+}
+
+.login-submit-button {
+    min-height: 3rem;
+    font-weight: 600;
+}
+
+@media (max-width: 640px) {
+    .login-page-shell {
+        padding: 1rem;
+    }
+
+    .login-panel {
+        width: 100%;
+        border-radius: .9rem;
+    }
+}

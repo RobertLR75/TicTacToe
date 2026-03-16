@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
+using Service.Contracts.Responses;
 using Service.Contracts.Shared;
 
 namespace GameService.IntegrationTests;
@@ -27,13 +28,17 @@ public sealed class GameServiceWebApplicationFactory(string connectionString) : 
         {
             configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ConnectionStrings:postgres"] = connectionString
+                ["ConnectionStrings:postgres"] = connectionString,
+                ["Services:gamestateservice:https:0"] = "https://gamestateservice.test"
             });
         });
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll<IGameEventPublisher>();
             services.AddScoped<IGameEventPublisher, NoOpGameEventPublisher>();
+            services.RemoveAll<IGameStateReadClient>();
+            services.AddSingleton<StubGameStateReadClient>();
+            services.AddSingleton<IGameStateReadClient>(serviceProvider => serviceProvider.GetRequiredService<StubGameStateReadClient>());
         });
     }
 
@@ -77,5 +82,22 @@ public sealed class GameServiceWebApplicationFactory(string connectionString) : 
     {
         public Task PublishEventAsync<T>(T @event, CancellationToken ct = default) where T : class, ISharedEvent
             => Task.CompletedTask;
+    }
+
+    public sealed class StubGameStateReadClient : IGameStateReadClient
+    {
+        private readonly Dictionary<Guid, GameStateReadResult> _responses = [];
+
+        public void SetResponse(Guid gameId, GameStateReadResult response)
+        {
+            _responses[gameId] = response;
+        }
+
+        public Task<GameStateReadResult> GetGameAsync(Guid gameId, CancellationToken ct = default)
+        {
+            return Task.FromResult(_responses.TryGetValue(gameId, out var response)
+                ? response
+                : GameStateReadResult.NotFound());
+        }
     }
 }

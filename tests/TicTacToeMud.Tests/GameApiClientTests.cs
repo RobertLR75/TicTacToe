@@ -77,6 +77,38 @@ public class GameApiClientTests
         Assert.Null(games[0].Player2);
     }
 
+    [Fact]
+    public async Task GetGameAsync_sends_get_to_gameservice_route_and_maps_response()
+    {
+        HttpRequestMessage? capturedRequest = null;
+
+        using var client = CreateHttpClient(async request =>
+        {
+            capturedRequest = request;
+            await Task.CompletedTask;
+
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    "{\"gameId\":\"game-123\",\"currentPlayer\":1,\"winner\":0,\"isDraw\":false,\"isOver\":false,\"board\":[{\"row\":0,\"col\":1,\"markEnum\":2}]}",
+                    Encoding.UTF8,
+                    "application/json")
+            };
+        });
+
+        var sut = new GameApiClient(client);
+
+        var game = await sut.GetGameAsync("game-123");
+
+        Assert.NotNull(capturedRequest);
+        Assert.Equal(HttpMethod.Get, capturedRequest!.Method);
+        Assert.Equal("https://example.test/api/games/game-123", capturedRequest.RequestUri!.ToString());
+        Assert.Equal("game-123", game.GameId);
+        Assert.Equal(1, game.CurrentPlayer);
+        Assert.Single(game.Board);
+        Assert.Equal(2, game.Board[0].Mark);
+    }
+
     private static HttpClient CreateHttpClient(Func<HttpRequestMessage, Task<HttpResponseMessage>> responder)
     {
         return new HttpClient(new StubHttpMessageHandler(responder))

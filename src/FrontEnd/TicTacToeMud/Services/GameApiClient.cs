@@ -23,6 +23,9 @@ public class GameApiClient(HttpClient httpClient)
         return response?.Games.Select(game => game.ToGameListItem()).ToList() ?? [];
     }
 
-    
-   
+    public virtual async Task<GameResponse> GetGameAsync(string gameId)
+    {
+        var response = await httpClient.GetFromJsonAsync<GetGameResponse>($"/api/games/{gameId}");
+        return response!.ToGameResponse();
+    }
 }

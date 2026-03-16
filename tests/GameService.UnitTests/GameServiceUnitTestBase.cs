@@ -1,6 +1,7 @@
 using GameService.Endpoints.Games.UpdateStatus;
 using GameService.Models;
 using GameService.Services;
+using Service.Contracts.Responses;
 using SharedLibrary.PostgreSql.EntityFramework;
 
 namespace GameService.UnitTests;
@@ -29,5 +30,10 @@ public abstract class GameServiceUnitTestBase
 
     protected IUpdateUpdateGameStatusCommandHandler CreateStatusValidator(GameStatusUpdateResult result)
         => Fixture.CreateStatusValidator(result);
-}
 
+    protected IGameStateReadClient CreateGameStateReadClient()
+        => Fixture.CreateGameStateReadClient();
+
+    protected GetGameResponse CreateGetGameResponse(string? gameId = null)
+        => Fixture.CreateGetGameResponse(gameId);
+}

@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @rendermode InteractiveServer
 
 <MudSnackbarProvider/>
@@ -10,16 +10,7 @@
     <MudText Typo="Typo.body1">A classic two-player game. Take turns placing X and O on the board. Get three in a row to win!</MudText>
 
     <MudPaper Class="pa-4" Outlined="true" Style="max-width: 720px;">
-        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-2">
-            <MudText Typo="Typo.h5">Created Games</MudText>
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       OnClick="OnNewGame"
-                       Disabled="@(_isLoadingGames || _isCreatingGame)"
-                       data-testid="home-new-game-button">
-                New Game
-            </MudButton>
-        </MudStack>
+        <MudText Typo="Typo.h5" Class="mb-2">Created Games</MudText>
 
         @if (_isLoadingGames)
         {
@@ -31,25 +22,41 @@
         }
         else
         {
-            <MudList T="string" Dense="true" data-testid="home-games-list">
-                @foreach (var game in _games)
-                {
-                    <MudListItem T="string">
-                        <MudText Typo="Typo.body2">
-                            @game.GameId - @game.StatusLabel - @game.PlayerName - @game.CreatedAtLabel
-                        </MudText>
-                    </MudListItem>
-                }
-            </MudList>
+            <table class="mud-table-root w-100" data-testid="home-games-list">
+                <thead>
+                    <tr>
+                        <th class="text-left pa-2" data-testid="home-games-header-game-id">Game Id</th>
+                        <th class="text-left pa-2" data-testid="home-games-header-status">Status</th>
+                        <th class="text-left pa-2" data-testid="home-games-header-player">Player</th>
+                        <th class="text-left pa-2" data-testid="home-games-header-created-at">Created</th>
+                        <th class="text-left pa-2" data-testid="home-games-header-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var game in _games)
+                    {
+                        <tr data-testid="home-games-row">
+                            <td class="pa-2">@game.GameId</td>
+                            <td class="pa-2">@game.StatusLabel</td>
+                            <td class="pa-2">@game.PlayerName</td>
+                            <td class="pa-2">@game.CreatedAtLabel</td>
+                            <td class="pa-2">
+                                <MudLink Href="@($"/game/{game.GameId}")" data-testid="home-game-row-play-link">Play Game</MudLink>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         }
-    </MudPaper>
 
-    <MudButton Variant="Variant.Filled"
-               Color="Color.Secondary"
-               Size="Size.Large"
-               Href="/game"
-               StartIcon="@Icons.Material.Filled.SportsEsports"
-               data-testid="home-play-game-button">
-        Play Game
-    </MudButton>
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="OnNewGame"
+                   Disabled="@(_isLoadingGames || _isCreatingGame)"
+                   Class="mt-4"
+                   data-testid="home-new-game-button">
+            New Game
+        </MudButton>
+    </MudPaper>
 </MudStack>
+

@@ -2,6 +2,7 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using GameService.Configuration;
 using GameService.Endpoints.Games.Create;
+using GameService.Endpoints.Games.Get;
 using GameService.Endpoints.Games.List;
 using GameService.Endpoints.Games.UpdateStatus;
 using GameService.Models;
@@ -20,8 +21,17 @@ builder.Services.AddScoped<IGameStorageService, GameStorageService>();
 builder.Services.AddScoped<IUpdateGameStatusHandler, UpdateGameStatusHandler>();
 builder.Services.AddScoped<IUpdateUpdateGameStatusCommandHandler, ValidateGameStatusCommand.ValidateGameStatusCommandHandler>();
 builder.Services.AddScoped<ICreateGameHandler, CreateGameHandler>();
+builder.Services.AddScoped<IGetGameHandler, GetGameHandler>();
 builder.Services.AddScoped<IListGamesHandler, ListGamesHandler>();
 builder.Services.AddScoped<IGameEventPublisher, MassTransitGameEventPublisher>();
+builder.Services.AddHttpClient<IGameStateReadClient, GameStateReadClient>(client =>
+{
+    var gameStateServiceBaseUrl = builder.Configuration.GetValue<string>("Services:gamestateservice:https:0")
+        ?? builder.Configuration.GetValue<string>("Services:gamestateservice:http:0")
+        ?? "https://localhost:7110";
+
+    client.BaseAddress = new Uri(gameStateServiceBaseUrl);
+});
 
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();

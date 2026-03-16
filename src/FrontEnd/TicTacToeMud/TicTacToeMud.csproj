@@ -21,4 +21,16 @@
     <ItemGroup>
         <InternalsVisibleTo Include="TicTacToeMud.Tests" />
     </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Components\Pages\Home.razor.cs">
+            <DependentUpon>Home.razor</DependentUpon>
+        </Compile>
+        <None Update="Components\Layout\LoginLayout.razor.css">
+            <DependentUpon>LoginLayout.razor</DependentUpon>
+        </None>
+        <None Update="Components\Pages\Login.razor.css">
+            <DependentUpon>Login.razor</DependentUpon>
+        </None>
+    </ItemGroup>
 </Project>

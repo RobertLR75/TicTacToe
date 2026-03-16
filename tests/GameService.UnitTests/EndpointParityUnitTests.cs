@@ -1,5 +1,6 @@
 using FastEndpoints;
 using GameService.Endpoints.Games.Create;
+using GameService.Endpoints.Games.Get;
 using GameService.Endpoints.Games.List;
 using GameService.Endpoints.Games.UpdateStatus;
 using GameService.Models;
@@ -25,6 +26,12 @@ public class EndpointParityUnitTests
     }
 
     [Fact]
+    public void Get_endpoint_contract_remains_request_response_pair()
+    {
+        Assert.Equal(typeof(Endpoint<GetGameRequest, GetGameResponse>), typeof(GetGameEndpoint).BaseType);
+    }
+
+    [Fact]
     public void Update_status_endpoint_contract_uses_mapper_based_endpoint()
     {
         Assert.Equal(
@@ -36,17 +43,21 @@ public class EndpointParityUnitTests
     public void Endpoints_delegate_to_expected_dependencies()
     {
         var createCtor = typeof(CreateGameEndpoint).GetConstructors().Single();
+        var getCtor = typeof(GetGameEndpoint).GetConstructors().Single();
         var listCtor = typeof(ListGamesEndpoint).GetConstructors().Single();
         var updateCtor = typeof(UpdateGameStatusEndpoint).GetConstructors().Single();
 
         Assert.Equal(
-            new[] { typeof(IRequestHandler<CreateGameCommand, Game>) },
+            new[] { typeof(ICreateGameHandler) },
             createCtor.GetParameters().Select(parameter => parameter.ParameterType).ToArray());
         Assert.Equal(
-            new[] { typeof(IRequestHandler<ListGamesQuery, IEnumerable<Game>>) },
+            new[] { typeof(IGetGameHandler) },
+            getCtor.GetParameters().Select(parameter => parameter.ParameterType).ToArray());
+        Assert.Equal(
+            new[] { typeof(IListGamesHandler) },
             listCtor.GetParameters().Select(parameter => parameter.ParameterType).ToArray());
         Assert.Equal(
-            new[] { typeof(IRequestHandler<UpdateGameStatusCommand, GameStatusUpdateResult>) },
+            new[] { typeof(IUpdateGameStatusHandler) },
             updateCtor.GetParameters().Select(parameter => parameter.ParameterType).ToArray());
     }
 }

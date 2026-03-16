@@ -1,0 +1,14 @@
+.login-layout-root {
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    background:
+        radial-gradient(circle at top, rgba(126, 111, 255, 0.18), transparent 30%),
+        linear-gradient(180deg, #050507, #101018);
+}
+
+.login-layout-root ::deep .login-page-shell {
+    flex: 1;
+}
+

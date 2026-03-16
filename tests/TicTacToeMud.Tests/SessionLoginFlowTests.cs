@@ -29,7 +29,7 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
     {
         using var client = CreateClient(allowAutoRedirect: false);
 
-        using var loginResponse = await client.PostAsync("/login", BuildLoginContent("Alice"));
+        using var loginResponse = await client.PostAsync("/login/submit", BuildLoginContent("Alice"));
 
         Assert.Equal(HttpStatusCode.Redirect, loginResponse.StatusCode);
         Assert.Equal("/", loginResponse.Headers.Location?.OriginalString);
@@ -44,11 +44,17 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
     {
         using var client = CreateClient(allowAutoRedirect: false);
 
-        using var loginResponse = await client.PostAsync("/login", BuildLoginContent("   "));
+        using var loginResponse = await client.PostAsync("/login/submit", BuildLoginContent("   "));
 
-        Assert.Equal(HttpStatusCode.BadRequest, loginResponse.StatusCode);
-        var content = await loginResponse.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.Redirect, loginResponse.StatusCode);
+        Assert.Equal("/login?error=Username%20is%20required.", loginResponse.Headers.Location?.OriginalString);
+
+        using var loginPageResponse = await client.GetAsync(loginResponse.Headers.Location);
+
+        Assert.Equal(HttpStatusCode.OK, loginPageResponse.StatusCode);
+        var content = await loginPageResponse.Content.ReadAsStringAsync();
         Assert.Contains("Username is required.", content);
+        Assert.Contains("data-testid=\"login-page\"", content);
 
         using var homeResponse = await client.GetAsync("/");
 
@@ -61,7 +67,7 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
     {
         using var client = CreateClient(allowAutoRedirect: false);
 
-        using var loginPostResponse = await client.PostAsync("/login", BuildLoginContent("Bob"));
+        using var loginPostResponse = await client.PostAsync("/login/submit", BuildLoginContent("Bob"));
         Assert.Equal(HttpStatusCode.Redirect, loginPostResponse.StatusCode);
 
         using var loginGetResponse = await client.GetAsync("/login");
@@ -82,11 +88,27 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
         Assert.Contains("data-testid=\"login-page\"", content);
         Assert.Contains("Welcome Back", content);
         Assert.Contains("mud-paper", content);
-        Assert.Contains("login-button", content);
-        Assert.Contains("action=\"/login\"", content);
-        Assert.Contains("--login-surface:#0f1118", content);
-        Assert.Contains("--login-bg-1:#000000", content);
-        Assert.Contains("--login-text:#f5f7ff", content);
+        Assert.Contains("mud-button-root", content);
+        Assert.Contains("login-panel", content);
+        Assert.Contains("login-input-field", content);
+        Assert.Contains("Tic-Tac-Toe", content);
+        Assert.Contains("login-layout-root", content);
+        Assert.Contains("login-page-shell", content);
+        Assert.Contains("action=\"/login/submit\"", content);
+    }
+
+    [Fact]
+    public async Task Login_get_renders_error_message_from_query_string()
+    {
+        using var client = CreateClient(allowAutoRedirect: false);
+
+        using var loginResponse = await client.GetAsync("/login?error=Username%20is%20required.");
+
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+        var content = await loginResponse.Content.ReadAsStringAsync();
+        Assert.Contains("Username is required.", content);
+        Assert.Contains("login-error", content);
+        Assert.Contains("mud-alert", content);
     }
 
     [Fact]
@@ -94,7 +116,7 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
     {
         using var client = CreateClient(allowAutoRedirect: false);
 
-        using var loginResponse = await client.PostAsync("/login", BuildLoginContent("Charlie"));
+        using var loginResponse = await client.PostAsync("/login/submit", BuildLoginContent("Charlie"));
         Assert.Equal(HttpStatusCode.Redirect, loginResponse.StatusCode);
 
         using var gameResponse = await client.GetAsync("/game");
@@ -110,15 +132,17 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
     {
         using var client = CreateClient(allowAutoRedirect: false);
 
-        using var loginResponse = await client.PostAsync("/login", BuildLoginContent("Dana"));
+        using var loginResponse = await client.PostAsync("/login/submit", BuildLoginContent("Dana"));
         Assert.Equal(HttpStatusCode.Redirect, loginResponse.StatusCode);
 
         using var homeResponse = await client.GetAsync("/");
 
         Assert.Equal(HttpStatusCode.OK, homeResponse.StatusCode);
         var content = await homeResponse.Content.ReadAsStringAsync();
+        Assert.Contains("Dana", content);
         Assert.Contains("Logout", content);
         Assert.Contains("/logout", content);
+        Assert.DoesNotContain(">Application<", content);
     }
 
     [Fact]
@@ -126,7 +150,7 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
     {
         using var client = CreateClient(allowAutoRedirect: false);
 
-        using var loginResponse = await client.PostAsync("/login", BuildLoginContent("Eve"));
+        using var loginResponse = await client.PostAsync("/login/submit", BuildLoginContent("Eve"));
         Assert.Equal(HttpStatusCode.Redirect, loginResponse.StatusCode);
 
         using var logoutResponse = await client.GetAsync("/logout");
@@ -145,15 +169,17 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
     {
         using var client = CreateClient(allowAutoRedirect: false);
 
-        using var loginResponse = await client.PostAsync("/login", BuildLoginContent("Frank"));
+        using var loginResponse = await client.PostAsync("/login/submit", BuildLoginContent("Frank"));
         Assert.Equal(HttpStatusCode.Redirect, loginResponse.StatusCode);
 
         using var gameResponse = await client.GetAsync("/game");
 
         Assert.Equal(HttpStatusCode.OK, gameResponse.StatusCode);
         var content = await gameResponse.Content.ReadAsStringAsync();
+        Assert.Contains("Frank", content);
         Assert.Contains("Logout", content);
         Assert.Contains("/logout", content);
+        Assert.DoesNotContain(">Application<", content);
     }
 
     private HttpClient CreateClient(bool allowAutoRedirect)

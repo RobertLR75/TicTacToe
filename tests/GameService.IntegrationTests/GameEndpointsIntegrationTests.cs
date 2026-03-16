@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using GameService.Models;
+using GameService.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Service.Contracts.Requests;
 using Service.Contracts.Responses;
 using Service.Contracts.Shared;
@@ -119,6 +121,67 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         Assert.NotNull(payload);
         Assert.Single(payload.Games);
         Assert.All(payload.Games, game => Assert.Equal(GameStatusEnum.Created, game.Status));
+    }
+
+    [Fact]
+    public async Task Get_by_id_endpoint_returns_current_state_for_existing_game()
+    {
+        await using var factory = CreateFactory();
+        await factory.ResetDatabaseAsync();
+        using var client = factory.CreateClient();
+
+        var game = await SeedGameAsync(factory.Services, GameStatus.Created);
+        factory.Services.GetRequiredService<GameServiceWebApplicationFactory.StubGameStateReadClient>()
+            .SetResponse(game.Id, GameStateReadResult.Success(new GetGameResponse
+            {
+                GameId = game.Id.ToString("D"),
+                CurrentPlayer = PlayerMarkEnum.X,
+                Winner = PlayerMarkEnum.None,
+                IsDraw = false,
+                IsOver = false,
+                Board = [new CellDto(0, 0, PlayerMarkEnum.X)]
+            }));
+
+        var response = await client.GetAsync($"/api/games/{game.Id}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var payload = await response.Content.ReadFromJsonAsync<GetGameResponse>();
+        Assert.NotNull(payload);
+        Assert.Equal(game.Id.ToString("D"), payload.GameId);
+        Assert.Equal(PlayerMarkEnum.X, payload.CurrentPlayer);
+        Assert.Single(payload.Board);
+        Assert.Equal(PlayerMarkEnum.X, payload.Board[0].MarkEnum);
+    }
+
+    [Fact]
+    public async Task Get_by_id_endpoint_returns_not_found_for_missing_game_state()
+    {
+        await using var factory = CreateFactory();
+        await factory.ResetDatabaseAsync();
+        using var client = factory.CreateClient();
+
+        var response = await client.GetAsync($"/api/games/{Guid.NewGuid()}");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Get_by_id_endpoint_returns_service_unavailable_when_state_dependency_is_unavailable()
+    {
+        await using var factory = CreateFactory();
+        await factory.ResetDatabaseAsync();
+        using var client = factory.CreateClient();
+
+        var game = await SeedGameAsync(factory.Services, GameStatus.Created);
+        factory.Services.GetRequiredService<GameServiceWebApplicationFactory.StubGameStateReadClient>()
+            .SetResponse(game.Id, GameStateReadResult.DependencyUnavailable());
+
+        var response = await client.GetAsync($"/api/games/{game.Id}");
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        var payload = await response.Content.ReadAsStringAsync();
+        Assert.Contains("temporarily unavailable", payload);
     }
 
     [Fact]

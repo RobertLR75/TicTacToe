@@ -79,6 +79,32 @@ public sealed class GamePageClientUsageTests : TestContext
         Assert.Equal(1, gameStateApi.LastMoveCol);
     }
 
+    [Fact]
+    public void Game_page_loads_selected_game_from_route_without_creating_a_new_game()
+    {
+        var gameApi = new StubGameApiClient();
+        var gameStateApi = new StubGameStateServiceClient();
+        var gameHub = new StubGameHubClient();
+
+        Services.AddSingleton<GameApiClient>(gameApi);
+        Services.AddSingleton<GameStateServiceClient>(gameStateApi);
+        Services.AddSingleton<GameHubClient>(gameHub);
+        Services.AddSingleton<INotificationService>(new TestNotificationService());
+
+        var cut = RenderComponent<Game>(parameters => parameters
+            .Add(component => component.SelectedGameId, "existing-game-123"));
+
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Equal(0, gameApi.CreateGameCalls);
+            Assert.Equal(1, gameApi.ListGamesCalls);
+            Assert.Equal(1, gameStateApi.GetGameCalls);
+            Assert.Equal("existing-game-123", gameStateApi.LastGameId);
+            Assert.Equal(1, gameHub.JoinGameCalls);
+            Assert.Equal("existing-game-123", gameHub.LastJoinedGameId);
+        });
+    }
+
     private sealed class StubGameApiClient : GameApiClient
     {
         public StubGameApiClient() : base(new HttpClient { BaseAddress = new Uri("https://example.test") })
@@ -146,8 +172,18 @@ public sealed class GamePageClientUsageTests : TestContext
         {
         }
 
+        public int JoinGameCalls { get; private set; }
+        public string? LastJoinedGameId { get; private set; }
+
         public override Task StartAsync(string? hubBaseUrl = null) => Task.CompletedTask;
-        public override Task JoinGame(string gameId) => Task.CompletedTask;
+
+        public override Task JoinGame(string gameId)
+        {
+            JoinGameCalls++;
+            LastJoinedGameId = gameId;
+            return Task.CompletedTask;
+        }
+
         public override Task LeaveGame(string gameId) => Task.CompletedTask;
     }
 

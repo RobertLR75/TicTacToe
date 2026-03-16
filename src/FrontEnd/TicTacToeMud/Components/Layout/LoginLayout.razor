@@ -1,0 +1,15 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="@_theme" IsDarkMode="true" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<div class="login-layout-root">
+	@Body
+</div>
+
+@code {
+	private readonly MudTheme _theme = TicTacToeMudTheme.Create();
+}
+

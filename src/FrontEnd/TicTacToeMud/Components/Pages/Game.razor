@@ -1,4 +1,5 @@
 @page "/game"
+@page "/game/{SelectedGameId}"
 @rendermode InteractiveServer
 @implements IAsyncDisposable
 
@@ -8,6 +9,7 @@
 
 @using TicTacToeMud.Services
 @using TicTacToeMud.Session
+@using TicTacToeMud.Models
 @inject GameApiClient GameApi
 @inject GameStateServiceClient GameStateApi
 @inject GameHubClient GameHub
@@ -92,16 +94,21 @@
 @code {
     private string?[,] _board = new string?[3, 3];
     private string? _gameId;
+    private string? _loadedSelectedGameId;
     private bool _isOver;
     private bool _isDraw;
     private string? _winner;
     private string? _currentPlayer;
     private bool _isLoading;
     private bool _isGamesLoading;
+    private bool _isInitialized;
     private string? _gamesError;
     private string? _playerId;
     private string? _playerName;
-    private List<TicTacToeMud.Models.GameListItem> _games = [];
+    private List<GameListItem> _games = [];
+
+    [Parameter]
+    public string? SelectedGameId { get; set; }
 
     private string StatusMessage
     {
@@ -126,7 +133,14 @@
             ResolvePlayerIdentity();
             await ConnectToHub();
             await LoadGamesAsync();
+            _isInitialized = true;
+            await LoadSelectedGameAsync();
         }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadSelectedGameAsync();
     }
 
     private void ResolvePlayerIdentity()
@@ -165,7 +179,7 @@
         }
     }
 
-    private void HandleGameStateUpdated(TicTacToeMud.Models.GameResponse response)
+    private void HandleGameStateUpdated(GameResponse response)
     {
         if (response.GameId != _gameId) return;
 
@@ -177,7 +191,7 @@
         });
     }
 
-    private void HandleGameStateInitialized(TicTacToeMud.Models.GameResponse response)
+    private void HandleGameStateInitialized(GameResponse response)
     {
         if (response.GameId != _gameId) return;
 
@@ -208,6 +222,40 @@
         }
     }
 
+    private async Task LoadSelectedGameAsync()
+    {
+        if (!_isInitialized || string.IsNullOrWhiteSpace(SelectedGameId) || SelectedGameId == _loadedSelectedGameId)
+        {
+            return;
+        }
+
+        _isLoading = true;
+
+        try
+        {
+            if (_gameId is not null && _gameId != SelectedGameId && GameHub.IsConnected)
+            {
+                await GameHub.LeaveGame(_gameId);
+            }
+
+            _gameId = SelectedGameId;
+
+            await GameHub.JoinGame(SelectedGameId);
+
+            var state = await GameStateApi.GetGameAsync(SelectedGameId);
+            UpdateState(state);
+            _loadedSelectedGameId = SelectedGameId;
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Failed to load game: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
     private async Task StartNewGame(string playerId, string playerName)
     {
         _isLoading = true;
@@ -228,6 +276,7 @@
 
             var gameId = await GameApi.CreateGameAsync(playerId, playerName);
             _gameId = gameId;
+            _loadedSelectedGameId = gameId;
 
             // Allow the UI to be interactive immediately while we wait for state (hub or API)
             _isLoading = false;
@@ -236,11 +285,8 @@
             try
             {
                 var state = await GameStateApi.GetGameAsync(gameId);
-                if (state is not null)
-                {
-                    UpdateState(state);
-                    _isLoading = false;
-                }
+                UpdateState(state);
+                _isLoading = false;
             }
             catch
             {
@@ -306,13 +352,13 @@
         return OnCellClick(row, col);
     }
 
-    internal void SetGameStateForTest(string gameId, TicTacToeMud.Models.GameResponse response)
+    internal void SetGameStateForTest(string gameId, GameResponse response)
     {
         _gameId = gameId;
         UpdateState(response);
     }
 
-    private void UpdateState(TicTacToeMud.Models.GameResponse response)
+    private void UpdateState(GameResponse response)
     {
         _gameId = response.GameId;
         _isOver = response.IsOver;
