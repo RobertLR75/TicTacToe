@@ -125,7 +125,9 @@ public sealed class RequestHandlersUnitTests : UnitTestBase
 
         await sut.Consume(context);
 
-        await handler.Received(1).HandleAsync(Arg.Any<InitializeGame>(), CancellationToken.None);
+        await handler.Received(1).HandleAsync(
+            Arg.Is<InitializeGame>(x => x.GameId == context.Message.GameId.ToString("D")),
+            CancellationToken.None);
     }
 
     [Fact]

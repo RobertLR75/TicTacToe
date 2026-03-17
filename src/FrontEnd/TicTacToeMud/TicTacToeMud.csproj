@@ -23,6 +23,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Update="Components\Pages\Game.razor.cs">
+            <DependentUpon>Game.razor</DependentUpon>
+        </Compile>
         <Compile Update="Components\Pages\Home.razor.cs">
             <DependentUpon>Home.razor</DependentUpon>
         </Compile>
@@ -32,5 +35,38 @@
         <None Update="Components\Pages\Login.razor.css">
             <DependentUpon>Login.razor</DependentUpon>
         </None>
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Update="Components\Pages\Game.razor">
+        <DependentUpon>Game.razor</DependentUpon>
+      </AdditionalFiles>
+      <AdditionalFiles Update="Components\Pages\Home.razor">
+        <DependentUpon>Home.razor</DependentUpon>
+      </AdditionalFiles>
+      <AdditionalFiles Update="Components\_Imports.razor">
+        <DependentUpon>_Imports.razor</DependentUpon>
+      </AdditionalFiles>
+      <AdditionalFiles Update="Components\Pages\NotFound.razor">
+        <DependentUpon>NotFound.razor</DependentUpon>
+      </AdditionalFiles>
+      <AdditionalFiles Update="Components\App.razor">
+        <DependentUpon>App.razor</DependentUpon>
+      </AdditionalFiles>
+      <AdditionalFiles Update="Components\Routes.razor">
+        <DependentUpon>Routes.razor</DependentUpon>
+      </AdditionalFiles>
+      <AdditionalFiles Update="Components\Pages\Login.razor">
+        <DependentUpon>Login.razor</DependentUpon>
+      </AdditionalFiles>
+      <AdditionalFiles Update="Components\Layout\MainLayout.razor">
+        <DependentUpon>MainLayout.razor</DependentUpon>
+      </AdditionalFiles>
+      <AdditionalFiles Update="Components\Layout\LoginLayout.razor">
+        <DependentUpon>LoginLayout.razor</DependentUpon>
+      </AdditionalFiles>
+      <AdditionalFiles Update="Components\Layout\ReconnectModal.razor">
+        <DependentUpon>ReconnectModal.razor</DependentUpon>
+      </AdditionalFiles>
     </ItemGroup>
 </Project>

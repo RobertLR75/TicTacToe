@@ -1,0 +1,167 @@
+.game-outcome {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow: hidden;
+    width: min(92vw, 700px);
+    min-height: 220px;
+    border-radius: 16px;
+    padding: 20px 24px;
+    border-width: 4px;
+    z-index: 20;
+    box-shadow: 0 26px 62px rgba(0, 0, 0, 0.46), inset 0 0 0 1px rgba(255, 255, 255, 0.30);
+    pointer-events: none;
+}
+
+.game-outcome.is-fading {
+    animation-play-state: paused;
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(-10px) scale(0.985);
+    transition: opacity 350ms ease, transform 350ms ease;
+}
+
+.outcome-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.46);
+    backdrop-filter: blur(1px);
+    z-index: 19;
+}
+
+.outcome-overlay.is-fading {
+    opacity: 0;
+    transition: opacity 350ms ease;
+}
+
+.outcome-content {
+    position: relative;
+    z-index: 2;
+    min-height: 160px;
+    text-align: center;
+}
+
+.outcome-copy {
+    max-width: 520px;
+}
+
+.outcome-title {
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-shadow: 0 3px 14px rgba(0, 0, 0, 0.34);
+}
+
+.outcome-subtitle {
+    opacity: 0.96;
+    font-weight: 600;
+}
+
+.game-outcome.win-x {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--mud-palette-primary) 58%, rgba(8, 14, 28, 0.98)), rgba(8, 14, 28, 0.98) 66%);
+    border-color: color-mix(in srgb, var(--mud-palette-primary) 82%, white);
+    animation: ultra-float-x 820ms ease-in-out infinite;
+}
+
+.game-outcome.win-o {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--mud-palette-secondary) 56%, rgba(8, 14, 28, 0.98)), rgba(8, 14, 28, 0.98) 66%);
+    border-color: color-mix(in srgb, var(--mud-palette-secondary) 82%, white);
+    animation: ultra-float-o 820ms ease-in-out infinite;
+}
+
+.game-outcome.draw {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--mud-palette-warning) 48%, rgba(8, 14, 28, 0.98)), rgba(8, 14, 28, 0.98) 66%);
+    border-color: color-mix(in srgb, var(--mud-palette-warning) 82%, white);
+    animation: ultra-float-draw 860ms ease-in-out infinite;
+}
+
+.outcome-icon {
+    font-size: 4.5rem !important;
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.32));
+    animation: pop-in 240ms cubic-bezier(.19, 1.32, .62, 1), icon-jolt 820ms ease-in-out infinite;
+}
+
+.outcome-image {
+    width: 88px;
+    height: 88px;
+    object-fit: contain;
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.30));
+    animation: floaty 700ms ease-in-out infinite;
+}
+
+.sparkles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.sparkles span {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: color-mix(in srgb, white 78%, var(--mud-palette-primary));
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+    transform: rotate(45deg);
+    animation: twinkle 560ms ease-in-out infinite;
+    opacity: 1;
+}
+
+.sparkles span:nth-child(1) { top: 12%; left: 8%; animation-delay: .05s; }
+.sparkles span:nth-child(2) { top: 18%; left: 74%; animation-delay: .35s; }
+.sparkles span:nth-child(3) { top: 62%; left: 18%; animation-delay: .55s; }
+.sparkles span:nth-child(4) { top: 72%; left: 58%; animation-delay: .8s; }
+.sparkles span:nth-child(5) { top: 26%; left: 44%; animation-delay: 1.05s; }
+.sparkles span:nth-child(6) { top: 52%; left: 88%; animation-delay: 1.25s; }
+
+@keyframes ultra-float-x {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0) scale(1); box-shadow: 0 26px 62px rgba(0, 0, 0, 0.46), 0 0 0 0 color-mix(in srgb, var(--mud-palette-primary) 62%, transparent), inset 0 0 0 1px rgba(255, 255, 255, 0.30); }
+    50% { transform: translate(-50%, -50%) translateY(-8px) scale(1.02); box-shadow: 0 34px 76px rgba(0, 0, 0, 0.52), 0 0 0 14px color-mix(in srgb, var(--mud-palette-primary) 34%, transparent), inset 0 0 0 1px rgba(255, 255, 255, 0.36); }
+}
+
+@keyframes ultra-float-o {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0) scale(1); box-shadow: 0 26px 62px rgba(0, 0, 0, 0.46), 0 0 0 0 color-mix(in srgb, var(--mud-palette-secondary) 62%, transparent), inset 0 0 0 1px rgba(255, 255, 255, 0.30); }
+    50% { transform: translate(-50%, -50%) translateY(-8px) scale(1.02); box-shadow: 0 34px 76px rgba(0, 0, 0, 0.52), 0 0 0 14px color-mix(in srgb, var(--mud-palette-secondary) 34%, transparent), inset 0 0 0 1px rgba(255, 255, 255, 0.36); }
+}
+
+@keyframes ultra-float-draw {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0) scale(1); box-shadow: 0 26px 62px rgba(0, 0, 0, 0.46), 0 0 0 0 color-mix(in srgb, var(--mud-palette-warning) 58%, transparent), inset 0 0 0 1px rgba(255, 255, 255, 0.30); }
+    50% { transform: translate(-50%, -50%) translateY(-7px) scale(1.018); box-shadow: 0 34px 76px rgba(0, 0, 0, 0.52), 0 0 0 12px color-mix(in srgb, var(--mud-palette-warning) 32%, transparent), inset 0 0 0 1px rgba(255, 255, 255, 0.36); }
+}
+
+@keyframes icon-jolt {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-3px) scale(1.05); }
+}
+
+@media (max-width: 600px) {
+    .game-outcome {
+        width: min(95vw, 520px);
+        min-height: 190px;
+        padding: 16px 16px;
+    }
+
+    .outcome-icon {
+        font-size: 3.5rem !important;
+    }
+
+    .outcome-image {
+        width: 72px;
+        height: 72px;
+    }
+}
+
+@keyframes floaty {
+    0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+    50% { transform: translateY(-5px) rotate(-5deg) scale(1.06); }
+}
+
+@keyframes pop-in {
+    0% { transform: scale(.4) rotate(-22deg); opacity: 0; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes twinkle {
+    0%, 100% { transform: rotate(45deg) scale(.72); opacity: .5; }
+    50% { transform: rotate(45deg) scale(1.5); opacity: 1; }
+}

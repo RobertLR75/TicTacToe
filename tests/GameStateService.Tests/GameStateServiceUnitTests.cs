@@ -32,6 +32,28 @@ public sealed class GameStateServiceUnitTests
     }
 
     [Fact]
+    public void GameRepository_create_honors_provided_game_id()
+    {
+        IGameRepository sut = new GameRepository();
+        var requestedGameId = Guid.NewGuid().ToString("D");
+
+        var game = sut.CreateGame(requestedGameId);
+
+        Assert.Equal(requestedGameId, game.GameId);
+        Assert.Same(game, sut.GetGame(requestedGameId));
+    }
+
+    [Fact]
+    public void InitializeGame_command_exposes_requested_game_id()
+    {
+        var requestedGameId = Guid.NewGuid().ToString("D");
+
+        var command = new GameStateService.Consumers.InitializeGame(requestedGameId);
+
+        Assert.Equal(requestedGameId, command.GameId);
+    }
+
+    [Fact]
     public async Task MassTransitGameStateEventPublisher_skips_publish_when_disabled()
     {
         var publishEndpoint = Substitute.For<IPublishEndpoint>();

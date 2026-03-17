@@ -5,11 +5,24 @@
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<div class="login-layout-root">
-	@Body
-</div>
+<MudLayout Class="login-layout-root">
+    <MudAppBar Elevation="0" Dense="true" Class="px-4 py-2">
+        <MudChip T="string"
+                 Icon="@Icons.Material.Filled.DarkMode"
+                 Color="Color.Primary"
+                 Variant="Variant.Outlined"
+                 Size="Size.Small"
+                 data-testid="login-brand-header">
+            Tic-Tac-Toe
+        </MudChip>
+        <MudSpacer />
+    </MudAppBar>
+
+    <MudMainContent Class="d-flex flex-grow-1">
+        @Body
+    </MudMainContent>
+</MudLayout>
 
 @code {
 	private readonly MudTheme _theme = TicTacToeMudTheme.Create();
 }
-

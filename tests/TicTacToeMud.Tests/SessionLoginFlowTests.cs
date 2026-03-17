@@ -37,6 +37,8 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
         using var homeResponse = await client.GetAsync("/");
 
         Assert.Equal(HttpStatusCode.OK, homeResponse.StatusCode);
+        var content = await homeResponse.Content.ReadAsStringAsync();
+        Assert.Contains("_framework/blazor.web.js", content);
     }
 
     [Fact]
@@ -112,7 +114,7 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
     }
 
     [Fact]
-    public async Task Game_page_renders_game_list_shell_with_new_game_action()
+    public async Task Game_page_hides_game_management_and_requires_selected_game()
     {
         using var client = CreateClient(allowAutoRedirect: false);
 
@@ -123,8 +125,10 @@ public class SessionLoginFlowTests : IClassFixture<WebApplicationFactory<Program
 
         Assert.Equal(HttpStatusCode.OK, gameResponse.StatusCode);
         var content = await gameResponse.Content.ReadAsStringAsync();
-        Assert.Contains("Created Games", content);
-        Assert.Contains("New Game", content);
+        Assert.Contains("No game selected. Create a game from Home, then open it to play.", content);
+        Assert.Contains("Select a created game from Home to start playing.", content);
+        Assert.DoesNotContain("Created Games", content);
+        Assert.DoesNotContain("New Game", content);
     }
 
     [Fact]

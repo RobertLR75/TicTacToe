@@ -2,8 +2,8 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using GameStateService.Configuration;
 using GameStateService.Consumers;
-using GameStateService.Endpoints.Games.Get;
-using GameStateService.Endpoints.Games.MakeMove;
+using GameStateService.Endpoints.GameStates.Get;
+using GameStateService.Endpoints.GameStates.Update;
 using GameStateService.GameState;
 using GameStateService.Services;
 using TicTacToe.ServiceDefaults;
@@ -22,7 +22,7 @@ builder.Services.AddScoped<IRequestHandler<CheckDraw, CheckDrawResult>, CheckDra
 builder.Services.AddScoped<IRequestHandler<GameState, GameLogicMoveResult>, GameStateHandler>();
 builder.Services.AddScoped<IRequestHandler<InitializeGame, GameStateService.Models.GameState>, InitializeGame.InitializeGameHandler>();
 builder.Services.AddScoped<IRequestHandler<GetGame, GetGameQueryResult>, GetGame.GetGameHandler>();
-builder.Services.AddScoped<IRequestHandler<MakeMove, MakeMoveCommandResult>, MakeMoveHandler>();
+builder.Services.AddScoped<IRequestHandler<UpdateGameState, MakeMoveCommandResult>, UpdateGameStateHandler>();
 
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();
@@ -61,4 +61,7 @@ if (app.Environment.IsDevelopment())
 
 app.Run();
 
-public partial class Program;
+namespace GameStateService
+{
+    public partial class Program;
+}

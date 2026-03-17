@@ -1,7 +1,7 @@
 using FastEndpoints;
 using GameStateService.Services;
 
-namespace GameStateService.Endpoints.Games.MakeMove;
+namespace GameStateService.Endpoints.GameStates.Update;
 
 public sealed record GameStateUpdatedEvent : IEvent
 {

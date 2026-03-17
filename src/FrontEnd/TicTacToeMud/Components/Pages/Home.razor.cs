@@ -11,6 +11,9 @@ public partial class Home
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
     [Inject] private INotificationService NotificationService { get; set; } = default!;
 
+    [PersistentState] public string? PersistedPlayerId { get; set; }
+    [PersistentState] public string? PersistedPlayerName { get; set; }
+
     private bool _isLoadingGames;
     private bool _isCreatingGame;
     private string? _playerId;
@@ -25,6 +28,13 @@ public partial class Home
 
     private void ResolvePlayerIdentity()
     {
+        if (!string.IsNullOrWhiteSpace(PersistedPlayerId) && !string.IsNullOrWhiteSpace(PersistedPlayerName))
+        {
+            _playerId = PersistedPlayerId;
+            _playerName = PersistedPlayerName;
+            return;
+        }
+
         var context = HttpContextAccessor.HttpContext;
         if (context is null)
         {
@@ -35,33 +45,21 @@ public partial class Home
         {
             _playerId = user.UserId.ToString();
             _playerName = user.Name;
+            PersistedPlayerId = _playerId;
+            PersistedPlayerName = _playerName;
         }
     }
 
-    private async Task LoadGamesAsync()
-    {
-        _isLoadingGames = true;
-
-        try
-        {
-            var games = await GameApi.ListGamesAsync();
-            _games = games.Select(MapToViewModel).ToList();
-        }
-        catch (Exception ex)
-        {
-            NotificationService.ShowError($"Failed to load games: {ex.Message}");
-        }
-        finally
-        {
-            _isLoadingGames = false;
-        }
-    }
-
-    private async Task OnNewGame()
+    async Task OnNewGame()
     {
         if (_isLoadingGames || _isCreatingGame)
         {
             return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_playerId) || string.IsNullOrWhiteSpace(_playerName))
+        {
+            ResolvePlayerIdentity();
         }
 
         if (string.IsNullOrWhiteSpace(_playerId) || string.IsNullOrWhiteSpace(_playerName))
@@ -87,6 +85,24 @@ public partial class Home
             _isCreatingGame = false;
         }
     }
+    private async Task LoadGamesAsync()
+    {
+        _isLoadingGames = true;
+
+        try
+        {
+            var games = await GameApi.ListGamesAsync();
+            _games = games.Select(MapToViewModel).ToList();
+        }
+        catch (Exception ex)
+        {
+            NotificationService.ShowError($"Failed to load games: {ex.Message}");
+        }
+        finally
+        {
+            _isLoadingGames = false;
+        }
+    }
 
     private static HomeGameListItemViewModel MapToViewModel(GameListItem game)
     {
@@ -108,5 +124,13 @@ public partial class Home
             2 => "Completed",
             _ => $"Status {status}"
         };
+    }
+
+    internal void SetPlayerIdentityForTest(string playerId, string playerName)
+    {
+        PersistedPlayerId = playerId;
+        PersistedPlayerName = playerName;
+        _playerId = playerId;
+        _playerName = playerName;
     }
 }

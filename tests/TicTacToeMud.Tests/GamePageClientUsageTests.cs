@@ -2,6 +2,7 @@ using Bunit;
 using Bunit.JSInterop;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
@@ -24,7 +25,7 @@ public sealed class GamePageClientUsageTests : TestContext
     }
 
     [Fact]
-    public async Task Game_page_uses_game_state_client_for_initial_state_load_after_create()
+    public void Game_page_disables_board_when_no_game_is_selected()
     {
         var gameApi = new StubGameApiClient();
         var gameStateApi = new StubGameStateServiceClient();
@@ -34,14 +35,27 @@ public sealed class GamePageClientUsageTests : TestContext
         Services.AddSingleton<GameHubClient>(new StubGameHubClient());
         Services.AddSingleton<INotificationService>(new TestNotificationService());
 
+        var navigationManager = Services.GetRequiredService<NavigationManager>();
+
         var cut = RenderComponent<Game>();
 
-        await cut.Instance.TriggerNewGameForTestAsync("player-1", "Alice");
+        var backButton = cut.Find("[data-testid='game-back-home-button']");
 
-        Assert.Equal(1, gameApi.CreateGameCalls);
-        Assert.Equal(1, gameApi.ListGamesCalls);
-        Assert.Equal(1, gameStateApi.GetGameCalls);
-        Assert.Equal("game-created-123", gameStateApi.LastGameId);
+        Assert.Contains("No game selected. Create a game from Home, then open it to play.", cut.Markup);
+        Assert.Contains("Select a created game from Home to start playing.", cut.Markup);
+        Assert.Equal("/", backButton.GetAttribute("href"));
+        Assert.DoesNotContain("Created Games", cut.Markup);
+        Assert.DoesNotContain("New Game", cut.Markup);
+
+        var cellButtons = cut.FindAll("button.mud-button-root");
+        Assert.Equal(9, cellButtons.Count);
+        Assert.All(cellButtons, button => Assert.True(button.HasAttribute("disabled")));
+
+        Assert.Equal(0, gameApi.CreateGameCalls);
+        Assert.Equal(0, gameApi.ListGamesCalls);
+        Assert.Equal(0, gameApi.GetGameCalls);
+        Assert.Equal(0, gameStateApi.GetGameCalls);
+        Assert.Equal("http://localhost/", navigationManager.Uri);
     }
 
     [Fact]
@@ -72,7 +86,8 @@ public sealed class GamePageClientUsageTests : TestContext
         await cut.Instance.TriggerCellClickForTestAsync(0, 1);
 
         Assert.Equal(0, gameApi.CreateGameCalls);
-        Assert.Equal(1, gameApi.ListGamesCalls);
+        Assert.Equal(0, gameApi.ListGamesCalls);
+        Assert.Equal(0, gameApi.GetGameCalls);
         Assert.Equal(1, gameStateApi.MakeMoveCalls);
         Assert.Equal("game-created-123", gameStateApi.LastMoveGameId);
         Assert.Equal(0, gameStateApi.LastMoveRow);
@@ -82,6 +97,8 @@ public sealed class GamePageClientUsageTests : TestContext
     [Fact]
     public void Game_page_loads_selected_game_from_route_without_creating_a_new_game()
     {
+        const string gameId = "2a08ef26-61f1-4304-8db3-9b43db8ad547";
+
         var gameApi = new StubGameApiClient();
         var gameStateApi = new StubGameStateServiceClient();
         var gameHub = new StubGameHubClient();
@@ -92,17 +109,73 @@ public sealed class GamePageClientUsageTests : TestContext
         Services.AddSingleton<INotificationService>(new TestNotificationService());
 
         var cut = RenderComponent<Game>(parameters => parameters
-            .Add(component => component.SelectedGameId, "existing-game-123"));
+            .Add(component => component.SelectedGameId, gameId));
 
         cut.WaitForAssertion(() =>
         {
             Assert.Equal(0, gameApi.CreateGameCalls);
-            Assert.Equal(1, gameApi.ListGamesCalls);
-            Assert.Equal(1, gameStateApi.GetGameCalls);
-            Assert.Equal("existing-game-123", gameStateApi.LastGameId);
+            Assert.Equal(0, gameApi.ListGamesCalls);
+            Assert.Equal(1, gameApi.GetGameCalls);
+            Assert.Equal(gameId, gameApi.LastGameId);
+            Assert.Equal(0, gameStateApi.GetGameCalls);
             Assert.Equal(1, gameHub.JoinGameCalls);
-            Assert.Equal("existing-game-123", gameHub.LastJoinedGameId);
+            Assert.Equal(gameId, gameHub.LastJoinedGameId);
+            Assert.DoesNotContain("No game selected. Create a game from Home, then open it to play.", cut.Markup);
+            Assert.Contains("Player X's turn", cut.Markup);
         });
+
+        Assert.Contains(cut.FindAll("button.mud-button-root"), button => !button.HasAttribute("disabled"));
+    }
+
+    [Fact]
+    public void Game_page_navigates_to_not_found_when_game_id_is_not_a_guid()
+    {
+        var gameApi = new StubGameApiClient();
+        var gameStateApi = new StubGameStateServiceClient();
+        var gameHub = new StubGameHubClient();
+
+        Services.AddSingleton<GameApiClient>(gameApi);
+        Services.AddSingleton<GameStateServiceClient>(gameStateApi);
+        Services.AddSingleton<GameHubClient>(gameHub);
+        Services.AddSingleton<INotificationService>(new TestNotificationService());
+
+        var navigationManager = Services.GetRequiredService<NavigationManager>();
+
+        _ = RenderComponent<Game>(parameters => parameters
+            .Add(component => component.SelectedGameId, "not-a-guid"));
+
+        Assert.Equal("http://localhost/not-found", navigationManager.Uri);
+        Assert.Equal(0, gameApi.GetGameCalls);
+        Assert.Equal(0, gameStateApi.GetGameCalls);
+        Assert.Equal(0, gameHub.JoinGameCalls);
+    }
+
+    [Fact]
+    public void Game_page_navigates_to_not_found_when_game_api_returns_missing_game()
+    {
+        var gameApi = new StubGameApiClient
+        {
+            GetGameException = new HttpRequestException("missing", null, System.Net.HttpStatusCode.NotFound)
+        };
+        var gameStateApi = new StubGameStateServiceClient();
+        var gameHub = new StubGameHubClient();
+        var notificationService = new TestNotificationService();
+
+        Services.AddSingleton<GameApiClient>(gameApi);
+        Services.AddSingleton<GameStateServiceClient>(gameStateApi);
+        Services.AddSingleton<GameHubClient>(gameHub);
+        Services.AddSingleton<INotificationService>(notificationService);
+
+        var navigationManager = Services.GetRequiredService<NavigationManager>();
+
+        _ = RenderComponent<Game>(parameters => parameters
+            .Add(component => component.SelectedGameId, "2a08ef26-61f1-4304-8db3-9b43db8ad547"));
+
+        Assert.Equal("http://localhost/not-found", navigationManager.Uri);
+        Assert.Equal(1, gameApi.GetGameCalls);
+        Assert.Equal(0, gameStateApi.GetGameCalls);
+        Assert.Equal(0, gameHub.JoinGameCalls);
+        Assert.Empty(notificationService.ErrorMessages);
     }
 
     private sealed class StubGameApiClient : GameApiClient
@@ -113,6 +186,9 @@ public sealed class GamePageClientUsageTests : TestContext
 
         public int CreateGameCalls { get; private set; }
         public int ListGamesCalls { get; private set; }
+        public int GetGameCalls { get; private set; }
+        public string? LastGameId { get; private set; }
+        public Exception? GetGameException { get; init; }
 
         public override Task<string> CreateGameAsync(string playerId, string playerName)
         {
@@ -124,6 +200,27 @@ public sealed class GamePageClientUsageTests : TestContext
         {
             ListGamesCalls++;
             return Task.FromResult<IReadOnlyList<GameListItem>>([]);
+        }
+
+        public override Task<GameResponse> GetGameAsync(string gameId)
+        {
+            GetGameCalls++;
+            LastGameId = gameId;
+
+            if (GetGameException is not null)
+            {
+                throw GetGameException;
+            }
+
+            return Task.FromResult(new GameResponse
+            {
+                GameId = gameId,
+                CurrentPlayer = 1,
+                Winner = 0,
+                IsDraw = false,
+                IsOver = false,
+                Board = []
+            });
         }
     }
 
@@ -172,6 +269,10 @@ public sealed class GamePageClientUsageTests : TestContext
         {
         }
 
+        public StubGameHubClient(IConfiguration configuration) : base(configuration)
+        {
+        }
+
         public int JoinGameCalls { get; private set; }
         public string? LastJoinedGameId { get; private set; }
 
@@ -189,12 +290,15 @@ public sealed class GamePageClientUsageTests : TestContext
 
     private sealed class TestNotificationService : INotificationService
     {
+        public List<string> ErrorMessages { get; } = [];
+
         public void ShowSuccess(string message)
         {
         }
 
         public void ShowError(string message)
         {
+            ErrorMessages.Add(message);
         }
 
         public void ShowWarning(string message)

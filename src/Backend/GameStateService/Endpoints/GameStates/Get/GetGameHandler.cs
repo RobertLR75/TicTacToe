@@ -2,7 +2,7 @@ using GameStateService.Services;
 using Service.Contracts.Responses;
 using Service.Contracts.Shared;
 
-namespace GameStateService.Endpoints.Games.Get;
+namespace GameStateService.Endpoints.GameStates.Get;
 
 public interface IGetGameHandler : IRequestHandler<GetGame, GetGameQueryResult>;
 

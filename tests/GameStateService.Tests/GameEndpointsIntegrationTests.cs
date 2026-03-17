@@ -29,23 +29,23 @@ public sealed class GameEndpointsIntegrationTests : IntegrationTestBase
         using var factory = new GameStateServiceWebApplicationFactory(_fixture.ConnectionString, repository, enableEventPublishing: false);
         using var client = factory.CreateClient();
 
-        var getResponse = await client.GetAsync($"/api/games/{initialized.GameId}");
+        var getResponse = await client.GetAsync($"/api/game-states/{initialized.GameId}");
 
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var game = await getResponse.Content.ReadFromJsonAsync<GetGameResponse>();
         Assert.NotNull(game);
         Assert.Equal(initialized.GameId, game!.GameId);
 
-        var moveResponse = await client.PostAsJsonAsync($"/api/games/{initialized.GameId}/moves", new MakeMoveRequest
+        var moveResponse = await client.PostAsJsonAsync($"/api/game-states/{initialized.GameId}/moves", new MakeMoveRequest
         {
             GameId = initialized.GameId,
             Row = 0,
             Col = 0
         });
 
-        Assert.Equal(HttpStatusCode.NoContent, moveResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.Accepted, moveResponse.StatusCode);
 
-        var getUpdatedResponse = await client.GetAsync($"/api/games/{initialized.GameId}");
+        var getUpdatedResponse = await client.GetAsync($"/api/game-states/{initialized.GameId}");
         var updated = await getUpdatedResponse.Content.ReadFromJsonAsync<GetGameResponse>();
 
         Assert.NotNull(updated);

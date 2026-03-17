@@ -8,9 +8,6 @@
         <MudPaper Class="login-panel pa-6 pa-sm-8" Outlined="true" Elevation="6">
             <MudStack Spacing="3">
                 <MudStack Spacing="1" AlignItems="AlignItems.Start">
-                    <MudChip T="string" Icon="@Icons.Material.Filled.DarkMode" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">
-                        Tic-Tac-Toe
-                    </MudChip>
                     <MudText Typo="Typo.h4" Class="login-title">Welcome Back</MudText>
                     <MudText Typo="Typo.body1" Class="login-subtitle">Sign in to continue to TicTacToe.</MudText>
                 </MudStack>
@@ -31,13 +28,13 @@
                                       Margin="Margin.Dense"
                                       Immediate="true"
                                       InputId="name"
+                                      name="name"
+                                      autocomplete="username"
                                       InputType="InputType.Text"
                                       Adornment="Adornment.Start"
                                       AdornmentIcon="@Icons.Material.Filled.Person"
                                       Class="login-input-field"
                                       @bind-Value="_username" />
-
-                        <input type="hidden" name="name" value="@_username" />
 
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Primary"

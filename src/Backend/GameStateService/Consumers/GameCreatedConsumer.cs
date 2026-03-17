@@ -20,6 +20,6 @@ public class GameCreatedConsumer : IConsumer<GameCreated>
     public async Task Consume(ConsumeContext<GameCreated> context)
     {
         _logger.LogInformation("Received GameCreatedEvent for GameId: {GameId}", context.Message.GameId);
-        await _initializeGameHandler.HandleAsync(new InitializeGame(), context.CancellationToken);
+        await _initializeGameHandler.HandleAsync(new InitializeGame(context.Message.GameId.ToString("D")), context.CancellationToken);
     }
 }

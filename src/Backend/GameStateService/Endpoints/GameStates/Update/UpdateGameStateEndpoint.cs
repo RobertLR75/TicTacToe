@@ -1,13 +1,14 @@
 using FastEndpoints;
 using GameStateService.Services;
+using Service.Contracts.Requests;
 
-namespace GameStateService.Endpoints.Games.MakeMove;
+namespace GameStateService.Endpoints.GameStates.Update;
 
-public class MakeMoveEndpoint : Endpoint<MakeMoveRequest>
+public class UpdateGameStateEndpoint : Endpoint<UpdateGameStateRequest>
 {
-    private readonly IRequestHandler<MakeMove, MakeMoveCommandResult> _handler;
+    private readonly IRequestHandler<UpdateGameState, MakeMoveCommandResult> _handler;
 
-    public MakeMoveEndpoint(IRequestHandler<MakeMove, MakeMoveCommandResult> handler)
+    public UpdateGameStateEndpoint(IRequestHandler<UpdateGameState, MakeMoveCommandResult> handler)
     {
         _handler = handler;
     }
@@ -18,9 +19,9 @@ public class MakeMoveEndpoint : Endpoint<MakeMoveRequest>
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(MakeMoveRequest req, CancellationToken ct)
+    public override async Task HandleAsync(UpdateGameStateRequest req, CancellationToken ct)
     {
-        var result = await _handler.HandleAsync(new MakeMove(req.GameId, req.Row, req.Col), ct);
+        var result = await _handler.HandleAsync(new UpdateGameState(req.GameId, req.Row, req.Col), ct);
 
         if (result.Status == MakeMoveCommandStatus.NotFound)
         {
@@ -49,7 +50,7 @@ public class MakeMoveEndpoint : Endpoint<MakeMoveRequest>
             return;
         }
 
-        HttpContext.Response.StatusCode = 202;
-        await Task.CompletedTask;
+        HttpContext.Response.StatusCode = StatusCodes.Status202Accepted;
+        await HttpContext.Response.CompleteAsync();
     }
 }

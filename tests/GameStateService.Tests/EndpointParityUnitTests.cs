@@ -1,9 +1,8 @@
 using FastEndpoints;
 using GameStateService.Endpoints.Games.Get;
 using GameStateService.Endpoints.Games.MakeMove;
-using GameStateService.GameState;
-using GameStateService.Models;
 using GameStateService.Services;
+using Service.Contracts.Requests;
 using Service.Contracts.Responses;
 using Xunit;
 

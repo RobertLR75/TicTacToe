@@ -1,3 +1,4 @@
+using Service.Contracts.Requests;
 using Service.Contracts.Responses;
 using TicTacToeMud.Models;
 
@@ -7,10 +8,10 @@ public class GameApiClient(HttpClient httpClient)
 {
     public virtual async Task<string> CreateGameAsync(string playerId, string playerName)
     {
-        var response = await httpClient.PostAsJsonAsync("/api/games", new
+        var response = await httpClient.PostAsJsonAsync("/api/games", new CreateGameRequest
         {
-            playerId,
-            playerName
+            PlayerId = new Guid(playerId),
+            PlayerName = playerName
         });
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadFromJsonAsync<CreateGameResponse>();

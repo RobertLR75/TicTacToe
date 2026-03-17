@@ -128,6 +128,31 @@ public sealed class HomePageTests : TestContext
     }
 
     [Fact]
+    public void Home_new_game_uses_persisted_identity_when_http_context_is_unavailable_after_first_render()
+    {
+        var api = new StubGameApiClient();
+        var notificationService = new TestNotificationService();
+
+        Services.AddSingleton<GameApiClient>(api);
+        Services.AddSingleton<INotificationService>(notificationService);
+        Services.AddSingleton<IHttpContextAccessor>(new HttpContextAccessor());
+
+        var cut = RenderComponent<Home>();
+        cut.Instance.SetPlayerIdentityForTest("7d9173f3-564f-4fdc-abfe-e98936e089f6", "Alice");
+        cut.WaitForAssertion(() => Assert.Equal(1, api.ListGamesCalls));
+
+        cut.Find("[data-testid='home-new-game-button']").Click();
+
+        cut.WaitForAssertion(() =>
+        {
+            Assert.Equal(1, api.CreateGameCalls);
+            Assert.Equal("7d9173f3-564f-4fdc-abfe-e98936e089f6", api.LastCreatePlayerId);
+            Assert.Equal("Alice", api.LastCreatePlayerName);
+            Assert.DoesNotContain(notificationService.ErrorMessages, m => m.Contains("Missing player identity."));
+        });
+    }
+
+    [Fact]
     public void Home_shows_error_notification_when_list_games_fails()
     {
         var api = new StubGameApiClient { ListGamesException = new InvalidOperationException("list-failed") };

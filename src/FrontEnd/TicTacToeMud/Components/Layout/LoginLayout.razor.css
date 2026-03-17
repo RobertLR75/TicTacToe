@@ -1,8 +1,8 @@
 .login-layout-root {
     min-height: 100vh;
     display: flex;
+    flex-direction: column;
     align-items: stretch;
-    justify-content: center;
     background:
         radial-gradient(circle at top, rgba(126, 111, 255, 0.18), transparent 30%),
         linear-gradient(180deg, #050507, #101018);
@@ -12,3 +12,7 @@
     flex: 1;
 }
 
+.login-layout-root ::deep .mud-appbar {
+    background: transparent;
+    border-bottom: 1px solid color-mix(in srgb, #7e6fff 22%, transparent);
+}

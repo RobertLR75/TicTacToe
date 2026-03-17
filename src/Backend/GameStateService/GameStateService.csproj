@@ -17,8 +17,4 @@
         <ProjectReference Include="..\..\TicTacToe.ServiceDefaults\TicTacToe.ServiceDefaults.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Events\" />
-    </ItemGroup>
-
 </Project>

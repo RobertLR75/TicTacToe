@@ -3,7 +3,7 @@ using GameStateService.Services;
 using Service.Contracts.Requests;
 using Service.Contracts.Responses;
 
-namespace GameStateService.Endpoints.Games.Get;
+namespace GameStateService.Endpoints.GameStates.Get;
 
 public class GetGameEndpoint : Endpoint<GetGameRequest, GetGameResponse>
 {

@@ -6,9 +6,13 @@ public class GameRepository : IGameRepository
 {
     private readonly ConcurrentDictionary<string, Models.GameState> _games = new();
 
-    public Models.GameState CreateGame()
+    public Models.GameState CreateGame(string? gameId = null)
     {
-        var game = new Models.GameState();
+        var game = new Models.GameState
+        {
+            GameId = string.IsNullOrWhiteSpace(gameId) ? Guid.NewGuid().ToString() : gameId
+        };
+
         _games[game.GameId] = game;
         return game;
     }

@@ -1,3 +1,4 @@
+using GameService.Consumers;
 using MassTransit;
 using Microsoft.Extensions.Options;
 
@@ -22,6 +23,8 @@ public static class ServiceCollectionExtensions
 
         services.AddMassTransit(x =>
         {
+            x.AddConsumer<GameStateUpdatedConsumer>();
+
             if (messagingOptions.EnableEventPublishing)
             {
                 x.UsingRabbitMq((context, cfg) =>
@@ -35,6 +38,11 @@ public static class ServiceCollectionExtensions
                     {
                         h.Username(messagingOptions.RabbitMq.Username);
                         h.Password(messagingOptions.RabbitMq.Password);
+                    });
+
+                    cfg.ReceiveEndpoint("gameservice-game-state-updated", e =>
+                    {
+                        e.ConfigureConsumer<GameStateUpdatedConsumer>(context);
                     });
                 });
             }

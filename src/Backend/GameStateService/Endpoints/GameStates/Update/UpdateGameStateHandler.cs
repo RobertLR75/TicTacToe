@@ -2,9 +2,9 @@ using FastEndpoints;
 using GameStateService.GameState;
 using GameStateService.Services;
 
-namespace GameStateService.Endpoints.Games.MakeMove;
+namespace GameStateService.Endpoints.GameStates.Update;
 
-public sealed record MakeMove(string GameId, int Row, int Col) : IRequest<MakeMoveCommandResult>;
+public sealed record UpdateGameState(string GameId, int Row, int Col) : IRequest<MakeMoveCommandResult>;
 
 public sealed record MakeMoveCommandResult
 {
@@ -24,13 +24,13 @@ public sealed record MakeMoveCommandResult
     public static MakeMoveCommandResult CellOccupied() => new() { Status = MakeMoveCommandStatus.CellOccupied };
 }
 
-public sealed class MakeMoveHandler(
+public sealed class UpdateGameStateHandler(
     IGameRepository repository,
     IRequestHandler<GameState.GameState, GameLogicMoveResult> gameLogicMoveHandler,
     IGameEventPublisher eventPublisher)
-    : IRequestHandler<MakeMove, MakeMoveCommandResult>
+    : IRequestHandler<UpdateGameState, MakeMoveCommandResult>
 {
-    public async Task<MakeMoveCommandResult> HandleAsync(MakeMove request, CancellationToken ct = default)
+    public async Task<MakeMoveCommandResult> HandleAsync(UpdateGameState request, CancellationToken ct = default)
     {
         var gameState = repository.GetGame(request.GameId);
         if (gameState is null)

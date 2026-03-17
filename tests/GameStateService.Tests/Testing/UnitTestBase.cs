@@ -22,13 +22,17 @@ public abstract class UnitTestBase
         public bool ThrowOnCreate { get; init; }
         public bool ThrowOnUpdate { get; init; }
 
-        public Models.GameState CreateGame()
+        public Models.GameState CreateGame(string? gameId = null)
         {
             if (ThrowOnCreate)
                 throw new InvalidOperationException("create failed");
 
             CreateCalls++;
-            var game = new Models.GameState();
+            var game = new Models.GameState
+            {
+                GameId = string.IsNullOrWhiteSpace(gameId) ? Guid.NewGuid().ToString() : gameId
+            };
+
             _games[game.GameId] = game;
             return game;
         }

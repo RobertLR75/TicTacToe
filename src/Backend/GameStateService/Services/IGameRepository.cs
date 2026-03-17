@@ -2,7 +2,7 @@ namespace GameStateService.Services;
 
 public interface IGameRepository
 {
-    Models.GameState CreateGame();
+    Models.GameState CreateGame(string? gameId = null);
 
     Models.GameState? GetGame(string gameId);
 

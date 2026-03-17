@@ -4,6 +4,14 @@
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode"/>
 <MudLayout>
     <MudAppBar Elevation="1">
+        <MudButton Variant="Variant.Text"
+                   Color="Color.Inherit"
+                   Href="/"
+                   StartIcon="@Icons.Material.Filled.DarkMode"
+                   Class="text-none px-2"
+                   data-testid="topbar-brand">
+            Tic-Tac-Toe
+        </MudButton>
         <MudSpacer />
         @if (!string.IsNullOrWhiteSpace(_signedInUserName))
         {
@@ -16,9 +24,6 @@
             Logout
         </MudButton>
     </MudAppBar>
-    <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-        <NavMenu/>
-    </MudDrawer>
     <MudMainContent Class="pt-16 pa-4">
         @Body
     </MudMainContent>
@@ -34,7 +39,6 @@
 @code {
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
 
-    private bool _drawerOpen = true;
     private bool _isDarkMode = true;
     private string? _signedInUserName;
     private readonly MudTheme _theme = TicTacToeMudTheme.Create();
@@ -48,11 +52,6 @@
         {
             _signedInUserName = sessionUser.Name;
         }
-    }
-
-    private void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
     }
 
     private void DarkModeToggle()
