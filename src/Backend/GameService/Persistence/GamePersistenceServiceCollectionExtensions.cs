@@ -1,5 +1,5 @@
 using FluentMigrator.Runner;
-using GameService.Models;
+using GameService.Features.Games.Entities;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.PostgreSql.EntityFramework;
 
@@ -14,9 +14,9 @@ public static class GamePersistenceServiceCollectionExtensions
         services.AddSingleton<GamePersistenceReadinessState>();
         services.AddSingleton<IGamePersistenceInitializer, GamePersistenceInitializer>();
 
-        services.AddDbContext<GenericDbContext<Game>>(options =>
+        services.AddDbContext<GenericDbContext<GameEntity>>(options =>
             options.UseNpgsql(connectionString));
-        services.AddScoped<DbContext>(sp => sp.GetRequiredService<GenericDbContext<Game>>());
+        services.AddScoped<DbContext>(sp => sp.GetRequiredService<GenericDbContext<GameEntity>>());
 
         services.AddFluentMigratorCore()
             .ConfigureRunner(runner => runner

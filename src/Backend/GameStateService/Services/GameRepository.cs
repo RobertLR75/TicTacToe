@@ -1,35 +1,54 @@
-using System.Collections.Concurrent;
+using GameStateService.Features.GameStates.Entities;
+using SharedLibrary.Interfaces;
+using SharedLibrary.Redis;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace GameStateService.Services;
 
-public class GameRepository : IGameRepository
+public sealed class GameRepository(IPersistenceService<GameEntity> persistenceService) : IGameRepository
 {
-    private readonly ConcurrentDictionary<string, Models.GameState> _games = new();
-
-    public Models.GameState CreateGame(string? gameId = null)
+    public async Task<GameEntity> CreateGameAsync(string? gameId = null, CancellationToken ct = default)
     {
-        var game = new Models.GameState
+        var game = new GameEntity();
+
+        if (!string.IsNullOrWhiteSpace(gameId))
         {
-            GameId = string.IsNullOrWhiteSpace(gameId) ? Guid.NewGuid().ToString() : gameId
-        };
+            game.GameId = gameId;
+        }
 
-        _games[game.GameId] = game;
+        await persistenceService.CreateAsync(game, ct);
         return game;
     }
 
-    public Models.GameState? GetGame(string gameId)
+    public async Task<GameEntity?> GetGameAsync(string gameId, CancellationToken ct = default)
     {
-        _games.TryGetValue(gameId, out var game);
-        return game;
+        if (!Guid.TryParse(gameId, out var parsedGameId))
+        {
+            return null;
+        }
+
+        return await persistenceService.GetAsync(parsedGameId, ct);
     }
 
-    public void UpdateGame(Models.GameState game)
+    public Task UpdateGameAsync(GameEntity game, CancellationToken ct = default)
     {
-        _games[game.GameId] = game;
+        game.UpdatedAt = DateTimeOffset.UtcNow;
+        return persistenceService.UpdateAsync(game, ct);
     }
 
-    public void DeleteGame(string gameId)
+    public async Task DeleteGameAsync(string gameId, CancellationToken ct = default)
     {
-        _games.TryRemove(gameId, out _);
+        if (!Guid.TryParse(gameId, out var parsedGameId))
+        {
+            return;
+        }
+
+        await persistenceService.DeleteAsync(parsedGameId, ct);
     }
+}
+
+public sealed class GameRedisPersistenceService(IDistributedCache cache)
+    : BaseRedisPersistenceService<GameEntity>(cache)
+{
+    public override string Name => "game-state-service-games";
 }

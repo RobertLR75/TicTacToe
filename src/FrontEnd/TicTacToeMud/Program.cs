@@ -1,4 +1,5 @@
 using MudBlazor.Services;
+using Service.Contracts.Services;
 using TicTacToeMud.Components;
 using TicTacToeMud.Session;
 using TicTacToeMud.Services;
@@ -27,12 +28,11 @@ var gameStateServiceBaseUrl = builder.Configuration.GetValue<string>("Services:g
     ?? builder.Configuration.GetValue<string>("Services:gamestateservice:http:0")
     ?? "https://localhost:7110";
 
-// Add GameApiClient typed HttpClient. Use Aspire-provided GameService URLs when available,
-// otherwise fall back to the local GameService development endpoint.
-builder.Services.AddHttpClient<GameApiClient>(client =>
+builder.Services.AddHttpClient("api/games", client =>
 {
     client.BaseAddress = new Uri(gameServiceBaseUrl);
 });
+builder.Services.AddScoped<GameApiClient>();
 
 builder.Services.AddHttpClient<GameStateServiceClient>(client =>
 {

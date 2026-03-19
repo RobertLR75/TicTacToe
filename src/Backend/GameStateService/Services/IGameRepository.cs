@@ -1,12 +1,14 @@
+using GameStateService.Features.GameStates.Entities;
+
 namespace GameStateService.Services;
 
 public interface IGameRepository
 {
-    Models.GameState CreateGame(string? gameId = null);
+    Task<GameEntity> CreateGameAsync(string? gameId = null, CancellationToken ct = default);
 
-    Models.GameState? GetGame(string gameId);
+    Task<GameEntity?> GetGameAsync(string gameId, CancellationToken ct = default);
 
-    void UpdateGame(Models.GameState game);
+    Task UpdateGameAsync(GameEntity game, CancellationToken ct = default);
 
-    void DeleteGame(string gameId);
+    Task DeleteGameAsync(string gameId, CancellationToken ct = default);
 }

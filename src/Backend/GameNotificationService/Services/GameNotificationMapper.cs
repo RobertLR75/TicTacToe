@@ -7,7 +7,7 @@ public static class GameNotificationMapper
 {
     public static bool TryMap(GameStateInitialized message, out GameStateInitializedNotification? notification)
     {
-        if (!IsValid(message.GameId, message.EventId, message.Board))
+        if (!IsValid(message.Id.ToString(), message.EventId, message.Board))
         {
             notification = null;
             return false;
@@ -15,7 +15,7 @@ public static class GameNotificationMapper
 
         notification = new GameStateInitializedNotification
         {
-            GameId = message.GameId,
+            Id = message.Id.ToString(),
             CurrentPlayer = message.CurrentPlayer,
             Winner = message.Winner,
             IsDraw = message.IsDraw,
@@ -30,7 +30,7 @@ public static class GameNotificationMapper
 
     public static bool TryMap(GameStateUpdated message, out GameStateUpdatedNotification? notification)
     {
-        if (!IsValid(message.GameId, message.EventId, message.Board))
+        if (!IsValid(message.Id.ToString(), message.EventId, message.Board))
         {
             notification = null;
             return false;
@@ -38,7 +38,7 @@ public static class GameNotificationMapper
 
         notification = new GameStateUpdatedNotification
         {
-            GameId = message.GameId,
+            Id = message.Id.ToString(),
             CurrentPlayer = message.CurrentPlayer,
             Winner = message.Winner,
             IsDraw = message.IsDraw,

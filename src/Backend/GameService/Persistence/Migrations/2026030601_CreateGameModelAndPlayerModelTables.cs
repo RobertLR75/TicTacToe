@@ -1,5 +1,5 @@
 using FluentMigrator;
-using GameService.Models;
+using GameService.Persistence.Records;
 using SharedLibrary.FluentMigration;
 
 namespace GameService.Persistence.Migrations;

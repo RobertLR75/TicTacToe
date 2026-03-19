@@ -1,5 +1,5 @@
-using GameService.Endpoints.Games.List;
-using GameService.Models;
+using GameService.Features.Games.Endpoints.List;
+using GameService.Features.Games.Entities;
 using GameService.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

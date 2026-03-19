@@ -1,5 +1,5 @@
-using GameService.Endpoints.Games.UpdateStatus;
-using GameService.Models;
+using GameService.Features.Games.Endpoints.UpdateStatus;
+using GameService.Features.Games.Entities;
 using GameService.Services;
 using NSubstitute;
 using Service.Contracts.Events;
@@ -13,7 +13,7 @@ public class UpdateGameStatusCommandHandlerUnitTests : GameServiceUnitTestBase
     public async Task HandleAsync_returns_not_found_when_game_does_not_exist()
     {
         var store = CreateStore();
-        store.GetAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((Game?)null);
+        store.GetAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns((GameEntity?)null);
         var validator = CreateStatusValidator(GameStatusUpdateResult.SuccessResult(Guid.NewGuid(), GameStatus.Created, DateTimeOffset.UtcNow));
         var sut = new UpdateGameStatusHandler(store, validator);
 
@@ -54,27 +54,21 @@ public class UpdateGameStatusCommandHandlerUnitTests : GameServiceUnitTestBase
         Assert.False(result.Succeeded);
         Assert.True(result.InvalidStatus);
         Assert.Equal(GameStatus.Created, game.Status);
-        await store.DidNotReceive().UpdateAsync(Arg.Any<Game>(), Arg.Any<CancellationToken>());
+        await store.DidNotReceive().UpdateAsync(Arg.Any<GameEntity>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task GameStatusUpdatedEventHandler_publishes_mapped_shared_event()
     {
-        var publisher = CreatePublisher();
+        var publisher = Substitute.For<IUpdateGameStatusEventPublisher>();
         var sut = new GameStatusUpdatedEvent.GameStatusUpdatedEventHandler(publisher);
         var updatedAt = new DateTimeOffset(2026, 3, 11, 12, 0, 0, TimeSpan.Zero);
         var game = CreateGame(GameStatus.Active, updatedAt: updatedAt);
 
-        await sut.HandleAsync(new GameStatusUpdatedEvent { Game = game }, CancellationToken.None);
+        await sut.HandleAsync(new GameStatusUpdatedEvent { GameEntity = game }, CancellationToken.None);
 
-        await publisher.Received(1).PublishEventAsync(
-            Arg.Is<GameStatusUpdated>(evt =>
-                evt.GameId == game.Id &&
-                evt.NewStatus == Service.Contracts.Shared.GameStatusEnum.Active &&
-                evt.UpdatedAt == updatedAt &&
-                evt.SchemaVersion == "1.0" &&
-                !string.IsNullOrWhiteSpace(evt.EventId) &&
-                evt.OccurredAtUtc != default),
+        await publisher.Received(1).PublishAsync(
+            Arg.Is<GameStatusUpdatedEvent>(evt => evt.GameEntity == game),
             Arg.Any<CancellationToken>());
     }
 }

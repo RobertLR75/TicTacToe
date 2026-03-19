@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text;
-using GameService.Models;
+using GameService.Features.Games.Entities;
 using GameService.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Service.Contracts.Requests;
@@ -54,10 +54,10 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         Assert.Equal(GameStatusEnum.Created, payload.Status);
         Assert.Equal("Alice", payload.Player1.Name);
 
-        var persisted = await GetGameAsync(factory.Services, payload.Id);
+        var persisted = await GetGameAsync(factory.Services, Guid.Parse(payload.Id));
         Assert.NotNull(persisted);
         Assert.Equal(GameStatus.Created, persisted.Status);
-        Assert.Equal(request.PlayerId.ToString("D"), persisted.Player1.Id);
+        Assert.Equal(request.PlayerId, persisted.Player1.Id);
         Assert.Equal(request.PlayerName, persisted.Player1.Name);
     }
 
@@ -100,7 +100,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         Assert.Contains("Player name must be 50 characters or fewer", payload);
 
         var games = await CreateGamesQuery(factory);
-        Assert.Empty(games.Games);
+        Assert.Empty(games);
     }
 
     [Fact]
@@ -119,28 +119,18 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
 
         var payload = await response.Content.ReadFromJsonAsync<ListGamesResponse>();
         Assert.NotNull(payload);
-        Assert.Single(payload.Games);
-        Assert.All(payload.Games, game => Assert.Equal(GameStatusEnum.Created, game.Status));
+        Assert.Single(payload);
+        Assert.All(payload, game => Assert.Equal(GameStatusEnum.Created, game.Status));
     }
 
     [Fact]
-    public async Task Get_by_id_endpoint_returns_current_state_for_existing_game()
+    public async Task Get_by_id_endpoint_returns_persisted_game_for_existing_game()
     {
         await using var factory = CreateFactory();
         await factory.ResetDatabaseAsync();
         using var client = factory.CreateClient();
 
         var game = await SeedGameAsync(factory.Services, GameStatus.Created);
-        factory.Services.GetRequiredService<GameServiceWebApplicationFactory.StubGameStateReadClient>()
-            .SetResponse(game.Id, GameStateReadResult.Success(new GetGameResponse
-            {
-                GameId = game.Id.ToString("D"),
-                CurrentPlayer = PlayerMarkEnum.X,
-                Winner = PlayerMarkEnum.None,
-                IsDraw = false,
-                IsOver = false,
-                Board = [new CellDto(0, 0, PlayerMarkEnum.X)]
-            }));
 
         var response = await client.GetAsync($"/api/games/{game.Id}");
 
@@ -149,13 +139,13 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         var payload = await response.Content.ReadFromJsonAsync<GetGameResponse>();
         Assert.NotNull(payload);
         Assert.Equal(game.Id.ToString("D"), payload.GameId);
-        Assert.Equal(PlayerMarkEnum.X, payload.CurrentPlayer);
-        Assert.Single(payload.Board);
-        Assert.Equal(PlayerMarkEnum.X, payload.Board[0].MarkEnum);
+        Assert.Equal(GameStatusEnum.Created, payload.Status);
+        Assert.Equal(game.Player1.Id.ToString(), payload.Player1.PlayerId);
+        Assert.Equal(game.Player1.Name, payload.Player1.Name);
     }
 
     [Fact]
-    public async Task Get_by_id_endpoint_returns_not_found_for_missing_game_state()
+    public async Task Get_by_id_endpoint_returns_not_found_for_missing_game()
     {
         await using var factory = CreateFactory();
         await factory.ResetDatabaseAsync();
@@ -164,24 +154,6 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         var response = await client.GetAsync($"/api/games/{Guid.NewGuid()}");
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-    }
-
-    [Fact]
-    public async Task Get_by_id_endpoint_returns_service_unavailable_when_state_dependency_is_unavailable()
-    {
-        await using var factory = CreateFactory();
-        await factory.ResetDatabaseAsync();
-        using var client = factory.CreateClient();
-
-        var game = await SeedGameAsync(factory.Services, GameStatus.Created);
-        factory.Services.GetRequiredService<GameServiceWebApplicationFactory.StubGameStateReadClient>()
-            .SetResponse(game.Id, GameStateReadResult.DependencyUnavailable());
-
-        var response = await client.GetAsync($"/api/games/{game.Id}");
-
-        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
-        var payload = await response.Content.ReadAsStringAsync();
-        Assert.Contains("temporarily unavailable", payload);
     }
 
     [Fact]
@@ -201,8 +173,8 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
 
         var payload = await response.Content.ReadFromJsonAsync<ListGamesResponse>();
         Assert.NotNull(payload);
-        Assert.Single(payload.Games);
-        Assert.Equal(GameStatusEnum.Created, payload.Games[0].Status);
+        Assert.Single(payload);
+        Assert.Equal(GameStatusEnum.Created, payload[0].Status);
     }
 
     [Fact]
@@ -241,9 +213,9 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
         Assert.NotNull(page1);
         Assert.NotNull(page3);
 
-        Assert.Equal(new[] { oldest.Id, middle.Id }, page1.Games.Select(x => x.Id).ToArray());
-        Assert.Equal(new[] { oldest.CreatedAt, middle.CreatedAt }, page1.Games.Select(x => x.CreatedAt).ToArray());
-        Assert.Equal(new[] { newest.Id }, page3.Games.Select(x => x.Id).ToArray());
+        Assert.Equal(new[] { oldest.Id.ToString("D"), middle.Id.ToString("D") }, page1.Select(x => x.GameId).ToArray());
+        Assert.Equal(new[] { oldest.CreatedAt, middle.CreatedAt }, page1.Select(x => x.CreatedAt).ToArray());
+        Assert.Equal(new[] { newest.Id.ToString("D") }, page3.Select(x => x.GameId).ToArray());
     }
 
 
@@ -265,7 +237,7 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
 
         var updateResponse = await client.PutAsJsonAsync($"/api/games/{created.Id}/status", new UpdateGameStatusRequest
         {
-            Id = created.Id,
+            Id = Guid.Parse(created.Id),
             Status = GameStatusEnum.Active
         });
 
@@ -273,10 +245,10 @@ public sealed class GameEndpointsIntegrationTests : GameServiceIntegrationTestBa
 
         var payload = await updateResponse.Content.ReadFromJsonAsync<UpdateGameStatusResponse>();
         Assert.NotNull(payload);
-        Assert.Equal(created.Id, payload.Id);
+        Assert.Equal(Guid.Parse(created.Id), payload.Id);
         Assert.Equal(GameStatusEnum.Active.ToString(), payload.Status);
 
-        var persisted = await GetGameAsync(factory.Services, created.Id);
+        var persisted = await GetGameAsync(factory.Services, Guid.Parse(created.Id));
         Assert.NotNull(persisted);
         Assert.Equal(GameStatus.Active, persisted.Status);
         Assert.NotNull(persisted.UpdatedAt);

@@ -1,4 +1,4 @@
-using GameNotificationService.Persistence;
+using GameNotificationService.Services;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Service.Contracts.Events;
@@ -18,8 +18,7 @@ public sealed class ConsumerPipelineIntegrationTests : GameNotificationServiceIn
     [Fact]
     public async Task RabbitMq_and_postgres_pipeline_persists_initialized_notification_end_to_end()
     {
-        using var provider = CreateServiceProvider(enableEventConsumers: true);
-        await ResetDatabaseAsync(provider);
+        await using var provider = CreateServiceProvider(enableEventConsumers: true);
 
         var bus = provider.GetRequiredService<IBusControl>();
         await bus.StartAsync();
@@ -46,8 +45,7 @@ public sealed class ConsumerPipelineIntegrationTests : GameNotificationServiceIn
     [Fact]
     public async Task RabbitMq_and_postgres_pipeline_persists_updated_notification_end_to_end()
     {
-        using var provider = CreateServiceProvider(enableEventConsumers: true);
-        await ResetDatabaseAsync(provider);
+        await using var provider = CreateServiceProvider(enableEventConsumers: true);
 
         var bus = provider.GetRequiredService<IBusControl>();
         await bus.StartAsync();
@@ -76,7 +74,7 @@ public sealed class ConsumerPipelineIntegrationTests : GameNotificationServiceIn
         {
             EventId = eventId ?? Guid.NewGuid().ToString("N"),
             SchemaVersion = "1.0",
-            GameId = "game-1",
+            Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
             CurrentPlayer = PlayerMarkEnum.X,
             Winner = PlayerMarkEnum.X,
             IsDraw = false,
@@ -91,7 +89,7 @@ public sealed class ConsumerPipelineIntegrationTests : GameNotificationServiceIn
         {
             EventId = eventId ?? Guid.NewGuid().ToString("N"),
             SchemaVersion = "1.0",
-            GameId = "game-1",
+            Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
             CurrentPlayer = PlayerMarkEnum.X,
             Winner = PlayerMarkEnum.X,
             IsDraw = false,

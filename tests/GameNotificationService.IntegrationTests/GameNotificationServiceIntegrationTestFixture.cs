@@ -1,11 +1,10 @@
 using GameNotificationService.Configuration;
-using GameNotificationService.Persistence;
 using GameNotificationService.Services;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 using Service.Contracts.Notifications;
-using Testcontainers.PostgreSql;
+using SharedLibrary.Interfaces;
 using Testcontainers.RabbitMq;
 using TicTacToe.Testing;
 using Xunit;
@@ -14,17 +13,14 @@ namespace GameNotificationService.IntegrationTests;
 
 public sealed class GameNotificationServiceIntegrationTestFixture : IAsyncLifetime
 {
-    private readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder().Build();
     private readonly RabbitMqContainer _rabbitMq = new RabbitMqBuilder().Build();
 
-    public string PostgresConnectionString => _postgres.GetConnectionString();
     public string RabbitMqConnectionString => _rabbitMq.GetConnectionString();
 
     public async Task InitializeAsync()
     {
         try
         {
-            await _postgres.StartAsync();
             await _rabbitMq.StartAsync();
         }
         catch
@@ -36,7 +32,6 @@ public sealed class GameNotificationServiceIntegrationTestFixture : IAsyncLifeti
 
     public async Task DisposeAsync()
     {
-        await _postgres.DisposeAsync();
         await _rabbitMq.DisposeAsync();
     }
 
@@ -47,7 +42,7 @@ public sealed class GameNotificationServiceIntegrationTestFixture : IAsyncLifeti
     {
         var values = new Dictionary<string, string?>
         {
-            ["ConnectionStrings:postgres"] = PostgresConnectionString,
+            ["ConnectionStrings:redis"] = "localhost:6379",
             ["Messaging:EnableEventConsumers"] = enableEventConsumers.ToString().ToLowerInvariant()
         };
 
@@ -72,44 +67,15 @@ public sealed class GameNotificationServiceIntegrationTestFixture : IAsyncLifeti
         var configuration = BuildConfiguration(enableEventConsumers);
         var services = new ServiceCollection();
         services.AddLogging();
+        services.AddDistributedMemoryCache();
         services.AddGameEventConsumers(configuration);
-        services.AddNotificationPersistence(configuration);
-        services.AddSingleton<IGameNotificationPublisher, NoOpGameNotificationPublisher>();
+        services.AddNotificationStorage(configuration);
+        services.AddScoped<INotificationStorageService, RedisNotificationStorageService>();
+        services.AddSingleton<ISignalRGameNotificationPublisher, NoOpGameNotificationPublisher>();
         configureServices?.Invoke(services);
 
         var provider = services.BuildServiceProvider();
         return provider;
-    }
-
-    public async Task ResetDatabaseAsync(IServiceProvider provider)
-    {
-        await using var connection = new NpgsqlConnection(PostgresConnectionString);
-        await connection.OpenAsync();
-
-        await using var command = connection.CreateCommand();
-        command.CommandText = "DROP SCHEMA IF EXISTS \"public\" CASCADE; CREATE SCHEMA \"public\";";
-        await command.ExecuteNonQueryAsync();
-
-        await WaitForPersistenceReadyAsync(provider);
-    }
-
-    private static async Task WaitForPersistenceReadyAsync(IServiceProvider provider)
-    {
-        var initializer = provider.GetRequiredService<INotificationPersistenceInitializer>();
-        var readinessState = provider.GetRequiredService<NotificationPersistenceReadinessState>();
-
-        for (var attempt = 0; attempt < 10; attempt++)
-        {
-            if (await initializer.EnsureInitializedAsync())
-            {
-                return;
-            }
-
-            await Task.Delay(200);
-        }
-
-        throw new InvalidOperationException(
-            $"Notification persistence initializer could not prepare the integration test database. Last error: {readinessState.LastErrorMessage ?? "unknown"}");
     }
 
     private void ApplyRabbitMqSettings(IDictionary<string, string?> values)
@@ -127,12 +93,10 @@ public sealed class GameNotificationServiceIntegrationTestFixture : IAsyncLifeti
         values["ConnectionStrings:rabbitmq"] = RabbitMqConnectionString;
     }
 
-    private sealed class NoOpGameNotificationPublisher : IGameNotificationPublisher
+    private sealed class NoOpGameNotificationPublisher : ISignalRGameNotificationPublisher
     {
-        public Task PublishGameStateInitializedAsync(GameStateInitializedNotification notification, CancellationToken ct = default)
-            => Task.CompletedTask;
-
-        public Task PublishGameStateUpdatedAsync(GameStateUpdatedNotification notification, CancellationToken ct = default)
-            => Task.CompletedTask;
+        public Task PublishAsync<TNotification>(TNotification notification, CancellationToken ct = new CancellationToken()) where TNotification : class, INotification 
+            => Task.CompletedTask; 
+            
     }
 }

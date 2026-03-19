@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using GameNotificationService.Endpoints.Notifications;
+using GameNotificationService.Services;
 using Xunit;
 
 namespace GameNotificationService.IntegrationTests;
@@ -16,7 +16,6 @@ public sealed class NotificationEndpointsIntegrationTests : GameNotificationServ
     public async Task List_notifications_endpoint_returns_notifications_in_repository_order()
     {
         await using var factory = CreateFactory();
-        await factory.ResetDatabaseAsync();
         await PersistNotificationAsync(factory.Services, CreateNotification("evt-1", "game-1", "GameStateInitialized", new DateTimeOffset(2026, 3, 10, 10, 0, 0, TimeSpan.Zero)));
         await PersistNotificationAsync(factory.Services, CreateNotification("evt-2", "game-1", "GameStateUpdated", new DateTimeOffset(2026, 3, 10, 10, 5, 0, TimeSpan.Zero)));
         using var client = factory.CreateClient();
@@ -24,7 +23,7 @@ public sealed class NotificationEndpointsIntegrationTests : GameNotificationServ
         var response = await client.GetAsync("/api/notifications");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var payload = await response.Content.ReadFromJsonAsync<List<ListNotificationsResponse>>();
+        var payload = await response.Content.ReadFromJsonAsync<List<NotificationRecord>>();
         Assert.NotNull(payload);
         Assert.Equal(["evt-2", "evt-1"], payload.Select(x => x.EventId).ToArray());
     }
@@ -33,7 +32,6 @@ public sealed class NotificationEndpointsIntegrationTests : GameNotificationServ
     public async Task List_notifications_endpoint_filters_by_game_id()
     {
         await using var factory = CreateFactory();
-        await factory.ResetDatabaseAsync();
         await PersistNotificationAsync(factory.Services, CreateNotification("evt-1", "game-1", "GameStateInitialized", DateTimeOffset.UtcNow.AddMinutes(-2)));
         await PersistNotificationAsync(factory.Services, CreateNotification("evt-2", "game-2", "GameStateUpdated", DateTimeOffset.UtcNow.AddMinutes(-1)));
         using var client = factory.CreateClient();
@@ -41,7 +39,7 @@ public sealed class NotificationEndpointsIntegrationTests : GameNotificationServ
         var response = await client.GetAsync("/api/notifications?gameId=game-2");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var payload = await response.Content.ReadFromJsonAsync<List<ListNotificationsResponse>>();
+        var payload = await response.Content.ReadFromJsonAsync<List<NotificationRecord>>();
         var notification = Assert.Single(payload!);
         Assert.Equal("game-2", notification.GameId);
         Assert.Equal("evt-2", notification.EventId);
@@ -55,7 +53,6 @@ public sealed class NotificationEndpointsIntegrationTests : GameNotificationServ
             ["NotificationQuery:DefaultPageSize"] = "1",
             ["NotificationQuery:MaxPageSize"] = "2"
         });
-        await factory.ResetDatabaseAsync();
         await PersistNotificationAsync(factory.Services, CreateNotification("evt-1", "game-1", "GameStateInitialized", new DateTimeOffset(2026, 3, 10, 10, 0, 0, TimeSpan.Zero)));
         await PersistNotificationAsync(factory.Services, CreateNotification("evt-2", "game-1", "GameStateUpdated", new DateTimeOffset(2026, 3, 10, 10, 5, 0, TimeSpan.Zero)));
         await PersistNotificationAsync(factory.Services, CreateNotification("evt-3", "game-1", "GameStateUpdated", new DateTimeOffset(2026, 3, 10, 10, 10, 0, TimeSpan.Zero)));
@@ -64,25 +61,9 @@ public sealed class NotificationEndpointsIntegrationTests : GameNotificationServ
         var response = await client.GetAsync("/api/notifications?page=0&pageSize=10");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var payload = await response.Content.ReadFromJsonAsync<List<ListNotificationsResponse>>();
+        var payload = await response.Content.ReadFromJsonAsync<List<NotificationRecord>>();
         Assert.NotNull(payload);
         Assert.Equal(2, payload.Count);
         Assert.Equal(["evt-3", "evt-2"], payload.Select(x => x.EventId).ToArray());
-    }
-
-    [Fact]
-    public async Task List_notifications_endpoint_returns_service_unavailable_when_persistence_is_not_ready()
-    {
-        await using var factory = CreateFactory(new Dictionary<string, string?>
-        {
-            ["ConnectionStrings:postgres"] = "Host=127.0.0.1;Port=1;Database=postgres;Username=postgres;Password=postgres"
-        });
-        using var client = factory.CreateClient();
-
-        var response = await client.GetAsync("/api/notifications");
-
-        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
-        var content = await response.Content.ReadAsStringAsync();
-        Assert.Contains("Notification persistence is temporarily unavailable", content);
     }
 }

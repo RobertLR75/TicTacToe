@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
+using Service.Contracts.Responses;
+using Service.Contracts.Services;
 using TicTacToeMud.Components.Pages;
 using TicTacToeMud.Models;
 using TicTacToeMud.Services;
@@ -14,7 +16,7 @@ using Xunit;
 
 namespace TicTacToeMud.Tests;
 
-public sealed class GamePageClientUsageTests : TestContext
+public sealed class GamePageClientUsageTests : BunitContext
 {
     public GamePageClientUsageTests()
     {
@@ -37,7 +39,7 @@ public sealed class GamePageClientUsageTests : TestContext
 
         var navigationManager = Services.GetRequiredService<NavigationManager>();
 
-        var cut = RenderComponent<Game>();
+        var cut = Render<Game>();
 
         var backButton = cut.Find("[data-testid='game-back-home-button']");
 
@@ -69,7 +71,7 @@ public sealed class GamePageClientUsageTests : TestContext
         Services.AddSingleton<GameHubClient>(new StubGameHubClient());
         Services.AddSingleton<INotificationService>(new TestNotificationService());
 
-        var cut = RenderComponent<Game>();
+        var cut = Render<Game>();
 
         cut.Instance.SetGameStateForTest(
             "game-created-123",
@@ -108,16 +110,16 @@ public sealed class GamePageClientUsageTests : TestContext
         Services.AddSingleton<GameHubClient>(gameHub);
         Services.AddSingleton<INotificationService>(new TestNotificationService());
 
-        var cut = RenderComponent<Game>(parameters => parameters
+        var cut = Render<Game>(parameters => parameters
             .Add(component => component.SelectedGameId, gameId));
 
         cut.WaitForAssertion(() =>
         {
             Assert.Equal(0, gameApi.CreateGameCalls);
             Assert.Equal(0, gameApi.ListGamesCalls);
-            Assert.Equal(1, gameApi.GetGameCalls);
-            Assert.Equal(gameId, gameApi.LastGameId);
-            Assert.Equal(0, gameStateApi.GetGameCalls);
+            Assert.Equal(0, gameApi.GetGameCalls);
+            Assert.Equal(1, gameStateApi.GetGameCalls);
+            Assert.Equal(gameId, gameStateApi.LastGameId);
             Assert.Equal(1, gameHub.JoinGameCalls);
             Assert.Equal(gameId, gameHub.LastJoinedGameId);
             Assert.DoesNotContain("No game selected. Create a game from Home, then open it to play.", cut.Markup);
@@ -141,7 +143,7 @@ public sealed class GamePageClientUsageTests : TestContext
 
         var navigationManager = Services.GetRequiredService<NavigationManager>();
 
-        _ = RenderComponent<Game>(parameters => parameters
+        _ = Render<Game>(parameters => parameters
             .Add(component => component.SelectedGameId, "not-a-guid"));
 
         Assert.Equal("http://localhost/not-found", navigationManager.Uri);
@@ -153,11 +155,11 @@ public sealed class GamePageClientUsageTests : TestContext
     [Fact]
     public void Game_page_navigates_to_not_found_when_game_api_returns_missing_game()
     {
-        var gameApi = new StubGameApiClient
+        var gameApi = new StubGameApiClient();
+        var gameStateApi = new StubGameStateServiceClient
         {
             GetGameException = new HttpRequestException("missing", null, System.Net.HttpStatusCode.NotFound)
         };
-        var gameStateApi = new StubGameStateServiceClient();
         var gameHub = new StubGameHubClient();
         var notificationService = new TestNotificationService();
 
@@ -168,19 +170,19 @@ public sealed class GamePageClientUsageTests : TestContext
 
         var navigationManager = Services.GetRequiredService<NavigationManager>();
 
-        _ = RenderComponent<Game>(parameters => parameters
+        _ = Render<Game>(parameters => parameters
             .Add(component => component.SelectedGameId, "2a08ef26-61f1-4304-8db3-9b43db8ad547"));
 
         Assert.Equal("http://localhost/not-found", navigationManager.Uri);
-        Assert.Equal(1, gameApi.GetGameCalls);
-        Assert.Equal(0, gameStateApi.GetGameCalls);
+        Assert.Equal(0, gameApi.GetGameCalls);
+        Assert.Equal(1, gameStateApi.GetGameCalls);
         Assert.Equal(0, gameHub.JoinGameCalls);
         Assert.Empty(notificationService.ErrorMessages);
     }
 
     private sealed class StubGameApiClient : GameApiClient
     {
-        public StubGameApiClient() : base(new HttpClient { BaseAddress = new Uri("https://example.test") })
+        public StubGameApiClient() : base(new FixedHttpClientFactory(new HttpClient { BaseAddress = new Uri("https://example.test") }))
         {
         }
 
@@ -190,19 +192,19 @@ public sealed class GamePageClientUsageTests : TestContext
         public string? LastGameId { get; private set; }
         public Exception? GetGameException { get; init; }
 
-        public override Task<string> CreateGameAsync(string playerId, string playerName)
+        public override Task<string> CreateGameAsync(string playerId, string playerName, CancellationToken cancellationToken = default)
         {
             CreateGameCalls++;
             return Task.FromResult("game-created-123");
         }
 
-        public override Task<IReadOnlyList<GameListItem>> ListGamesAsync()
+        public override Task<IReadOnlyList<GameModel>> ListGamesAsync(CancellationToken cancellationToken = default)
         {
             ListGamesCalls++;
-            return Task.FromResult<IReadOnlyList<GameListItem>>([]);
+            return Task.FromResult<IReadOnlyList<GameModel>>([]);
         }
 
-        public override Task<GameResponse> GetGameAsync(string gameId)
+        public override Task<GetGameResponse> GetGameAsync(string gameId, CancellationToken cancellationToken = default)
         {
             GetGameCalls++;
             LastGameId = gameId;
@@ -212,14 +214,18 @@ public sealed class GamePageClientUsageTests : TestContext
                 throw GetGameException;
             }
 
-            return Task.FromResult(new GameResponse
+            return Task.FromResult(new GetGameResponse
             {
                 GameId = gameId,
-                CurrentPlayer = 1,
-                Winner = 0,
-                IsDraw = false,
-                IsOver = false,
-                Board = []
+                Status = Service.Contracts.Shared.GameStatusEnum.Created,
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = null,
+                Player1 = new Service.Contracts.Shared.PlayerModel
+                {
+                    PlayerId = "11111111-1111-1111-1111-111111111111",
+                    Name = "Alice"
+                },
+                Player2 = null
             });
         }
     }
@@ -236,11 +242,17 @@ public sealed class GamePageClientUsageTests : TestContext
         public string? LastMoveGameId { get; private set; }
         public int LastMoveRow { get; private set; }
         public int LastMoveCol { get; private set; }
+        public Exception? GetGameException { get; init; }
 
         public override Task<GameResponse> GetGameAsync(string gameId)
         {
             GetGameCalls++;
             LastGameId = gameId;
+
+            if (GetGameException is not null)
+            {
+                throw GetGameException;
+            }
 
             return Task.FromResult(new GameResponse
             {
@@ -263,20 +275,16 @@ public sealed class GamePageClientUsageTests : TestContext
         }
     }
 
-    private sealed class StubGameHubClient : GameHubClient
+    private sealed class StubGameHubClient(IConfiguration configuration) : GameHubClient(configuration)
     {
-        public StubGameHubClient() : base(new ConfigurationBuilder().Build())
-        {
-        }
-
-        public StubGameHubClient(IConfiguration configuration) : base(configuration)
+        public StubGameHubClient() : this(new ConfigurationBuilder().Build())
         {
         }
 
         public int JoinGameCalls { get; private set; }
         public string? LastJoinedGameId { get; private set; }
 
-        public override Task StartAsync(string? hubBaseUrl = null) => Task.CompletedTask;
+        public Task StartAsync(string? hubBaseUrl = null) => Task.CompletedTask;
 
         public override Task JoinGame(string gameId)
         {
@@ -343,5 +351,10 @@ public sealed class GamePageClientUsageTests : TestContext
     private sealed class SessionFeature : ISessionFeature
     {
         public ISession Session { get; set; } = default!;
+    }
+
+    private sealed class FixedHttpClientFactory(HttpClient client) : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name) => client;
     }
 }

@@ -2,27 +2,32 @@ using FastEndpoints;
 using FastEndpoints.Swagger;
 using GameStateService.Configuration;
 using GameStateService.Consumers;
-using GameStateService.Endpoints.GameStates.Get;
-using GameStateService.Endpoints.GameStates.Update;
-using GameStateService.GameState;
+using GameStateService.Features.GameStates.Endpoints.Get;
+using GameStateService.Features.GameStates.Endpoints.Update;
+using GameStateService.Features.GameStates.Entities;
 using GameStateService.Services;
+using SharedLibrary.Interfaces;
+using SharedLibrary.Redis;
+using SharedLibrary.Services.Interfaces;
 using TicTacToe.ServiceDefaults;
-using GameState = GameStateService.GameState.GameState;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
+builder.ConfigureRedisDistributedCache("gamestateservice");
+
 builder.Services.AddGameEventPublishing(builder.Configuration);
 
-builder.Services.AddSingleton<IGameRepository, GameRepository>();
-builder.Services.AddScoped<IGameEventPublisher, MassTransitGameStateEventPublisher>();
-builder.Services.AddScoped<IRequestHandler<CheckWinner, CheckWinnerResult>, CheckWinnerHandler>();
-builder.Services.AddScoped<IRequestHandler<CheckDraw, CheckDrawResult>, CheckDrawHandler>();
-builder.Services.AddScoped<IRequestHandler<GameState, GameLogicMoveResult>, GameStateHandler>();
-builder.Services.AddScoped<IRequestHandler<InitializeGame, GameStateService.Models.GameState>, InitializeGame.InitializeGameHandler>();
-builder.Services.AddScoped<IRequestHandler<GetGame, GetGameQueryResult>, GetGame.GetGameHandler>();
-builder.Services.AddScoped<IRequestHandler<UpdateGameState, MakeMoveCommandResult>, UpdateGameStateHandler>();
+builder.Services.AddScoped<IPersistenceService<GameEntity>, GameRedisPersistenceService>();
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+builder.Services.AddScoped<IGameInitializedPublisher, GameInitializedPublisher>();
+builder.Services.AddScoped<IGameStateUpdatedEventPublisher, GameStateUpdatedEventPublisher>();
+builder.Services.AddScoped<IRequestHandler<ApplyMove, GameLogicMoveResult>, GameStateHandler>();
+builder.Services.AddScoped<IRequestHandler<InitializeGame, GameEntity>, InitializeGame.InitializeGameHandler>();
+builder.Services.AddScoped<IGetGameHandler, GetGameHandler>();
+builder.Services.AddScoped<IUpdateGameStateHandler, UpdateGameStateHandler>();
+builder.Services.AddScoped<ICheckStateService, CheckStateService>();
 
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();

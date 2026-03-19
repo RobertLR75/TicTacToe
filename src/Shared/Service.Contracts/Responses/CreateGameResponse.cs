@@ -1,10 +1,11 @@
 using Service.Contracts.Shared;
+using SharedLibrary.Interfaces;
 
 namespace Service.Contracts.Responses;
 
-public record CreateGameResponse
+public sealed record CreateGameResponse
 {
-    public required Guid Id { get; init; }
-    public required GameStatusEnum Status { get; init; }
-    public required PlayerModel Player1 { get; init; }
+    public string Id { get; set; }
+    public required GameStatusEnum Status { get; set; }
+    public required PlayerModel Player1 { get; set; }
 }

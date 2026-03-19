@@ -1,5 +1,5 @@
-using GameService.Endpoints.Games.List;
-using GameService.Models;
+using GameService.Features.Games.Endpoints.List;
+using GameService.Features.Games.Entities;
 using NSubstitute;
 using SharedLibrary.PostgreSql.EntityFramework;
 using Xunit;
@@ -11,7 +11,7 @@ public class ListGamesQueryHandlerUnitTests : GameServiceUnitTestBase
     [Fact]
     public async Task HandleAsync_queries_store_with_search_specification_and_returns_games()
     {
-        var expected = new List<Game>
+        var expected = new List<GameEntity>
         {
             CreateGame(GameStatus.Created)
         };

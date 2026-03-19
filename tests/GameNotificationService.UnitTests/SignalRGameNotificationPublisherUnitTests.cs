@@ -22,7 +22,7 @@ public sealed class SignalRGameNotificationPublisherUnitTests
         var sut = new SignalRGameNotificationPublisher(hubContext, NullLogger<SignalRGameNotificationPublisher>.Instance);
         var notification = new GameStateInitializedNotification
         {
-            GameId = "game-1",
+            Id = "game-1",
             CurrentPlayer = PlayerMarkEnum.X,
             Winner = PlayerMarkEnum.X,
             IsDraw = false,
@@ -30,7 +30,7 @@ public sealed class SignalRGameNotificationPublisherUnitTests
             Board = [new CellNotification(0, 0, PlayerMarkEnum.X)]
         };
 
-        await sut.PublishGameStateInitializedAsync(notification);
+        await sut.PublishAsync(notification);
 
         await clientProxy.Received(1).SendCoreAsync(
             "GameStateInitializedNotification",
@@ -49,7 +49,7 @@ public sealed class SignalRGameNotificationPublisherUnitTests
         var sut = new SignalRGameNotificationPublisher(hubContext, NullLogger<SignalRGameNotificationPublisher>.Instance);
         var notification = new GameStateUpdatedNotification
         {
-            GameId = "game-2",
+            Id = "game-2",
             CurrentPlayer = PlayerMarkEnum.O,
             Winner = PlayerMarkEnum.O,
             IsDraw = false,
@@ -57,7 +57,7 @@ public sealed class SignalRGameNotificationPublisherUnitTests
             Board = [new CellNotification(0, 0, PlayerMarkEnum.X), new CellNotification(0, 1, PlayerMarkEnum.O)]
         };
 
-        await sut.PublishGameStateUpdatedAsync(notification);
+        await sut.PublishAsync(notification);
 
         await clientProxy.Received(1).SendCoreAsync(
             "GameStateUpdatedNotification",

@@ -20,10 +20,10 @@ public abstract class GameNotificationServiceUnitTestBase : IAsyncLifetime
     protected IConfiguration BuildConfiguration(Dictionary<string, string?> values)
         => Fixture.BuildConfiguration(values);
 
-    protected GameStateInitialized BuildInitializedEvent(string? eventId = null, string gameId = "game-1")
+    protected GameStateInitialized BuildInitializedEvent(string? eventId = null, string gameId = "11111111-1111-1111-1111-111111111111")
         => Fixture.BuildInitializedEvent(eventId, gameId);
 
-    protected GameStateUpdated BuildUpdatedEvent(string? eventId = null, string gameId = "game-1")
+    protected GameStateUpdated BuildUpdatedEvent(string? eventId = null, string gameId = "11111111-1111-1111-1111-111111111111")
         => Fixture.BuildUpdatedEvent(eventId, gameId);
 
     protected GameNotificationServiceUnitTestFixture.InMemoryNotificationRepository CreateRepository(bool rejectDuplicates = false)
@@ -32,4 +32,3 @@ public abstract class GameNotificationServiceUnitTestBase : IAsyncLifetime
     protected GameNotificationServiceUnitTestFixture.RecordingNotificationPublisher CreatePublisher()
         => Fixture.CreatePublisher();
 }
-

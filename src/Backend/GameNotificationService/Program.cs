@@ -1,9 +1,11 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using GameNotificationService.Configuration;
+using GameNotificationService.Features.Notifications.Consumers;
+using GameNotificationService.Features.Notifications.Endpoints.List;
 using GameNotificationService.Hubs;
-using GameNotificationService.Persistence;
 using GameNotificationService.Services;
+using SharedLibrary.Redis;
 using TicTacToe.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,8 +13,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 builder.Services.AddGameEventConsumers(builder.Configuration);
-builder.Services.AddNotificationPersistence(builder.Configuration);
-builder.Services.AddSingleton<IGameNotificationPublisher, SignalRGameNotificationPublisher>();
+builder.Services.AddNotificationStorage(builder.Configuration);
+builder.ConfigureRedisDistributedCache("redis");
+builder.Services.AddScoped<INotificationStorageService, RedisNotificationStorageService>();
+builder.Services.AddScoped<IGameStateInitializedHandler, GameStateInitializedHandler>();
+builder.Services.AddScoped<IGameStateUpdatedHandler, GameStateUpdatedHandler>();
+builder.Services.AddScoped<IListNotificationsHandler, ListNotificationsHandler>();
+builder.Services.AddSingleton<ISignalRGameNotificationPublisher, SignalRGameNotificationPublisher>();
 builder.Services.AddSignalR();
 
 builder.Services.AddFastEndpoints();

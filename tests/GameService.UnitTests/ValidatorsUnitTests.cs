@@ -1,5 +1,5 @@
-using GameService.Endpoints.Games.Create;
-using GameService.Endpoints.Games.UpdateStatus;
+using GameService.Features.Games.Endpoints.Create;
+using GameService.Features.Games.Endpoints.UpdateStatus;
 using Service.Contracts.Requests;
 using Service.Contracts.Shared;
 using Xunit;

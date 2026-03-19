@@ -1,4 +1,5 @@
-using GameService.Models;
+using GameService.Features.Games.Endpoints.UpdateStatus;
+using GameService.Features.Games.Entities;
 using GameService.Services;
 using Xunit;
 

@@ -1,8 +1,8 @@
-using GameService.Endpoints.Games.UpdateStatus;
-using GameService.Models;
+using GameService.Features.Games.Endpoints.Create;
+using GameService.Features.Games.Endpoints.UpdateStatus;
+using GameService.Features.Games.Entities;
 using GameService.Services;
 using Microsoft.Extensions.DependencyInjection;
-using Service.Contracts.Shared;
 using SharedLibrary.PostgreSql.EntityFramework;
 using Xunit;
 
@@ -78,12 +78,12 @@ public sealed class UpdateGameStatusHandlersIntegrationTests : GameServiceIntegr
         services.AddScoped<IGameStorageService, GameStorageService>();
         services.AddScoped<UpdateGameStatusHandler>();
         services.AddScoped<IUpdateUpdateGameStatusCommandHandler, ValidateGameStatusCommand.ValidateGameStatusCommandHandler>();
-        services.AddScoped<IGameEventPublisher, FakeGameEventPublisher>();
+        services.AddScoped<ICreateGameEventPublisher, FakeCreateGameEventPublisher>();
     }
 
-    private sealed class FakeGameEventPublisher : IGameEventPublisher
+    private sealed class FakeCreateGameEventPublisher : ICreateGameEventPublisher
     {
-        public Task PublishEventAsync<T>(T @event, CancellationToken ct = default) where T : class, ISharedEvent
+        public Task PublishAsync(GameCreatedEvent @event, CancellationToken ct = default)
             => Task.CompletedTask;
     }
 }

@@ -7,11 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FastEndpoints" Version="7.2.0" />
-    <PackageReference Include="FastEndpoints.Swagger" Version="7.2.0" />
-    <PackageReference Include="FluentMigrator.Runner" Version="6.2.0" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.2" />
-    <PackageReference Include="Npgsql" Version="9.0.2" />
+    <PackageReference Include="FastEndpoints" Version="8.0.1" />
+    <PackageReference Include="FastEndpoints.Swagger" Version="8.0.1" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="9.0.1" />
+    <PackageReference Include="SharedLibrary.MassTransit" Version="1.0.255" />
+    <PackageReference Include="SharedLibrary.Redis" Version="1.0.254" />
+    <PackageReference Include="SharedLibrary.Services" Version="1.0.255" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.1" />
+    <PackageReference Include="SharedLibrary.SignalR" Version="1.0.256" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Contracts\Events\" />
+    <Folder Include="Features\Notifications\Endpoints\" />
   </ItemGroup>
 
 </Project>

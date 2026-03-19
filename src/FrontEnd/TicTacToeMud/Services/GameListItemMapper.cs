@@ -1,17 +1,18 @@
 using Service.Contracts.Responses;
+using Service.Contracts.Shared;
 using TicTacToeMud.Models;
 
 namespace TicTacToeMud.Services;
 
 internal static class GameListItemMapper
 {
-    public static GameListItem ToGameListItem(this GameDto game)
+    public static GameListItem ToGameListItem(this GameModel game)
     {
         ArgumentNullException.ThrowIfNull(game);
 
         return new GameListItem
         {
-            Id = game.Id,
+            Id = Guid.Parse(game.GameId),
             Status = (int)game.Status,
             CreatedAt = game.CreatedAt,
             UpdatedAt = game.UpdatedAt,
@@ -20,15 +21,14 @@ internal static class GameListItemMapper
         };
     }
 
-    private static PlayerListItem ToPlayerListItem(this PlayerDto player)
+    private static PlayerListItem ToPlayerListItem(this PlayerModel player)
     {
         ArgumentNullException.ThrowIfNull(player);
 
         return new PlayerListItem
         {
-            Id = player.Id,
+            Id = player.PlayerId,
             Name = player.Name
         };
     }
 }
-

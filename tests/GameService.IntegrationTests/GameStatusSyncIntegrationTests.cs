@@ -1,4 +1,4 @@
-using GameService.Models;
+using GameService.Features.Games.Entities;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Service.Contracts.Events;
@@ -26,7 +26,7 @@ public sealed class GameStatusSyncIntegrationTests : GameServiceIntegrationTestB
         {
             EventId = Guid.NewGuid().ToString("N"),
             SchemaVersion = "1.0",
-            GameId = game.Id.ToString("D"),
+            Id = game.Id,
             CurrentPlayer = PlayerMarkEnum.O,
             Winner = PlayerMarkEnum.X,
             IsDraw = false,
@@ -53,7 +53,7 @@ public sealed class GameStatusSyncIntegrationTests : GameServiceIntegrationTestB
         {
             EventId = Guid.NewGuid().ToString("N"),
             SchemaVersion = "1.0",
-            GameId = game.Id.ToString("D"),
+            Id = game.Id,
             CurrentPlayer = PlayerMarkEnum.O,
             Winner = PlayerMarkEnum.None,
             IsDraw = false,
@@ -77,7 +77,7 @@ public sealed class GameStatusSyncIntegrationTests : GameServiceIntegrationTestB
         await publisher.Publish(@event);
     }
 
-    private static async Task<Game?> WaitForStatusAsync(IServiceProvider services, Guid gameId, GameStatus expectedStatus)
+    private static async Task<GameEntity?> WaitForStatusAsync(IServiceProvider services, Guid gameId, GameStatus expectedStatus)
     {
         for (var attempt = 0; attempt < 20; attempt++)
         {

@@ -1,4 +1,4 @@
-using GameService.Consumers;
+using GameService.Features.Games.Consumers;
 using MassTransit;
 using Microsoft.Extensions.Options;
 

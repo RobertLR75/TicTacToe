@@ -1,4 +1,4 @@
-using GameNotificationService.Consumers;
+using GameNotificationService.Features.Notifications.Consumers;
 using MassTransit;
 using Microsoft.Extensions.Options;
 

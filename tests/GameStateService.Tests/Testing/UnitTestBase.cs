@@ -1,82 +1,87 @@
-using Service.Contracts.Events;
-using Service.Contracts.Shared;
-using GameStateService.GameState;
-using GameStateService.Models;
+using GameStateService.Consumers;
+using GameStateService.Features.GameStates.Entities;
+using GameStateService.Features.GameStates.Endpoints.Update;
 using GameStateService.Services;
+using SharedLibrary.Services.Interfaces;
 
 namespace GameStateService.Tests.Testing;
 
 public abstract class UnitTestBase
 {
-    protected static IRequestHandler<GameStateService.GameState.GameState, GameLogicMoveResult> CreateGameLogicHandler()
+    protected static IRequestHandler<ApplyMove, GameLogicMoveResult> CreateGameLogicHandler()
     {
         return new GameStateHandler(new CheckWinnerHandler(), new CheckDrawHandler());
     }
 
     protected sealed class FakeRepository : IGameRepository
     {
-        private readonly Dictionary<string, Models.GameState> _games = new();
+        private readonly Dictionary<string, GameEntity> _games = new();
 
         public int CreateCalls { get; private set; }
         public int UpdateCalls { get; private set; }
         public bool ThrowOnCreate { get; init; }
         public bool ThrowOnUpdate { get; init; }
 
-        public Models.GameState CreateGame(string? gameId = null)
+        public Task<GameEntity> CreateGameAsync(string? gameId = null, CancellationToken ct = default)
         {
             if (ThrowOnCreate)
                 throw new InvalidOperationException("create failed");
 
             CreateCalls++;
-            var game = new Models.GameState
+            var game = new GameEntity
             {
                 GameId = string.IsNullOrWhiteSpace(gameId) ? Guid.NewGuid().ToString() : gameId
             };
 
             _games[game.GameId] = game;
-            return game;
+            return Task.FromResult(game);
         }
 
-        public Models.GameState? GetGame(string gameId)
+        public Task<GameEntity?> GetGameAsync(string gameId, CancellationToken ct = default)
         {
             _games.TryGetValue(gameId, out var game);
-            return game;
+            return Task.FromResult(game);
         }
 
-        public void UpdateGame(Models.GameState game)
+        public Task UpdateGameAsync(GameEntity game, CancellationToken ct = default)
         {
             if (ThrowOnUpdate)
                 throw new InvalidOperationException("update failed");
 
             UpdateCalls++;
             _games[game.GameId] = game;
+            return Task.CompletedTask;
         }
 
-        public void DeleteGame(string gameId)
+        public Task DeleteGameAsync(string gameId, CancellationToken ct = default)
         {
             _games.Remove(gameId);
+            return Task.CompletedTask;
         }
     }
 
-    protected sealed class FakePublisher : IGameEventPublisher
+    protected sealed class FakeInitializedPublisher : IGameInitializedPublisher
     {
         public int InitializedPublishCalls { get; private set; }
+        public string? LastGameId { get; private set; }
+
+        public Task PublishAsync(GameInitializedEvent ev, CancellationToken cancellation = default)
+        {
+            InitializedPublishCalls++;
+            LastGameId = ev.GameState.GameId;
+            return Task.CompletedTask;
+        }
+    }
+
+    protected sealed class FakeUpdatedPublisher : IGameStateUpdatedEventPublisher
+    {
         public int UpdatedPublishCalls { get; private set; }
         public string? LastGameId { get; private set; }
 
-        public Task PublishEventAsync<T>(T @event, CancellationToken ct = default) where T : class, ISharedEvent
+        public Task PublishAsync(GameStateUpdatedEvent ev, CancellationToken cancellation = default)
         {
-            if (@event is GameStateInitialized initialized)
-            {
-                InitializedPublishCalls++;
-                LastGameId = initialized.GameId;
-            }
-            else if (@event is GameStateUpdated updated)
-            {
-                UpdatedPublishCalls++;
-                LastGameId = updated.GameId;
-            }
-
+            UpdatedPublishCalls++;
+            LastGameId = ev.GameState.GameId;
             return Task.CompletedTask;
         }
     }

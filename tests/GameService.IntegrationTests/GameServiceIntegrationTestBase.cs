@@ -1,4 +1,4 @@
-using GameService.Models;
+using GameService.Features.Games.Entities;
 using GameService.Persistence;
 using GameService.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,18 +16,18 @@ public abstract class GameServiceIntegrationTestBase
 
     protected PostgresTestContainerFixture Fixture { get; }
 
-    protected Player CreatePlayer(string id = "p1", string name = "Alice")
+    protected PlayerEntity CreatePlayer(string id = "11111111-1111-1111-1111-111111111111", string name = "Alice")
         => new()
         {
-            Id = id,
+            Id = Guid.Parse(id),
             Name = name
         };
 
-    protected Game CreateGame(
+    protected GameEntity CreateGame(
         GameStatus status = GameStatus.Created,
         Guid? id = null,
-        Player? player1 = null,
-        Player? player2 = null,
+        PlayerEntity? player1 = null,
+        PlayerEntity? player2 = null,
         DateTimeOffset? createdAt = null,
         DateTimeOffset? updatedAt = null)
         => new()
@@ -60,26 +60,26 @@ public abstract class GameServiceIntegrationTestBase
     protected static Task ResetDatabaseAsync(IServiceProvider provider)
         => PostgresTestContainerFixture.ResetDatabaseAsync(provider);
 
-    protected static async Task<Game> PersistGameAsync(IServiceProvider services, Game game)
+    protected static async Task<GameEntity> PersistGameAsync(IServiceProvider services, GameEntity gameEntity)
     {
         using var scope = services.CreateScope();
         var store = scope.ServiceProvider.GetRequiredService<IGameStorageService>();
-        await store.CreateAsync(game);
-        return game;
+        await store.CreateAsync(gameEntity);
+        return gameEntity;
     }
 
-    protected static async Task<Game> SeedGameAsync(IServiceProvider services, GameStatus status, string playerId = "p1", string playerName = "Alice")
+    protected static async Task<GameEntity> SeedGameAsync(IServiceProvider services, GameStatus status, string playerId = "11111111-1111-1111-1111-111111111111", string playerName = "Alice")
     {
         using var scope = services.CreateScope();
         var store = scope.ServiceProvider.GetRequiredService<IGameStorageService>();
 
-        var game = new Game
+        var game = new GameEntity
         {
             Id = Guid.NewGuid(),
             Status = status,
-            Player1 = new Player
+            Player1 = new PlayerEntity
             {
-                Id = playerId,
+                Id = Guid.Parse(playerId),
                 Name = playerName
             },
             UpdatedAt = status == GameStatus.Created ? null : DateTimeOffset.UtcNow
@@ -89,7 +89,7 @@ public abstract class GameServiceIntegrationTestBase
         return game;
     }
 
-    protected static async Task<Game?> GetGameAsync(IServiceProvider services, Guid id)
+    protected static async Task<GameEntity?> GetGameAsync(IServiceProvider services, Guid id)
     {
         using var scope = services.CreateScope();
         var store = scope.ServiceProvider.GetRequiredService<IGameStorageService>();

@@ -1,4 +1,4 @@
-using GameService.Models;
+using GameService.Features.Games.Entities;
 using GameService.Services;
 using SharedLibrary.PostgreSql.EntityFramework;
 using Xunit;
@@ -10,7 +10,7 @@ public sealed class GameStorageServiceUnitTests
     [Fact]
     public void Storage_service_inherits_base_postgres_storage_service_for_game_model()
     {
-        Assert.Equal(typeof(BasePostgresSqlStorageService<Game>), typeof(GameStorageService).BaseType);
+        Assert.Equal(typeof(EntityFrameworkPostgresSqlStorageBase<GameEntity>), typeof(GameStorageService).BaseType);
     }
 
     [Fact]

@@ -1,6 +1,6 @@
 using Ardalis.Specification;
-using GameService.Endpoints.Games.List;
-using GameService.Models;
+using GameService.Features.Games.Endpoints.List;
+using GameService.Features.Games.Entities;
 using SharedLibrary.Interfaces;
 using Xunit;
 
@@ -13,8 +13,7 @@ public class SearchByStatusSpecificationUnitTests
     {
         var sut = new SearchByStatusSpecification(GameStatus.Active, page: 2, pageSize: 10);
 
-        Assert.IsAssignableFrom<StorageSpecification<Game>>(sut);
-        Assert.IsAssignableFrom<ISpecification<Game>>(sut);
+        Assert.IsAssignableFrom<PersistenceSpecification<GameEntity>>(sut);
+        Assert.IsAssignableFrom<ISpecification<GameEntity>>(sut);
     }
 }
-

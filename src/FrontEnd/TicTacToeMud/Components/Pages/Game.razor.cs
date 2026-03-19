@@ -1,6 +1,8 @@
 using System.Net;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using Service.Contracts.Models;
+using Service.Contracts.Services;
 using TicTacToeMud.Models;
 using TicTacToeMud.Services;
 
@@ -114,7 +116,7 @@ public partial class Game : IAsyncDisposable
         }
     }
 
-    private void HandleGameStateUpdated(GameResponse response)
+    private void HandleGameStateUpdated(GameHubModel response)
     {
         if (response.GameId != _gameId)
         {
@@ -123,13 +125,13 @@ public partial class Game : IAsyncDisposable
 
         _ = InvokeAsync(() =>
         {
-            UpdateState(response);
+            UpdateState(response.ToGameResponse());
             _isLoading = false;
             StateHasChanged();
         });
     }
 
-    private void HandleGameStateInitialized(GameResponse response)
+    private void HandleGameStateInitialized(GameHubModel response)
     {
         if (response.GameId != _gameId)
         {
@@ -138,7 +140,7 @@ public partial class Game : IAsyncDisposable
 
         _ = InvokeAsync(() =>
         {
-            UpdateState(response);
+            UpdateState(response.ToGameResponse());
             _isLoading = false;
             StateHasChanged();
         });
@@ -164,18 +166,15 @@ public partial class Game : IAsyncDisposable
         {
             var previousGameId = _gameId;
 
-            if (previousGameId is not null && previousGameId != SelectedGameId && GameHub.IsConnected)
+            if (previousGameId is not null && previousGameId != SelectedGameId)
             {
                 await GameHub.LeaveGame(previousGameId);
             }
 
-            var state = await GameApi.GetGameAsync(SelectedGameId);
+            var state = await GameStateApi.GetGameAsync(SelectedGameId);
             _gameId = SelectedGameId;
 
-            if (GameHub.IsConnected)
-            {
-                await GameHub.JoinGame(SelectedGameId);
-            }
+            await GameHub.JoinGame(SelectedGameId);
 
             UpdateState(state);
         }
@@ -342,7 +341,7 @@ public partial class Game : IAsyncDisposable
         GameHub.OnGameStateUpdated -= HandleGameStateUpdated;
         GameHub.OnGameStateInitialized -= HandleGameStateInitialized;
 
-        if (_gameId is not null && GameHub.IsConnected)
+        if (_gameId is not null)
         {
             await GameHub.LeaveGame(_gameId);
         }

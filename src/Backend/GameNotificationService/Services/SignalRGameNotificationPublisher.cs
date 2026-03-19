@@ -1,26 +1,14 @@
 using GameNotificationService.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Service.Contracts.Notifications;
+using SharedLibrary.SignalR;
 
 namespace GameNotificationService.Services;
 
+public interface ISignalRGameNotificationPublisher : ISignalRNotificationPublisher<GameHub>;
+    
 public class SignalRGameNotificationPublisher(
     IHubContext<GameHub> hubContext,
-    ILogger<SignalRGameNotificationPublisher> logger) : IGameNotificationPublisher
+    ILogger<SignalRGameNotificationPublisher> logger) : SignalRNotificationBase<GameHub>(hubContext, logger), ISignalRGameNotificationPublisher
 {
-    public async Task PublishGameStateInitializedAsync(GameStateInitializedNotification notification, CancellationToken ct = default)
-    {
-        logger.LogInformation("Publishing GameStateInitializedNotification for game {GameId}", notification.GameId);
-
-        await hubContext.Clients.Group(notification.GameId)
-            .SendAsync("GameStateInitializedNotification", notification, ct);
-    }
-
-    public async Task PublishGameStateUpdatedAsync(GameStateUpdatedNotification notification, CancellationToken ct = default)
-    {
-        logger.LogInformation("Publishing GameStateUpdatedNotification for game {GameId}", notification.GameId);
-
-        await hubContext.Clients.Group(notification.GameId)
-            .SendAsync("GameStateUpdatedNotification", notification, ct);
-    }
 }

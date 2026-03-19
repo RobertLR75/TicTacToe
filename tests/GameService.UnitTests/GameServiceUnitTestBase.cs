@@ -1,7 +1,8 @@
-using GameService.Endpoints.Games.UpdateStatus;
-using GameService.Models;
+using GameService.Features.Games.Endpoints.Create;
+using GameService.Features.Games.Endpoints.Get;
+using GameService.Features.Games.Endpoints.UpdateStatus;
+using GameService.Features.Games.Entities;
 using GameService.Services;
-using Service.Contracts.Responses;
 using SharedLibrary.PostgreSql.EntityFramework;
 
 namespace GameService.UnitTests;
@@ -10,14 +11,14 @@ public abstract class GameServiceUnitTestBase
 {
     protected GameServiceUnitTestFixture Fixture { get; } = new();
 
-    protected Player CreatePlayer(string id = "p1", string name = "Alice")
+    protected PlayerEntity CreatePlayer(string id = "p1", string name = "Alice")
         => Fixture.CreatePlayer(id, name);
 
-    protected Game CreateGame(
+    protected GameEntity CreateGame(
         GameStatus status = GameStatus.Created,
         Guid? id = null,
-        Player? player1 = null,
-        Player? player2 = null,
+        PlayerEntity? player1 = null,
+        PlayerEntity? player2 = null,
         DateTimeOffset? createdAt = null,
         DateTimeOffset? updatedAt = null)
         => Fixture.CreateGame(status, id, player1, player2, createdAt, updatedAt);
@@ -25,15 +26,12 @@ public abstract class GameServiceUnitTestBase
     protected IGameStorageService CreateStore()
         => Fixture.CreateStore();
 
-    protected IGameEventPublisher CreatePublisher()
+    protected ICreateGameEventPublisher CreatePublisher()
         => Fixture.CreatePublisher();
 
     protected IUpdateUpdateGameStatusCommandHandler CreateStatusValidator(GameStatusUpdateResult result)
         => Fixture.CreateStatusValidator(result);
 
-    protected IGameStateReadClient CreateGameStateReadClient()
-        => Fixture.CreateGameStateReadClient();
-
-    protected GetGameResponse CreateGetGameResponse(string? gameId = null)
-        => Fixture.CreateGetGameResponse(gameId);
+    protected IGetGameHandler CreateGetGameHandler(GameEntity? game)
+        => Fixture.CreateGetGameHandler(game);
 }

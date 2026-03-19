@@ -1,3 +1,4 @@
+using GameService.Features.Games.Endpoints.Create;
 using GameService.Persistence;
 using GameService.Services;
 using Microsoft.AspNetCore.Hosting;
@@ -8,8 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
-using Service.Contracts.Responses;
-using Service.Contracts.Shared;
 
 namespace GameService.IntegrationTests;
 
@@ -34,11 +33,8 @@ public sealed class GameServiceWebApplicationFactory(string connectionString) : 
         });
         builder.ConfigureTestServices(services =>
         {
-            services.RemoveAll<IGameEventPublisher>();
-            services.AddScoped<IGameEventPublisher, NoOpGameEventPublisher>();
-            services.RemoveAll<IGameStateReadClient>();
-            services.AddSingleton<StubGameStateReadClient>();
-            services.AddSingleton<IGameStateReadClient>(serviceProvider => serviceProvider.GetRequiredService<StubGameStateReadClient>());
+            services.RemoveAll<ICreateGameEventPublisher>();
+            services.AddScoped<ICreateGameEventPublisher, NoOpCreateGameEventPublisher>();
         });
     }
 
@@ -78,26 +74,9 @@ public sealed class GameServiceWebApplicationFactory(string connectionString) : 
             $"Game persistence initializer could not prepare the test database. Last error: {readinessState.LastErrorMessage ?? "unknown"}");
     }
 
-    private sealed class NoOpGameEventPublisher : IGameEventPublisher
+    private sealed class NoOpCreateGameEventPublisher : ICreateGameEventPublisher
     {
-        public Task PublishEventAsync<T>(T @event, CancellationToken ct = default) where T : class, ISharedEvent
+        public Task PublishAsync(GameCreatedEvent @event, CancellationToken ct = default)
             => Task.CompletedTask;
-    }
-
-    public sealed class StubGameStateReadClient : IGameStateReadClient
-    {
-        private readonly Dictionary<Guid, GameStateReadResult> _responses = [];
-
-        public void SetResponse(Guid gameId, GameStateReadResult response)
-        {
-            _responses[gameId] = response;
-        }
-
-        public Task<GameStateReadResult> GetGameAsync(Guid gameId, CancellationToken ct = default)
-        {
-            return Task.FromResult(_responses.TryGetValue(gameId, out var response)
-                ? response
-                : GameStateReadResult.NotFound());
-        }
     }
 }

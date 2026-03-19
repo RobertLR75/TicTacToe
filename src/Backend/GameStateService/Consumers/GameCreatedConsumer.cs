@@ -1,16 +1,18 @@
+using GameStateService.Features.GameStates.Entities;
 using GameStateService.Services;
 using MassTransit;
 using Service.Contracts.Events;
+using SharedLibrary.Services.Interfaces;
 
 namespace GameStateService.Consumers;
 
 public class GameCreatedConsumer : IConsumer<GameCreated>
 {
-    private readonly IRequestHandler<InitializeGame, Models.GameState> _initializeGameHandler;
+    private readonly IRequestHandler<InitializeGame, GameEntity> _initializeGameHandler;
     private readonly ILogger<GameCreatedConsumer> _logger;
 
     public GameCreatedConsumer(
-        IRequestHandler<InitializeGame, Models.GameState> initializeGameHandler,
+        IRequestHandler<InitializeGame, GameEntity> initializeGameHandler,
         ILogger<GameCreatedConsumer> logger)
     {
         _initializeGameHandler = initializeGameHandler;
@@ -19,7 +21,7 @@ public class GameCreatedConsumer : IConsumer<GameCreated>
 
     public async Task Consume(ConsumeContext<GameCreated> context)
     {
-        _logger.LogInformation("Received GameCreatedEvent for GameId: {GameId}", context.Message.GameId);
-        await _initializeGameHandler.HandleAsync(new InitializeGame(context.Message.GameId.ToString("D")), context.CancellationToken);
+        _logger.LogInformation("Received GameCreatedEvent for GameId: {GameId}", context.Message.Id);
+        await _initializeGameHandler.HandleAsync(new InitializeGame(context.Message.Id.ToString("D")), context.CancellationToken);
     }
 }

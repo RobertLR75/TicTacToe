@@ -1,4 +1,4 @@
-using GameNotificationService.Persistence;
+using GameNotificationService.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -15,10 +15,8 @@ public sealed class NotificationRepositoryIntegrationTests : GameNotificationSer
     public async Task TryAddAsync_persists_notification_and_ListAsync_returns_newest_first()
     {
         using var provider = CreateServiceProvider();
-        await ResetDatabaseAsync(provider);
-
         using var scope = provider.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
+        var repository = scope.ServiceProvider.GetRequiredService<INotificationStorageService>();
 
         await repository.TryAddAsync(CreateNotification("evt-1", "game-1", "GameStateInitialized", new DateTimeOffset(2026, 3, 10, 10, 0, 0, TimeSpan.Zero)));
         await repository.TryAddAsync(CreateNotification("evt-2", "game-1", "GameStateUpdated", new DateTimeOffset(2026, 3, 10, 10, 5, 0, TimeSpan.Zero)));
@@ -32,10 +30,8 @@ public sealed class NotificationRepositoryIntegrationTests : GameNotificationSer
     public async Task TryAddAsync_returns_false_for_duplicate_event_id()
     {
         using var provider = CreateServiceProvider();
-        await ResetDatabaseAsync(provider);
-
         using var scope = provider.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
+        var repository = scope.ServiceProvider.GetRequiredService<INotificationStorageService>();
         var notification = CreateNotification("evt-dup", "game-1", "GameStateInitialized", DateTimeOffset.UtcNow);
 
         var first = await repository.TryAddAsync(notification);
@@ -49,10 +45,8 @@ public sealed class NotificationRepositoryIntegrationTests : GameNotificationSer
     public async Task ListAsync_filters_by_game_id_and_applies_paging()
     {
         using var provider = CreateServiceProvider();
-        await ResetDatabaseAsync(provider);
-
         using var scope = provider.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
+        var repository = scope.ServiceProvider.GetRequiredService<INotificationStorageService>();
 
         await repository.TryAddAsync(CreateNotification("evt-1", "game-1", "GameStateInitialized", new DateTimeOffset(2026, 3, 10, 10, 0, 0, TimeSpan.Zero)));
         await repository.TryAddAsync(CreateNotification("evt-2", "game-1", "GameStateUpdated", new DateTimeOffset(2026, 3, 10, 10, 5, 0, TimeSpan.Zero)));

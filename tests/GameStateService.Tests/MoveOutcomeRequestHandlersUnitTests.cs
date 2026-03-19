@@ -1,5 +1,5 @@
-using GameStateService.GameState;
-using GameStateService.Models;
+using GameStateService.Features.GameStates.Entities;
+using GameStateService.Features.GameStates.Endpoints.Update;
 using Xunit;
 
 namespace GameStateService.Tests;

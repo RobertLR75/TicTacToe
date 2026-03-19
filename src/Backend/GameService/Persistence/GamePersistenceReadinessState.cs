@@ -34,14 +34,5 @@ public sealed class GamePersistenceReadinessState
             LastErrorMessage = errorMessage;
         }
     }
-
-    public bool TryGetLastError([NotNullWhen(true)] out string? errorMessage)
-    {
-        lock (_sync)
-        {
-            errorMessage = LastErrorMessage;
-            return !string.IsNullOrWhiteSpace(errorMessage);
-        }
-    }
 }
 

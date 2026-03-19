@@ -1,17 +1,11 @@
 using FastEndpoints;
-using GameService.Endpoints.Games.Create;
-using GameService.Endpoints.Games.UpdateStatus;
-using GameService.Models;
-using GameService.Persistence.Migrations;
-using GameService.Services;
+using GameService.Features.Games.Endpoints.Create;
+using GameService.Features.Games.Endpoints.Get;
+using GameService.Features.Games.Endpoints.UpdateStatus;
+using GameService.Features.Games.Entities;
 using NSubstitute;
-using SharedLibrary.FluentMigration;
 using SharedLibrary.Interfaces;
 using Xunit;
-using DomainGame = GameService.Models.Game;
-using DomainPlayer = GameService.Models.Player;
-using PersistenceGame = GameService.Persistence.Entities.Game;
-using PersistencePlayer = GameService.Persistence.Entities.Player;
 
 namespace GameService.UnitTests;
 
@@ -20,18 +14,19 @@ public class GameServiceClassContractsUnitTests
     [Fact]
     public void Domain_models_expose_expected_properties()
     {
-        var player = new DomainPlayer { Id = "p1", Name = "Alice" };
-        var game = new DomainGame
+        var playerId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        var player = new PlayerEntity { Id = playerId, Name = "Alice" };
+        var game = new GameEntity
         {
             Id = Guid.NewGuid(),
             Status = GameStatus.Active,
             CreatedAt = DateTimeOffset.UtcNow.AddMinutes(-1),
             UpdatedAt = DateTimeOffset.UtcNow,
             Player1 = player,
-            Player2 = new DomainPlayer { Id = "p2", Name = "Bob" }
+            Player2 = new PlayerEntity { Id = Guid.Parse("22222222-2222-2222-2222-222222222222"), Name = "Bob" }
         };
 
-        Assert.Equal("p1", player.Id);
+        Assert.Equal(playerId, player.Id);
         Assert.Equal("Alice", player.Name);
         Assert.IsAssignableFrom<IEntity>(game);
         Assert.Equal(GameStatus.Active, game.Status);
@@ -39,51 +34,29 @@ public class GameServiceClassContractsUnitTests
     }
 
     [Fact]
-    public void Persistence_entities_expose_expected_properties()
-    {
-        var player1 = new PersistencePlayer { Id = "p1", Name = "Alice", CreatedAt = DateTimeOffset.UtcNow };
-        var player2 = new PersistencePlayer { Id = "p2", Name = "Bob", CreatedAt = DateTimeOffset.UtcNow };
-        var game = new PersistenceGame
-        {
-            Id = Guid.NewGuid().ToString("D"),
-            Status = GameStatus.Created.ToString(),
-            CreatedAt = DateTimeOffset.UtcNow,
-            UpdatedAt = DateTimeOffset.UtcNow,
-            Player1Id = player1.Id,
-            Player2Id = player2.Id,
-            Player1 = player1,
-            Player2 = player2
-        };
-
-        Assert.Equal(player1.Id, game.Player1Id);
-        Assert.Equal(player2.Id, game.Player2Id);
-        Assert.Equal("Alice", game.Player1.Name);
-        Assert.Equal("Bob", game.Player2!.Name);
-    }
-
-    [Fact]
     public async Task Placeholder_event_handlers_complete_successfully()
     {
-        var publisher = Substitute.For<IGameEventPublisher>();
-        var createdHandler = new GameCreatedEvent.GameCreatedEventHandler(publisher);
-        var statusHandler = new GameStatusUpdatedEvent.GameStatusUpdatedEventHandler(publisher);
-        var game = new DomainGame
+        var createPublisher = Substitute.For<ICreateGameEventPublisher>();
+        var statusPublisher = Substitute.For<IUpdateGameStatusEventPublisher>();
+        var createdHandler = new GameCreatedEvent.GameCreatedEventHandler(createPublisher);
+        var statusHandler = new GameStatusUpdatedEvent.GameStatusUpdatedEventHandler(statusPublisher);
+        var game = new GameEntity
         {
             Id = Guid.NewGuid(),
             Status = GameStatus.Active,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow,
-            Player1 = new DomainPlayer { Id = "p1", Name = "Alice" }
+            Player1 = new PlayerEntity { Id = Guid.Parse("11111111-1111-1111-1111-111111111111"), Name = "Alice" }
         };
 
         await createdHandler.HandleAsync(new GameCreatedEvent
         {
-            Game = game
+            GameEntity = game
         }, CancellationToken.None);
 
         await statusHandler.HandleAsync(new GameStatusUpdatedEvent
         {
-            Game = game
+            GameEntity = game
         }, CancellationToken.None);
     }
 
@@ -93,7 +66,8 @@ public class GameServiceClassContractsUnitTests
         Assert.Contains(typeof(IEvent), typeof(GameCreatedEvent).GetInterfaces());
         Assert.Contains(typeof(IEventHandler<GameCreatedEvent>), typeof(GameCreatedEvent.GameCreatedEventHandler).GetInterfaces());
         Assert.Contains(typeof(IEventHandler<GameStatusUpdatedEvent>), typeof(GameStatusUpdatedEvent.GameStatusUpdatedEventHandler).GetInterfaces());
-        Assert.Contains(typeof(IGameEventPublisher), typeof(MassTransitGameEventPublisher).GetInterfaces());
-        Assert.True(typeof(GenericTableMigration<DomainGame>).IsAssignableFrom(typeof(CreateGameAndPlayerTables)));
+        Assert.Contains(typeof(ICreateGameEventPublisher), typeof(CreateGameEventPublisher).GetInterfaces());
+        Assert.Contains(typeof(IUpdateGameStatusEventPublisher), typeof(UpdateGameStatusEventPublisher).GetInterfaces());
+        Assert.Contains(typeof(IGetGameHandler), typeof(GetGameHandler).GetInterfaces());
     }
 }

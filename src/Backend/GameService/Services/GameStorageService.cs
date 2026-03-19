@@ -1,16 +1,15 @@
-using GameService.Models;
+using GameService.Features.Games.Entities;
 using Microsoft.EntityFrameworkCore;
 using SharedLibrary.PostgreSql.EntityFramework;
 
 namespace GameService.Services;
 
-public interface IGameStorageService : IPostgresSqlStorageService<Game>
+public interface IGameStorageService : IPostgresSqlStorageService<GameEntity>
 {
-	Task<Player?> GetPlayerAsync(string playerId, CancellationToken ct = default);
-	Task CreateGameAsync(Game game, CancellationToken ct = default);
+	Task<PlayerEntity?> GetPlayerAsync(Guid playerId, CancellationToken ct = default);
 }
 
-public sealed class GameStorageService : BasePostgresSqlStorageService<Game>, IGameStorageService
+public sealed class GameStorageService : EntityFrameworkPostgresSqlStorageBase<GameEntity>, IGameStorageService
 {
 	private readonly DbContext _context;
 
@@ -19,34 +18,44 @@ public sealed class GameStorageService : BasePostgresSqlStorageService<Game>, IG
 		_context = context;
 	}
 
-	public async Task<Player?> GetPlayerAsync(string playerId, CancellationToken ct = default)
+	public async Task<PlayerEntity?> GetPlayerAsync(Guid playerId, CancellationToken ct = default)
 	{
-		ArgumentException.ThrowIfNullOrWhiteSpace(playerId);
+		ArgumentOutOfRangeException.ThrowIfEqual(playerId, Guid.Empty);
+		
 
 		return await _context
-			.Set<Player>()
+			.Set<PlayerEntity>()
 			.SingleOrDefaultAsync(player => player.Id == playerId, ct);
 	}
 
-	public async Task CreateGameAsync(Game game, CancellationToken ct = default)
+	
+	public override async Task<Guid> CreateAsync(GameEntity gameEntity, CancellationToken ct = default)
 	{
-		ArgumentNullException.ThrowIfNull(game);
-		ArgumentNullException.ThrowIfNull(game.Player1);
+		ArgumentNullException.ThrowIfNull(gameEntity);
+		ArgumentNullException.ThrowIfNull(gameEntity.Player1);
 
-		await EnsureExistingPlayerIsTrackedAsync(game.Player1, ct);
+		await EnsureExistingPlayerIsTrackedAsync(gameEntity.Player1, ct);
 
-		if (game.Player2 is not null)
+		if (gameEntity.Player2 is not null)
 		{
-			await EnsureExistingPlayerIsTrackedAsync(game.Player2, ct);
+			await EnsureExistingPlayerIsTrackedAsync(gameEntity.Player2, ct);
 		}
 
-		_context.Set<Game>().Add(game);
-		await _context.SaveChangesAsync(ct);
-	}
+		gameEntity.Id = gameEntity.Id == Guid.Empty ? Guid.CreateVersion7() : gameEntity.Id;
+		gameEntity.CreatedAt = DateTimeOffset.UtcNow;
 
-	private async Task EnsureExistingPlayerIsTrackedAsync(Player player, CancellationToken ct)
+		await ExecuteInTransactionAsync(async () =>
+		{
+			_context.Set<GameEntity>().Add(gameEntity);
+			await _context.SaveChangesAsync(ct);
+		}, ct);
+		
+		return gameEntity.Id;
+	}
+	
+	private async Task EnsureExistingPlayerIsTrackedAsync(PlayerEntity playerEntity, CancellationToken ct)
 	{
-		var entry = _context.Entry(player);
+		var entry = _context.Entry(playerEntity);
 
 		if (entry.State != EntityState.Detached)
 		{
@@ -54,8 +63,8 @@ public sealed class GameStorageService : BasePostgresSqlStorageService<Game>, IG
 		}
 
 		var playerExists = await _context
-			.Set<Player>()
-			.AnyAsync(existingPlayer => existingPlayer.Id == player.Id, ct);
+			.Set<PlayerEntity>()
+			.AnyAsync(existingPlayer => existingPlayer.Id == playerEntity.Id, ct);
 
 		if (playerExists)
 		{

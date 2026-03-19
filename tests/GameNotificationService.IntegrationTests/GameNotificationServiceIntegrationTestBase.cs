@@ -1,4 +1,4 @@
-using GameNotificationService.Persistence;
+using GameNotificationService.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GameNotificationService.IntegrationTests;
@@ -18,20 +18,17 @@ public abstract class GameNotificationServiceIntegrationTestBase
     protected GameNotificationServiceWebApplicationFactory CreateFactory(Dictionary<string, string?>? overrides = null)
         => new(Fixture.BuildConfigurationValues(enableEventConsumers: false, overrides));
 
-    protected Task ResetDatabaseAsync(IServiceProvider provider)
-        => Fixture.ResetDatabaseAsync(provider);
-
     protected static async Task PersistNotificationAsync(IServiceProvider services, NotificationWriteModel notification)
     {
         using var scope = services.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
+        var repository = scope.ServiceProvider.GetRequiredService<INotificationStorageService>();
         await repository.TryAddAsync(notification);
     }
 
     protected static async Task<IReadOnlyList<NotificationRecord>> ListNotificationsAsync(IServiceProvider services, NotificationQuery query)
     {
         using var scope = services.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<INotificationRepository>();
+        var repository = scope.ServiceProvider.GetRequiredService<INotificationStorageService>();
         return await repository.ListAsync(query);
     }
 

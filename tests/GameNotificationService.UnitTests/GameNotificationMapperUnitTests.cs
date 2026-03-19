@@ -14,7 +14,7 @@ public class GameNotificationMapperUnitTests
         {
             EventId = "evt-1",
             SchemaVersion = "1.0",
-            GameId = "game-1",
+            Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
             CurrentPlayer = PlayerMarkEnum.X,
             Winner = PlayerMarkEnum.X,
             IsDraw = false,
@@ -28,7 +28,7 @@ public class GameNotificationMapperUnitTests
 
         Assert.True(mapped);
         Assert.NotNull(notification);
-        Assert.Equal(message.GameId, notification!.GameId);
+        Assert.Equal(message.Id.ToString(), notification!.Id);
         Assert.Single(notification.Board);
         Assert.Equal(PlayerMarkEnum.X, notification.Board[0].Mark);
     }
@@ -40,7 +40,7 @@ public class GameNotificationMapperUnitTests
         {
             EventId = string.Empty,
             SchemaVersion = "1.0",
-            GameId = string.Empty,
+            Id = Guid.Empty,
             CurrentPlayer = PlayerMarkEnum.X,
             Winner = PlayerMarkEnum.X,
             IsDraw = false,
@@ -63,7 +63,7 @@ public class GameNotificationMapperUnitTests
         {
             EventId = "evt-2",
             SchemaVersion = "1.0",
-            GameId = "game-2",
+            Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
             CurrentPlayer = PlayerMarkEnum.X,
             Winner = PlayerMarkEnum.X,
             IsDraw = false,
@@ -77,7 +77,7 @@ public class GameNotificationMapperUnitTests
 
         Assert.True(mapped);
         Assert.NotNull(notification);
-        Assert.Equal(message.GameId, notification!.GameId);
+        Assert.Equal(message.Id.ToString(), notification!.Id);
         Assert.Equal(PlayerMarkEnum.X, notification.CurrentPlayer);
         Assert.Equal(2, notification.Board.Count);
         Assert.Equal(PlayerMarkEnum.X, notification.Board[1].Mark);
@@ -90,7 +90,7 @@ public class GameNotificationMapperUnitTests
         {
             EventId = string.Empty,
             SchemaVersion = "1.0",
-            GameId = string.Empty,
+            Id = Guid.Empty,
             CurrentPlayer = PlayerMarkEnum.X,
             Winner = PlayerMarkEnum.X,
             IsDraw = false,

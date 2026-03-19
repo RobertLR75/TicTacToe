@@ -1,5 +1,5 @@
-using GameService.Endpoints.Games.UpdateStatus;
-using GameService.Models;
+using GameService.Features.Games.Endpoints.UpdateStatus;
+using GameService.Features.Games.Entities;
 using Service.Contracts.Requests;
 using Service.Contracts.Shared;
 using Xunit;
@@ -14,7 +14,7 @@ public class UpdateGameStatusMapperUnitTests
         var gameId = Guid.NewGuid();
         var sut = new UpdateGameStatusMapper();
 
-        var command = sut.ToEntity(new UpdateGameStatusRequest
+        var command = sut.ToCommand(new UpdateGameStatusRequest
         {
             Id = gameId,
             Status = GameStatusEnum.Active
@@ -30,7 +30,7 @@ public class UpdateGameStatusMapperUnitTests
         var gameId = Guid.NewGuid();
         var sut = new UpdateGameStatusMapper();
 
-        var command = sut.ToEntity(new UpdateGameStatusRequest
+        var command = sut.ToCommand(new UpdateGameStatusRequest
         {
             Id = gameId,
             Status = GameStatusEnum.Completed
@@ -45,7 +45,7 @@ public class UpdateGameStatusMapperUnitTests
     {
         var sut = new UpdateGameStatusMapper();
 
-        var ex = Assert.Throws<ArgumentException>(() => sut.ToEntity(new UpdateGameStatusRequest
+        var ex = Assert.Throws<ArgumentException>(() => sut.ToCommand(new UpdateGameStatusRequest
         {
             Id = Guid.NewGuid(),
             Status = GameStatusEnum.Created
@@ -59,7 +59,7 @@ public class UpdateGameStatusMapperUnitTests
     {
         var sut = new UpdateGameStatusMapper();
 
-        Assert.Throws<ArgumentNullException>(() => sut.ToEntity(null!));
+        Assert.Throws<ArgumentNullException>(() => sut.ToCommand(null!));
     }
 
     [Fact]

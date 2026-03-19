@@ -1,16 +1,11 @@
 using Service.Contracts.Shared;
+using SharedLibrary.Interfaces;
 
 namespace Service.Contracts.Responses;
 
-public record GetGameResponse
+public sealed record GetGameResponse : GameModel
 {
-    public required string GameId { get; init; }
-    public required PlayerMarkEnum CurrentPlayer { get; init; }
-    public required PlayerMarkEnum Winner { get; init; }
-    public required bool IsDraw { get; init; }
-    public required bool IsOver { get; init; }
-    public required List<CellDto> Board { get; init; }
+    
 }
 
-public record CellDto(int Row, int Col, PlayerMarkEnum MarkEnum);
-
+public record CellResponse(int Row, int Col, PlayerMarkEnum MarkEnum);

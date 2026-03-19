@@ -2,23 +2,26 @@ using Service.Contracts.Shared;
 
 namespace Service.Contracts.Responses;
 
-public record ListGamesResponse
+public sealed class ListGamesResponse :  List<GameModel>
 {
-    public required List<GameDto> Games { get; init; }
+    public void Add(List<GameModel> toList)
+    {
+        AddRange(toList);
+    }
 }
 
-public record GameDto
-{
-    public required Guid Id { get; init; }
-    public required GameStatusEnum Status { get; init; }
-    public required DateTimeOffset CreatedAt { get; init; }
-    public required DateTimeOffset? UpdatedAt { get; init; }
-    public required PlayerDto Player1 { get; init; }
-    public PlayerDto? Player2 { get; init; }
-}
-
-public record PlayerDto
-{
-    public required string Id { get; init; }
-    public required string Name { get; init; }
-}
+// public sealed record GameDto
+// {
+//     public required string Id { get; set; }
+//     public required GameStatusEnum Status { get; set; }
+//     public required DateTimeOffset CreatedAt { get; set; }
+//     public required DateTimeOffset UpdatedAt { get; set; }
+//     public required PlayerDto Player1 { get; set; }
+//     public PlayerDto? Player2 { get; set; }
+// }
+//
+// public sealed record PlayerDto
+// {
+//     public required string Id { get; set; }
+//     public required string Name { get; set; }
+// }

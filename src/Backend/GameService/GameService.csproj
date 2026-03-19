@@ -7,18 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FastEndpoints" Version="7.2.0" />
-    <PackageReference Include="FastEndpoints.Swagger" Version="7.2.0" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="8.3.2" />
+    <PackageReference Include="FastEndpoints" Version="8.0.1" />
+    <PackageReference Include="FastEndpoints.Swagger" Version="8.0.1" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="9.0.1" />
     <PackageReference Include="SharedLibrary.FlientMigration" Version="1.0.0" />
-    <PackageReference Include="SharedLibrary.FluentMigration" Version="1.0.10" />
-    <PackageReference Include="SharedLibrary.PostgreSql.EntityFramework" Version="1.0.50" />
+    <PackageReference Include="SharedLibrary.FastEndpoints" Version="1.0.255" />
+    <PackageReference Include="SharedLibrary.FluentMigration" Version="1.0.255" />
+    <PackageReference Include="SharedLibrary.MassTransit" Version="1.0.255" />
+    <PackageReference Include="SharedLibrary.PostgreSql.EntityFramework" Version="1.0.255" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Shared\Service.Contracts\Service.Contracts.csproj" />
-    <ProjectReference Include="..\..\Shared\Service.Contracts\Service.Contracts.csproj" />
     <ProjectReference Include="..\..\TicTacToe.ServiceDefaults\TicTacToe.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Features\Games\" />
   </ItemGroup>
 
 </Project>

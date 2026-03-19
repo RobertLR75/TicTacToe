@@ -1,5 +1,5 @@
 using GameNotificationService.Configuration;
-using GameNotificationService.Consumers;
+using GameNotificationService.Features.Notifications.Consumers;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -12,14 +12,14 @@ public sealed class ConsumerUnitTests : GameNotificationServiceUnitTestBase
     {
         var repository = CreateRepository();
         var publisher = CreatePublisher();
-        var sut = new GameStateInitializedConsumer(repository, CreateMessagingOptions(), publisher, NullLogger<GameStateInitializedConsumer>.Instance);
+        var sut = new GameStateInitializedHandler(repository, CreateMessagingOptions(), publisher, NullLogger<GameStateInitializedHandler>.Instance);
 
-        await sut.ProcessAsync(BuildInitializedEvent(), CancellationToken.None);
+        await sut.HandleAsync(new GameStateInitializedCommand(BuildInitializedEvent()), CancellationToken.None);
 
         var write = Assert.Single(repository.Writes);
         Assert.Equal("GameStateInitialized", write.EventType);
         var notification = Assert.Single(publisher.InitializedNotifications);
-        Assert.Equal(write.GameId, notification.GameId);
+        Assert.Equal(write.GameId, notification.Id);
     }
 
     [Fact]
@@ -27,14 +27,14 @@ public sealed class ConsumerUnitTests : GameNotificationServiceUnitTestBase
     {
         var repository = CreateRepository();
         var publisher = CreatePublisher();
-        var sut = new GameStateUpdatedConsumer(repository, CreateMessagingOptions(), publisher, NullLogger<GameStateUpdatedConsumer>.Instance);
+        var sut = new GameStateUpdatedHandler(repository, CreateMessagingOptions(), publisher, NullLogger<GameStateUpdatedHandler>.Instance);
 
-        await sut.ProcessAsync(BuildUpdatedEvent(), CancellationToken.None);
+        await sut.HandleAsync(new GameStateUpdatedCommand(BuildUpdatedEvent()), CancellationToken.None);
 
         var write = Assert.Single(repository.Writes);
         Assert.Equal("GameStateUpdated", write.EventType);
         var notification = Assert.Single(publisher.UpdatedNotifications);
-        Assert.Equal(write.GameId, notification.GameId);
+        Assert.Equal(write.GameId, notification.Id);
     }
 
     [Fact]
@@ -42,11 +42,11 @@ public sealed class ConsumerUnitTests : GameNotificationServiceUnitTestBase
     {
         var repository = CreateRepository(rejectDuplicates: true);
         var publisher = CreatePublisher();
-        var sut = new GameStateUpdatedConsumer(repository, CreateMessagingOptions(), publisher, NullLogger<GameStateUpdatedConsumer>.Instance);
+        var sut = new GameStateUpdatedHandler(repository, CreateMessagingOptions(), publisher, NullLogger<GameStateUpdatedHandler>.Instance);
         var message = BuildUpdatedEvent();
 
-        await sut.ProcessAsync(message, CancellationToken.None);
-        await sut.ProcessAsync(message, CancellationToken.None);
+        await sut.HandleAsync(new GameStateUpdatedCommand(message), CancellationToken.None);
+        await sut.HandleAsync(new GameStateUpdatedCommand(message), CancellationToken.None);
 
         Assert.Single(repository.Writes);
         Assert.Equal(2, publisher.UpdatedNotifications.Count);
@@ -57,9 +57,9 @@ public sealed class ConsumerUnitTests : GameNotificationServiceUnitTestBase
     {
         var repository = CreateRepository();
         var publisher = CreatePublisher();
-        var sut = new GameStateInitializedConsumer(repository, CreateMessagingOptions(enableEventConsumers: false), publisher, NullLogger<GameStateInitializedConsumer>.Instance);
+        var sut = new GameStateInitializedHandler(repository, CreateMessagingOptions(enableEventConsumers: false), publisher, NullLogger<GameStateInitializedHandler>.Instance);
 
-        await sut.ProcessAsync(BuildInitializedEvent(), CancellationToken.None);
+        await sut.HandleAsync(new GameStateInitializedCommand(BuildInitializedEvent()), CancellationToken.None);
 
         Assert.Empty(repository.Writes);
         Assert.Empty(publisher.InitializedNotifications);
@@ -70,10 +70,10 @@ public sealed class ConsumerUnitTests : GameNotificationServiceUnitTestBase
     {
         var repository = CreateRepository();
         var publisher = CreatePublisher();
-        var sut = new GameStateInitializedConsumer(repository, CreateMessagingOptions(), publisher, NullLogger<GameStateInitializedConsumer>.Instance);
+        var sut = new GameStateInitializedHandler(repository, CreateMessagingOptions(), publisher, NullLogger<GameStateInitializedHandler>.Instance);
         var invalidMessage = BuildInitializedEvent() with { EventId = string.Empty };
 
-        await sut.ProcessAsync(invalidMessage, CancellationToken.None);
+        await sut.HandleAsync(new GameStateInitializedCommand(invalidMessage), CancellationToken.None);
 
         Assert.Empty(repository.Writes);
         Assert.Empty(publisher.InitializedNotifications);
@@ -84,10 +84,10 @@ public sealed class ConsumerUnitTests : GameNotificationServiceUnitTestBase
     {
         var repository = CreateRepository();
         var publisher = CreatePublisher();
-        var sut = new GameStateUpdatedConsumer(repository, CreateMessagingOptions(), publisher, NullLogger<GameStateUpdatedConsumer>.Instance);
+        var sut = new GameStateUpdatedHandler(repository, CreateMessagingOptions(), publisher, NullLogger<GameStateUpdatedHandler>.Instance);
         var invalidMessage = BuildUpdatedEvent() with { EventId = string.Empty };
 
-        await sut.ProcessAsync(invalidMessage, CancellationToken.None);
+        await sut.HandleAsync(new GameStateUpdatedCommand(invalidMessage), CancellationToken.None);
 
         Assert.Empty(repository.Writes);
         Assert.Empty(publisher.UpdatedNotifications);

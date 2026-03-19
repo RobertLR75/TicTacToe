@@ -1,5 +1,7 @@
-using GameService.Endpoints.Games.UpdateStatus;
-using GameService.Models;
+using GameService.Features.Games.Endpoints.Create;
+using GameService.Features.Games.Endpoints.Get;
+using GameService.Features.Games.Endpoints.UpdateStatus;
+using GameService.Features.Games.Entities;
 using GameService.Services;
 using NSubstitute;
 using Service.Contracts.Responses;
@@ -9,24 +11,24 @@ namespace GameService.UnitTests;
 
 public sealed class GameServiceUnitTestFixture
 {
-    public Player CreatePlayer(string id = "p1", string name = "Alice")
+    public PlayerEntity CreatePlayer(string id = "11111111-1111-1111-1111-111111111111", string name = "Alice")
     {
-        return new Player
+        return new PlayerEntity
         {
-            Id = id,
+            Id = Guid.Parse(id),
             Name = name
         };
     }
 
-    public Game CreateGame(
+    public GameEntity CreateGame(
         GameStatus status = GameStatus.Created,
         Guid? id = null,
-        Player? player1 = null,
-        Player? player2 = null,
+        PlayerEntity? player1 = null,
+        PlayerEntity? player2 = null,
         DateTimeOffset? createdAt = null,
         DateTimeOffset? updatedAt = null)
     {
-        return new Game
+        return new GameEntity
         {
             Id = id ?? Guid.NewGuid(),
             Status = status,
@@ -40,25 +42,18 @@ public sealed class GameServiceUnitTestFixture
     public IGameStorageService CreateStore()
         => Substitute.For<IGameStorageService>();
 
-    public IGameEventPublisher CreatePublisher()
-        => Substitute.For<IGameEventPublisher>();
+    public ICreateGameEventPublisher CreatePublisher()
+        => Substitute.For<ICreateGameEventPublisher>();
 
     public IUpdateUpdateGameStatusCommandHandler CreateStatusValidator(GameStatusUpdateResult result)
         => new StubStatusValidator(result);
 
-    public IGameStateReadClient CreateGameStateReadClient()
-        => Substitute.For<IGameStateReadClient>();
-
-    public GetGameResponse CreateGetGameResponse(string? gameId = null)
-        => new()
-        {
-            GameId = gameId ?? Guid.NewGuid().ToString("D"),
-            CurrentPlayer = Service.Contracts.Shared.PlayerMarkEnum.X,
-            Winner = Service.Contracts.Shared.PlayerMarkEnum.None,
-            IsDraw = false,
-            IsOver = false,
-            Board = []
-        };
+    public IGetGameHandler CreateGetGameHandler(GameEntity? game)
+    {
+        var store = CreateStore();
+        store.GetAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(game);
+        return new GetGameHandler(store);
+    }
 
     private sealed class StubStatusValidator(GameStatusUpdateResult result) : IUpdateUpdateGameStatusCommandHandler
     {

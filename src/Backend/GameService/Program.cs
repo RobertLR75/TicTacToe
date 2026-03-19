@@ -1,11 +1,10 @@
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using GameService.Configuration;
-using GameService.Endpoints.Games.Create;
-using GameService.Endpoints.Games.Get;
-using GameService.Endpoints.Games.List;
-using GameService.Endpoints.Games.UpdateStatus;
-using GameService.Models;
+using GameService.Features.Games.Endpoints.Create;
+using GameService.Features.Games.Endpoints.Get;
+using GameService.Features.Games.Endpoints.List;
+using GameService.Features.Games.Endpoints.UpdateStatus;
 using GameService.Persistence;
 using GameService.Services;
 using SharedLibrary.PostgreSql.EntityFramework;
@@ -23,15 +22,16 @@ builder.Services.AddScoped<IUpdateUpdateGameStatusCommandHandler, ValidateGameSt
 builder.Services.AddScoped<ICreateGameHandler, CreateGameHandler>();
 builder.Services.AddScoped<IGetGameHandler, GetGameHandler>();
 builder.Services.AddScoped<IListGamesHandler, ListGamesHandler>();
-builder.Services.AddScoped<IGameEventPublisher, MassTransitGameEventPublisher>();
-builder.Services.AddHttpClient<IGameStateReadClient, GameStateReadClient>(client =>
-{
-    var gameStateServiceBaseUrl = builder.Configuration.GetValue<string>("Services:gamestateservice:https:0")
-        ?? builder.Configuration.GetValue<string>("Services:gamestateservice:http:0")
-        ?? "https://localhost:7110";
-
-    client.BaseAddress = new Uri(gameStateServiceBaseUrl);
-});
+builder.Services.AddScoped<ICreateGameEventPublisher, CreateGameEventPublisher>();
+builder.Services.AddScoped<IUpdateGameStatusEventPublisher, UpdateGameStatusEventPublisher>();
+// builder.Services.AddHttpClient<IGameStateReadClient, GameStateReadClient>(client =>
+// {
+//     var gameStateServiceBaseUrl = builder.Configuration.GetValue<string>("Services:gamestateservice:https:0")
+//         ?? builder.Configuration.GetValue<string>("Services:gamestateservice:http:0")
+//         ?? "https://localhost:7110";
+//
+//     client.BaseAddress = new Uri(gameStateServiceBaseUrl);
+// });
 
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();

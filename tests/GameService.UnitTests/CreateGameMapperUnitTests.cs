@@ -1,5 +1,5 @@
-using GameService.Endpoints.Games.Create;
-using GameService.Models;
+using GameService.Features.Games.Endpoints.Create;
+using GameService.Features.Games.Entities;
 using Service.Contracts.Requests;
 using Service.Contracts.Shared;
 using Xunit;
@@ -14,7 +14,7 @@ public class CreateGameMapperUnitTests
         var playerId = Guid.NewGuid();
         var sut = new CreateGameMapper();
 
-        var command = sut.ToEntity(new CreateGameRequest
+        var command = sut.ToCommand(new CreateGameRequest
         {
             PlayerId = playerId,
             PlayerName = "Alice"
@@ -30,21 +30,20 @@ public class CreateGameMapperUnitTests
         var gameId = Guid.NewGuid();
         var sut = new CreateGameMapper();
 
-        var response = sut.FromEntity(new Game
+        var response = sut.FromEntity(new GameEntity
         {
             Id = gameId,
             Status = GameStatus.Created,
-            Player1 = new Player
+            Player1 = new PlayerEntity
             {
-                Id = "p1",
+                Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                 Name = "Alice"
             }
         });
 
-        Assert.Equal(gameId, response.Id);
+        Assert.Equal(gameId.ToString(), response.Id);
         Assert.Equal(GameStatusEnum.Created, response.Status);
-        Assert.Equal("p1", response.Player1.Id);
+        Assert.Equal("11111111-1111-1111-1111-111111111111", response.Player1.PlayerId);
         Assert.Equal("Alice", response.Player1.Name);
     }
 }
-

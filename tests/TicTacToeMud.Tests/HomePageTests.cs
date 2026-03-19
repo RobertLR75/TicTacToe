@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor.Services;
+using Service.Contracts.Responses;
+using Service.Contracts.Services;
+using Service.Contracts.Shared;
 using TicTacToeMud.Components.Pages;
 using TicTacToeMud.Models;
 using TicTacToeMud.Services;
@@ -11,7 +14,7 @@ using Xunit;
 
 namespace TicTacToeMud.Tests;
 
-public sealed class HomePageTests : TestContext
+public sealed class HomePageTests : BunitContext
 {
     public HomePageTests()
     {
@@ -42,7 +45,7 @@ public sealed class HomePageTests : TestContext
         Services.AddSingleton<INotificationService>(notificationService);
         Services.AddSingleton<IHttpContextAccessor>(CreateHttpContextAccessor("Alice"));
 
-        var cut = RenderComponent<Home>();
+        var cut = Render<Home>();
 
         cut.WaitForAssertion(() =>
         {
@@ -78,7 +81,7 @@ public sealed class HomePageTests : TestContext
         Services.AddSingleton<INotificationService>(new TestNotificationService());
         Services.AddSingleton<IHttpContextAccessor>(CreateHttpContextAccessor("Alice"));
 
-        var cut = RenderComponent<Home>();
+        var cut = Render<Home>();
 
         cut.WaitForAssertion(() =>
         {
@@ -112,7 +115,7 @@ public sealed class HomePageTests : TestContext
         Services.AddSingleton<INotificationService>(notificationService);
         Services.AddSingleton<IHttpContextAccessor>(CreateHttpContextAccessor("Alice", Guid.Parse("7d9173f3-564f-4fdc-abfe-e98936e089f6")));
 
-        var cut = RenderComponent<Home>();
+        var cut = Render<Home>();
         cut.WaitForAssertion(() => Assert.Equal(1, api.ListGamesCalls));
 
         cut.Find("[data-testid='home-new-game-button']").Click();
@@ -137,7 +140,7 @@ public sealed class HomePageTests : TestContext
         Services.AddSingleton<INotificationService>(notificationService);
         Services.AddSingleton<IHttpContextAccessor>(new HttpContextAccessor());
 
-        var cut = RenderComponent<Home>();
+        var cut = Render<Home>();
         cut.Instance.SetPlayerIdentityForTest("7d9173f3-564f-4fdc-abfe-e98936e089f6", "Alice");
         cut.WaitForAssertion(() => Assert.Equal(1, api.ListGamesCalls));
 
@@ -162,7 +165,7 @@ public sealed class HomePageTests : TestContext
         Services.AddSingleton<INotificationService>(notificationService);
         Services.AddSingleton<IHttpContextAccessor>(CreateHttpContextAccessor("Alice"));
 
-        _ = RenderComponent<Home>();
+        _ = Render<Home>();
 
         Assert.Contains(notificationService.ErrorMessages, m => m.Contains("Failed to load games: list-failed"));
     }
@@ -192,7 +195,7 @@ public sealed class HomePageTests : TestContext
         Services.AddSingleton<INotificationService>(notificationService);
         Services.AddSingleton<IHttpContextAccessor>(CreateHttpContextAccessor("Alice"));
 
-        var cut = RenderComponent<Home>();
+        var cut = Render<Home>();
         cut.WaitForAssertion(() => Assert.Equal(1, api.ListGamesCalls));
 
         cut.Find("[data-testid='home-new-game-button']").Click();
@@ -219,7 +222,7 @@ public sealed class HomePageTests : TestContext
 
     private sealed class StubGameApiClient : GameApiClient
     {
-        public StubGameApiClient() : base(new HttpClient { BaseAddress = new Uri("https://example.test") })
+        public StubGameApiClient() : base(new FixedHttpClientFactory(new HttpClient { BaseAddress = new Uri("https://example.test") }))
         {
         }
 
@@ -231,7 +234,7 @@ public sealed class HomePageTests : TestContext
         public Exception? ListGamesException { get; set; }
         public Exception? CreateGameException { get; set; }
 
-        public override Task<IReadOnlyList<GameListItem>> ListGamesAsync()
+        public override Task<IReadOnlyList<GameModel>> ListGamesAsync(CancellationToken cancellationToken = default)
         {
             ListGamesCalls++;
 
@@ -240,10 +243,26 @@ public sealed class HomePageTests : TestContext
                 throw ListGamesException;
             }
 
-            return Task.FromResult(ListedGames);
+            return Task.FromResult<IReadOnlyList<GameModel>>(ListedGames.Select(game => new GameModel
+            {
+                GameId = game.Id.ToString(),
+                Status = (Service.Contracts.Shared.GameStatusEnum)game.Status,
+                CreatedAt = game.CreatedAt,
+                UpdatedAt = game.UpdatedAt,
+                Player1 = new PlayerModel()
+                { 
+                    PlayerId = game.Player1.Id,
+                    Name = game.Player1.Name
+                },
+                Player2 = game.Player2 is null ? null : new PlayerModel
+                {
+                    PlayerId = game.Player2.Id,
+                    Name = game.Player2.Name
+                }
+            }).ToList());
         }
 
-        public override Task<string> CreateGameAsync(string playerId, string playerName)
+        public override Task<string> CreateGameAsync(string playerId, string playerName, CancellationToken cancellationToken = default)
         {
             CreateGameCalls++;
             LastCreatePlayerId = playerId;
@@ -309,5 +328,10 @@ public sealed class HomePageTests : TestContext
     private sealed class SessionFeature : ISessionFeature
     {
         public ISession Session { get; set; } = default!;
+    }
+
+    private sealed class FixedHttpClientFactory(HttpClient client) : IHttpClientFactory
+    {
+        public HttpClient CreateClient(string name) => client;
     }
 }

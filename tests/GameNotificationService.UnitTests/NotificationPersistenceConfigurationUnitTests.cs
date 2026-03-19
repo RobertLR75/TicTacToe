@@ -1,5 +1,6 @@
 using GameNotificationService.Configuration;
-using GameNotificationService.Persistence;
+using GameNotificationService.Services;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -9,34 +10,37 @@ namespace GameNotificationService.UnitTests;
 public sealed class NotificationPersistenceConfigurationUnitTests : GameNotificationServiceUnitTestBase
 {
     [Fact]
-    public void AddNotificationPersistence_throws_when_postgres_connection_string_is_missing()
+    public void AddNotificationStorage_registers_query_options()
     {
         var services = new ServiceCollection();
         var configuration = BuildConfiguration([]);
 
-        var ex = Assert.Throws<InvalidOperationException>(() => services.AddNotificationPersistence(configuration));
+        services.AddNotificationStorage(configuration);
+        using var provider = services.BuildServiceProvider();
 
-        Assert.Contains("ConnectionStrings:postgres", ex.Message);
+        var options = provider.GetRequiredService<IOptions<NotificationQueryOptions>>().Value;
+        Assert.Equal(50, options.DefaultPageSize);
     }
 
     [Fact]
-    public void AddNotificationPersistence_registers_repository_and_query_options()
+    public void AddNotificationStorage_and_redis_storage_register_expected_services()
     {
         var services = new ServiceCollection();
         var configuration = BuildConfiguration(new Dictionary<string, string?>
         {
-            ["ConnectionStrings:postgres"] = "Host=localhost;Database=test;Username=test;Password=test",
             ["NotificationQuery:DefaultPageSize"] = "25",
             ["NotificationQuery:MaxPageSize"] = "100"
         });
 
-        services.AddNotificationPersistence(configuration);
+        services.AddDistributedMemoryCache();
+        services.AddNotificationStorage(configuration);
+        services.AddScoped<INotificationStorageService, RedisNotificationStorageService>();
         using var provider = services.BuildServiceProvider();
 
-        var repository = provider.GetRequiredService<INotificationRepository>();
+        var repository = provider.GetRequiredService<INotificationStorageService>();
         var options = provider.GetRequiredService<IOptions<NotificationQueryOptions>>().Value;
 
-        Assert.IsType<PostgresNotificationRepository>(repository);
+        Assert.IsType<RedisNotificationStorageService>(repository);
         Assert.Equal(25, options.DefaultPageSize);
         Assert.Equal(100, options.MaxPageSize);
     }
@@ -70,4 +74,3 @@ public sealed class NotificationPersistenceConfigurationUnitTests : GameNotifica
         Assert.True(result.Succeeded);
     }
 }
-

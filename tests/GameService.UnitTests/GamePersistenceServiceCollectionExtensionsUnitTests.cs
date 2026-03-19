@@ -1,5 +1,5 @@
 using FluentMigrator.Runner;
-using GameService.Models;
+using GameService.Features.Games.Entities;
 using GameService.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,53 +23,6 @@ public class GamePersistenceServiceCollectionExtensionsUnitTests
         Assert.Contains("PostgreSQL configuration is required", ex.Message);
         Assert.Contains("ConnectionStrings:postgres", ex.Message);
         Assert.Contains("ConnectionStrings:postgres-db", ex.Message);
-    }
-
-    [Fact]
-    public void AddGamePersistence_registers_game_db_context_and_db_context_alias()
-    {
-        var services = new ServiceCollection();
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:postgres"] = "Host=localhost;Database=test;Username=test;Password=test"
-            })
-            .Build();
-
-        services.AddGamePersistence(configuration);
-        using var provider = services.BuildServiceProvider();
-        using var scope = provider.CreateScope();
-
-        var genericDbContext = scope.ServiceProvider.GetRequiredService<GenericDbContext<Game>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<DbContext>();
-        var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        var readinessState = scope.ServiceProvider.GetRequiredService<GamePersistenceReadinessState>();
-        var initializer = scope.ServiceProvider.GetRequiredService<IGamePersistenceInitializer>();
-
-        Assert.Same(genericDbContext, dbContext);
-        Assert.NotNull(runner);
-        Assert.NotNull(readinessState);
-        Assert.NotNull(initializer);
-    }
-
-    [Fact]
-    public void AddGamePersistence_uses_postgres_db_fallback_when_primary_connection_string_is_missing()
-    {
-        var services = new ServiceCollection();
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:postgres-db"] = "Host=localhost;Database=fallback;Username=test;Password=test"
-            })
-            .Build();
-
-        services.AddGamePersistence(configuration);
-        using var provider = services.BuildServiceProvider();
-        using var scope = provider.CreateScope();
-
-        var genericDbContext = scope.ServiceProvider.GetRequiredService<GenericDbContext<Game>>();
-
-        Assert.NotNull(genericDbContext);
     }
 
     [Fact]

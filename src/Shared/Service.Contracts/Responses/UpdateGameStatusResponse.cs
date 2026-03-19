@@ -1,8 +1,10 @@
+using SharedLibrary.Interfaces;
+
 namespace Service.Contracts.Responses;
 
 public sealed record UpdateGameStatusResponse
 {
-    public required Guid Id { get; init; }
-    public required string Status { get; init; }
-    public required DateTimeOffset UpdatedAt { get; init; }
+    public Guid Id { get; set; }
+    public required string Status { get; set; }
+    public required DateTimeOffset UpdatedAt { get; set; }
 }

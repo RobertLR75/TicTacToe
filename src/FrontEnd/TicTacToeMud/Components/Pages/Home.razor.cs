@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Components;
+using Service.Contracts.Responses;
+using Service.Contracts.Services;
 using TicTacToeMud.Models;
 using TicTacToeMud.Services;
 using TicTacToeMud.Session;
@@ -92,7 +94,7 @@ public partial class Home
         try
         {
             var games = await GameApi.ListGamesAsync();
-            _games = games.Select(MapToViewModel).ToList();
+            _games = games.Select(game => MapToViewModel(game.ToGameListItem())).ToList();
         }
         catch (Exception ex)
         {

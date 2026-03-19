@@ -1,46 +1,50 @@
 using GameStateService.Configuration;
-using GameStateService.Models;
+using GameStateService.Features.GameStates.Entities;
 using GameStateService.Services;
 using MassTransit;
-using Microsoft.Extensions.Options;
-using NSubstitute;
-using Service.Contracts.Events;
+using Microsoft.Extensions.DependencyInjection;
+using SharedLibrary.Interfaces;
 using Xunit;
+using GameStateService.Tests.Testing;
 
 namespace GameStateService.Tests;
 
 public sealed class GameStateServiceUnitTests
 {
     [Fact]
-    public void GameRepository_create_get_update_and_delete_round_trip()
+    public async Task GameRepository_create_get_update_and_delete_round_trip()
     {
-        IGameRepository sut = new GameRepository();
+        await using var provider = CreateServices();
+        var sut = provider.GetRequiredService<IGameRepository>();
 
-        var game = sut.CreateGame();
-        var loaded = sut.GetGame(game.GameId);
+        var game = await sut.CreateGameAsync();
+        var loaded = await sut.GetGameAsync(game.GameId);
 
         Assert.NotNull(loaded);
         loaded!.Winner = PlayerMark.X;
-        sut.UpdateGame(loaded);
+        await sut.UpdateGameAsync(loaded);
 
-        var updated = sut.GetGame(game.GameId);
+        var updated = await sut.GetGameAsync(game.GameId);
         Assert.Equal(PlayerMark.X, updated!.Winner);
 
-        sut.DeleteGame(game.GameId);
+        await sut.DeleteGameAsync(game.GameId);
 
-        Assert.Null(sut.GetGame(game.GameId));
+        Assert.Null(await sut.GetGameAsync(game.GameId));
     }
 
     [Fact]
-    public void GameRepository_create_honors_provided_game_id()
+    public async Task GameRepository_create_honors_provided_game_id()
     {
-        IGameRepository sut = new GameRepository();
+        await using var provider = CreateServices();
+        var sut = provider.GetRequiredService<IGameRepository>();
         var requestedGameId = Guid.NewGuid().ToString("D");
 
-        var game = sut.CreateGame(requestedGameId);
+        var game = await sut.CreateGameAsync(requestedGameId);
 
         Assert.Equal(requestedGameId, game.GameId);
-        Assert.Same(game, sut.GetGame(requestedGameId));
+        var loaded = await sut.GetGameAsync(requestedGameId);
+        Assert.NotNull(loaded);
+        Assert.Equal(game.Id, loaded!.Id);
     }
 
     [Fact]
@@ -53,26 +57,11 @@ public sealed class GameStateServiceUnitTests
         Assert.Equal(requestedGameId, command.GameId);
     }
 
-    [Fact]
-    public async Task MassTransitGameStateEventPublisher_skips_publish_when_disabled()
+    private static ServiceProvider CreateServices()
     {
-        var publishEndpoint = Substitute.For<IPublishEndpoint>();
-        var options = Options.Create(new MessagingOptions { EnableEventPublishing = false });
-        var sut = new MassTransitGameStateEventPublisher(publishEndpoint, options);
-
-        await sut.PublishEventAsync(new GameStateInitialized
-        {
-            EventId = "evt-1",
-            SchemaVersion = "1.0",
-            GameId = "game-1",
-            CurrentPlayer = Service.Contracts.Shared.PlayerMarkEnum.X,
-            Winner = Service.Contracts.Shared.PlayerMarkEnum.None,
-            IsDraw = false,
-            IsOver = false,
-            Board = [],
-            OccurredAtUtc = DateTimeOffset.UtcNow
-        });
-
-        await publishEndpoint.DidNotReceiveWithAnyArgs().Publish(default(object)!, default(CancellationToken));
+        var services = new ServiceCollection();
+        services.AddSingleton<IPersistenceService<GameEntity>, InMemoryGamePersistenceService>();
+        services.AddScoped<IGameRepository, GameRepository>();
+        return services.BuildServiceProvider();
     }
 }
