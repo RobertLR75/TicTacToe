@@ -105,7 +105,7 @@ public partial class Game : IAsyncDisposable
 
             if (_gameId is not null)
             {
-                await GameHub.JoinGame(_gameId);
+                await GameHub.Join(_gameId);
             }
 
             await InvokeAsync(StateHasChanged);
@@ -168,13 +168,13 @@ public partial class Game : IAsyncDisposable
 
             if (previousGameId is not null && previousGameId != SelectedGameId)
             {
-                await GameHub.LeaveGame(previousGameId);
+                await GameHub.Leave(previousGameId);
             }
 
             var state = await GameStateApi.GetGameAsync(SelectedGameId);
             _gameId = SelectedGameId;
 
-            await GameHub.JoinGame(SelectedGameId);
+            await GameHub.Join(SelectedGameId);
 
             UpdateState(state);
         }
@@ -343,7 +343,7 @@ public partial class Game : IAsyncDisposable
 
         if (_gameId is not null)
         {
-            await GameHub.LeaveGame(_gameId);
+            await GameHub.Leave(_gameId);
         }
     }
 }

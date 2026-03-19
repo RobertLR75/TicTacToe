@@ -286,14 +286,14 @@ public sealed class GamePageClientUsageTests : BunitContext
 
         public Task StartAsync(string? hubBaseUrl = null) => Task.CompletedTask;
 
-        public override Task JoinGame(string gameId)
+        public override Task Join(string gameId)
         {
             JoinGameCalls++;
             LastJoinedGameId = gameId;
             return Task.CompletedTask;
         }
 
-        public override Task LeaveGame(string gameId) => Task.CompletedTask;
+        public override Task Leave(string gameId) => Task.CompletedTask;
     }
 
     private sealed class TestNotificationService : INotificationService

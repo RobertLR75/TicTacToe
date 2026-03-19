@@ -11,6 +11,17 @@ public class GameHubClient : BaseHubClient
     public event Action<GameHubModel>? OnGameStateUpdated;
     public event Action<GameHubModel>? OnGameStateInitialized;
 
+    protected override string HubUrl { get; }
+    protected override string HubName { get; } = "game";
+    
+    public GameHubClient(IConfiguration configuration)
+    {
+        HubUrl = configuration.GetValue<string>("Services:gamenotificationservice:https:0")
+                 ?? configuration.GetValue<string>("Services:gamenotificationservice:http:0")
+                 ?? "https://localhost:7293";
+        
+    }
+    
     protected override async Task<Task> InitializeHubAsync()
     {
         if (Connection is null)
@@ -52,35 +63,6 @@ public class GameHubClient : BaseHubClient
         
         return Task.CompletedTask;
     }
-    
-    protected override string HubUrl { get; }
-    protected override string HubName { get; } = "game";
-    
-    public GameHubClient(IConfiguration configuration)
-    {
-        HubUrl = configuration.GetValue<string>("Services:gamenotificationservice:https:0")
-                 ?? configuration.GetValue<string>("Services:gamenotificationservice:http:0")
-                 ?? "https://localhost:7293";
-        
-    }
-    
-    public virtual async Task JoinGame(string gameId)
-    {
-        if (Connection is not null)
-        {
-            await Connection.InvokeAsync("JoinGame", gameId);
-        }
-    }
-
-    public virtual async Task LeaveGame(string gameId)
-    {
-        if (Connection is not null)
-        {
-            await Connection.InvokeAsync("LeaveGame", gameId);
-        }
-    }
-
-   
 }
 
 public record GameStateUpdatedNotification

@@ -9,7 +9,7 @@
     <ItemGroup>
         <PackageReference Include="SharedLibrary" Version="1.0.233" />
         <PackageReference Include="SharedLibrary.HttpClient" Version="1.0.254" />
-        <PackageReference Include="SharedLibrary.HubClient" Version="1.0.254" />
+        <PackageReference Include="SharedLibrary.HubClient" Version="1.0.256" />
     </ItemGroup>
 
 </Project>
